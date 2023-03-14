@@ -1,0 +1,62 @@
+\documentclass{article}
+
+\title{Projekt z SI}
+\author{Dominik Lau, Mateusz Kowalczyk, Michał Tarnacki}
+
+\usepackage{blindtext}
+\usepackage{amsmath}
+\usepackage[utf8]{inputenc}
+\usepackage[polish]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{amssymb}
+\usepackage{esvect}
+\usepackage{graphicx}
+
+\graphicspath{ {./obrazy/} }
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{frame=tb,
+  language=Python,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
+
+
+\begin{document}
+
+\maketitle
+
+\section{Wstęp}
+coś tu napisać
+\section{Teoria}
+coś tu napisać
+
+\section{Implementacja}
+\subsection{Pozyskiwanie częstotliwości i polepszanie jakości danych}
+Danymi wejściowymi jest sygnał natężenia dźwięku (np. z mikrofonu, pliku .wav).
+Stosujemy FFT dla bloków po 128 próbek każdy, którą następnie uśredniamy i traktujemy jako 
+dane wejściowe do modelu (średnia częstotliwość w czasie).\\\\
+Do polepszenia jakości danych stosujemy filtr wygładzający Savitzky-Golay z parametrami 50,3.
+Filtr ten sekwencyjnie dopasowuje małe podzbiory próbek do wielomianu niskiego stopnia.
+
+
+
+
+
+\end{document}
