@@ -47,4 +47,23 @@ def ema(array):
 
 
 def signal_clean(signal):
-    return savgol_filter(signal, 51, 3)
+    return savgol_filter(signal, 100, 4)
+
+
+def debug_plot_marked(t, f, labels):
+    x_in = []
+    y_in = []
+    x_out = []
+    y_out = []
+
+    for i in range(len(t)):
+        if labels[i] == 'in':
+            x_in.append(t[i])
+            y_in.append(f[i])
+        else:
+            x_out.append(t[i])
+            y_out.append(f[i])
+
+    plt.scatter(x_in, y_in)
+    plt.scatter(x_out, y_out)
+    plt.show()
