@@ -9,20 +9,25 @@ from scipy.signal import savgol_filter
 matplotlib.use("MacOSX")
 
 
+def dominant_freq(y, fs):
+    spec = np.abs(np.fft.rfft(y))
+    freq = np.fft.rfftfreq(len(y), d=1/fs)
+    return freq[np.argmax(spec)]
+
+
 def mean_freq(y, fs):
     spec = np.abs(np.fft.rfft(y))
     freq = np.fft.rfftfreq(len(y), d=1/fs)
-    plt.show()
     amp = spec / spec.sum()
     return (freq * amp).sum()
 
 
-def to_dominant_freq(timestamps, pressure, chunk_size=128):
+def to_dominant_freq(timestamps, pressure, chunk_size=352):
     fs = 1/(timestamps[1] - timestamps[0])
     dominant_y = []
     for i in range(0, len(pressure), chunk_size):
         chunk = pressure[i:i+chunk_size]
-        dominant_y.append(mean_freq(chunk, fs))
+        dominant_y.append(dominant_freq(chunk, fs))
 
     chunked_timestamps = np.arange(0, pressure.shape[0]/fs, chunk_size/fs)
     return chunked_timestamps, dominant_y
@@ -37,6 +42,7 @@ def wav_to_sample_xy(filename):
     sample_rate, pressure = wavfile.read(filename)
     timestamps = np.arange(0, pressure.shape[0]/sample_rate, 1/sample_rate)
     return timestamps, pressure
+
 
 def ema(array):
     N = len(array)
@@ -64,6 +70,7 @@ def debug_plot_marked(t, f, labels):
             x_out.append(t[i])
             y_out.append(f[i])
 
-    plt.scatter(x_in, y_in)
-    plt.scatter(x_out, y_out)
+    plt.scatter(x_in, y_in, s=5)
+    plt.scatter(x_out, y_out, s=5)
+    plt.legend(['in', 'out'])
     plt.show()
