@@ -22,6 +22,7 @@ def mean_freq(y, fs):
     return (freq * amp).sum()
 
 
+# example chunk sizes: 352, 22050
 def to_dominant_freq(timestamps, pressure, chunk_size=352):
     fs = 1/(timestamps[1] - timestamps[0])
     dominant_y = []
@@ -53,7 +54,7 @@ def ema(array):
 
 
 def signal_clean(signal):
-    return savgol_filter(signal, 100, 4)
+    return savgol_filter(signal, 100, 5)
 
 
 def debug_plot_marked(t, f, labels):
