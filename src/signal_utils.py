@@ -22,13 +22,25 @@ def mean_freq(y, fs):
     return (freq * amp).sum()
 
 
+def to_spectro_frames(timestamps, pressure):
+    # pressure = pressure[101430:190512]
+    # pressure = pressure[:101430]
+    spec = np.abs(np.fft.rfft(pressure))
+    freq = np.fft.rfftfreq(len(pressure), d=timestamps[1] - timestamps[0])
+    mf = mean_freq(pressure, 1/(timestamps[1] - timestamps[0]))
+
+    plt.plot(freq, spec)
+    plt.scatter([mf], [spec[int(mf)]])
+    plt.show()
+
+
 # example chunk sizes: 352, 22050
 def to_dominant_freq(timestamps, pressure, chunk_size=352):
     fs = 1/(timestamps[1] - timestamps[0])
     dominant_y = []
     for i in range(0, len(pressure), chunk_size):
         chunk = pressure[i:i+chunk_size]
-        dominant_y.append(dominant_freq(chunk, fs))
+        dominant_y.append(mean_freq(chunk, fs))
 
     chunked_timestamps = np.arange(0, pressure.shape[0]/fs, chunk_size/fs)
     return chunked_timestamps, dominant_y
@@ -54,7 +66,7 @@ def ema(array):
 
 
 def signal_clean(signal):
-    return savgol_filter(signal, 100, 5)
+    return savgol_filter(signal, 200, 5)
 
 
 def debug_plot_marked(t, f, labels):

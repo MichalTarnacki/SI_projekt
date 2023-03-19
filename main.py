@@ -21,10 +21,13 @@ def debug_recorded(file):
 
 
 if __name__ == '__main__':
-    debug_recorded('e2')
-    l, t, f = du.file_with_labels(file_csv=f'media/train/e2.csv', file_wav=f'media/train/e2.wav')
-    t, f, l, fp = svm.prepare(t, l, f)
-    sv = svm.train(fp, l)
-    pred = sv.predict(StandardScaler().fit_transform(fp))
+    x_train, y_train = svm.create_train_dataset(['e1', 'e2', 'e3', 'e4', 'e5', 'e7'])
+    sv, scaler = svm.train(x_train, y_train)
 
+    l, t, f = du.file_with_labels(file_csv=f'media/train/e6.csv', file_wav=f'media/train/e6.wav')
+    su.debug_plot_marked(t, svm.filter_NaN(f), l)
+    t, f, l, fp = svm.prepare(t, l, f)
+
+    pred = sv.predict(StandardScaler().fit_transform(fp))
     su.debug_plot_marked(t, f, pred)
+
