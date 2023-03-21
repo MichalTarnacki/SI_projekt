@@ -26,7 +26,7 @@ def buffer_get_labels(filename, timestamps):
 
 def file_with_labels(file_csv, file_wav):
     x, y = su.wav_to_sample_xy(file_wav)
-    t, f = su.to_dominant_freq(x, y)
+    t, f = su.to_dominant_freq(1/(x[1]-x[0]), y)
 
     return buffer_get_labels(file_csv, t), t, su.signal_clean(f)
 

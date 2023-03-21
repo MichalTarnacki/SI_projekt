@@ -47,3 +47,4 @@ def train(x_train, y_train):
     x_train_std = scaler.fit_transform(x_train)
     clf.fit(x_train_std, y_train)
     return clf, scaler
+

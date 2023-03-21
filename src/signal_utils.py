@@ -35,8 +35,7 @@ def to_spectro_frames(timestamps, pressure):
 
 
 # example chunk sizes: 352, 22050
-def to_dominant_freq(timestamps, pressure, chunk_size=352):
-    fs = 1/(timestamps[1] - timestamps[0])
+def to_dominant_freq(fs, pressure, chunk_size=352):
     dominant_y = []
     for i in range(0, len(pressure), chunk_size):
         chunk = pressure[i:i+chunk_size]
