@@ -9,4 +9,8 @@ jak nie działa to to poniżej instaluje wszystkie paczki
 ```
 pip install -r requirements.txt
 ```
+może być problem z pyAudio, przed zainstalowaniem
+```
+brew install portaudio
+```
 

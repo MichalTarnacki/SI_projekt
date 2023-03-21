@@ -32,7 +32,7 @@ def file_with_labels(file_csv, file_wav):
 
 
 def data_recorder(file_csv, file_wav):
-    record_time_s = 30
+    record_time_s = 25
     sample_rate = 44100
     channels = 1
 

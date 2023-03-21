@@ -85,4 +85,3 @@ def debug_plot_marked(t, f, labels):
     plt.scatter(x_in, y_in, s=5)
     plt.scatter(x_out, y_out, s=5)
     plt.legend(['in', 'out'])
-    plt.show()

@@ -1,29 +1,45 @@
+import matplotlib.pyplot as plt
+import noisereduce
+import numpy as np
 import pygame
-import src.signal_utils as su
+import pyaudio
+import sounddevice as sd
+import src.spectrogram as sp
 
 from sklearn.preprocessing import StandardScaler
+from scipy.io.wavfile import write
+from threading import Lock
 
 
-def real_time_detection(model, chunk_size=352, input_size=40):
+def detection(model, scaler, chunk_size=352, input_size=40):
     pygame.init()
     pygame.font.init()
     screen = pygame.display.set_mode((740, 480))
     font = pygame.font.SysFont(None, 50)
+    p = pyaudio.PyAudio()
     fs = 44100
+
+    stream = p.open(format=pyaudio.paInt16, channels=1, rate=fs, input=True, frames_per_buffer=1024)
+    samples = np.array([])
     state = 'in'
-    samples = []
 
     while True:
+        data = np.frombuffer(stream.read(1024, exception_on_overflow=False), dtype=np.int16)
+        samples = np.append(samples, data)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                stream.stop_stream()
+                stream.close()
+                p.terminate()
+                write('test.wav', fs, samples)
                 return
+        if samples.shape[0] > chunk_size * (input_size + 200):
+            clean = noisereduce.reduce_noise(samples, 44100)
+            last_frame = abs(np.fft.rfft(clean[len(clean) - sp.CHUNK_SIZE:]))[:160]
 
-        if len(samples) > chunk_size * input_size:
-            t, f = su.to_dominant_freq(fs, samples)
-            f = su.signal_clean(f)
-            f = StandardScaler().fit_transform(f)
-            input = f[len(f)-input_size:]
-            state = model.predict(input)
+            last_frame_std = scaler.transform(last_frame.reshape(-1,1).T)
+            state = model.predict(last_frame_std)
+
 
         screen.fill((0, 0, 0))
         text = font.render('teraz wdychasz' if state == 'in' else 'teraz wydychasz', True, (255, 255, 255))

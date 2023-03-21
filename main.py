@@ -1,11 +1,14 @@
+import matplotlib.pyplot as plt
+
 import src.svm as svm
 import src.signal_utils as su
 import src.data_utils as du
 import src.model_generics as mg
 import src.real_time as rt
+import src.spectrogram as sp
 
 from sklearn.preprocessing import StandardScaler
-
+from joblib import load
 
 def record(file):
     file_csv = f'media/train/{file}.csv'
@@ -16,26 +19,21 @@ def record(file):
     su.debug_plot_marked(t, f, l)
 
 
-def debug_recorded(file):
-    l, t, f = du.file_with_labels(file_csv=f'media/train/{file}.csv', file_wav=f'media/train/{file}.wav')
-    su.debug_plot(t, f)
-    su.debug_plot_marked(t, f, l)
-
-
-def debug_train():
-    x_train, y_train = svm.create_train_dataset(['e1', 'e2', 'e3', 'e4', 'e5', 'e7'])
-    sv, scaler = svm.train(x_train, y_train)
-    mg.save_model(sv, 'media/models/svm.joblib')
-
-
 if __name__ == '__main__':
-    l, t, f = du.file_with_labels(file_csv=f'media/train/e7.csv', file_wav=f'media/train/e7.wav')
-    su.debug_plot_marked(t, svm.filter_NaN(f), l)
-    t, f, l, fp = svm.prepare(t, l, f)
-    sv = mg.load('media/models/svm.joblib')
-    # rt.real_time_detection(sv)
-    # pred = sv.predict(StandardScaler().fit_transform(fp))
-    pred = sv.predict(StandardScaler().fit_transform(fp))
-    su.debug_plot_marked(t, f, pred)
-    # su.debug_plot_marked(t, f, pred)
+    # sp.svm_train(['e1', 'e2', 'e3', 'e4', 'e5', 'e7'])
 
+    rt.detection(
+        load('media/models/spectro_svm.joblib'),
+        load('media/models/spectro_svm_scaler.joblib'))
+
+    # x, y = su.wav_to_sample_xy('media/train/e9.wav')
+    # timestamps, frames = sp.to_spectro(y, 44100)
+    # labels = sp.spectro_labeled('media/train/e9.csv', timestamps)
+    # clf = load('media/models/spectro_svm.joblib')
+    # scaler = load('media/models/spectro_svm_scaler.joblib')
+    #
+    # sp.pressure_labeled_plot(labels, x, y)
+    #
+    # frames_std = scaler.transform(frames)
+    # predictions = clf.predict(frames_std)
+    # sp.pressure_labeled_plot(predictions, x, y)
