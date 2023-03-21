@@ -17,12 +17,12 @@ def prepare(t, labels, f):
     f = filter_NaN(f)
     t = filter_NaN(t)
 
-    dimensions = 225
+    dimensions = 40
     return \
-        t[:len(t) - dimensions], \
-        f[:len(f) - dimensions], \
-        labels[:len(labels) - dimensions], \
-        [f[i:i + dimensions] for i in range(len(f) - dimensions)]
+        t[dimensions:], \
+        f[dimensions:], \
+        labels[dimensions:], \
+        [f[i-dimensions:i] for i in range(dimensions, len(f))]
 
 
 def create_train_dataset(train_files, train_dir='media/train'):
