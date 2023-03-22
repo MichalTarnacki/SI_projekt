@@ -43,9 +43,30 @@
 \maketitle
 
 \section{Wstęp}
-coś tu napisać
+Celem projektu było określanie chwil na nagraniu, w których osoba bierze wdech, i w których wydech. 
+Dokonano oceny jakościowej za pomocą detekcji oddechu na żywo jak i ilościowej (przy wykorzystaniu
+dalej wymienionych metryk.
+\section{Podejście}
+\subsection{Średnia częstotliwość w czasie}
+Pierwotnie przyjętym założeniem było, że podczas wdechu średnia częstotliwość dźwięku jest wyższa niż
+gdy osoba wydycha. Z pliku w formacie .wav dla bloków próbek generujemy spektrogramy i obliczamy
+średnią ważoną częstotliwość (czyli znacznie redukujemy rozmiar danych tj. $nowy = stary/rozmiar_{bloku}$).
+Cechami, na podstawie których
+dokonywana byłaby predykcja mogłyby być na przykład $\vec{x} = [\bar{f}(t_0), \bar{f}(t_1), ..., \bar{f}(t_n)]$.
+Podejście to jednak jak i pierwotne założenie jest mylne - dla niektórych osób 
+dźwięk wydechu jest bowiem wyższy
+niż wdechu. Ponadto, stosując to podejście, ograniczylibyśmy się tylko do niektórych typów oddechu (np. 
+wdychanie przez nos i wydychanie przez usta).  Biorąc pod uwagę wszystkie wady podejście zostało odrzucone.
+\subsection{Dane wejściowe ze spektrogramu}
+Innym podejściem jest wzięcie całego spektrogramu (a przynajmniej jego części) jako dane wejściowe do 
+modelu.  Podobnie jak ostatnio dzielimy dane na bloki ale tym razem nie liczymy średniej tylko zostawiamy
+całą taką klatkę.
+Metoda pochodzi od przypuszczenia, że człowiek rozpoznaje i rozróżnia wdech/wydech
+na podstawie barwy dźwięku. 
+
 \section{Teoria}
 coś tu napisać
+
 
 \section{Implementacja}
 \subsection{Pozyskiwanie częstotliwości i polepszanie jakości danych}
