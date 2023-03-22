@@ -43,10 +43,16 @@
 \maketitle
 
 \section{Wstęp}
-Celem projektu było określanie chwil na nagraniu, w których osoba bierze wdech, i w których wydech. 
+Celem projektu było określanie chwil na nagraniu, w których osoba bierze wdech i wydech. 
 Dokonano oceny jakościowej za pomocą detekcji oddechu na żywo jak i ilościowej (przy wykorzystaniu
-dalej wymienionych metryk.
-\section{Podejście}
+dalej wymienionych metryk).
+\section{Zbieranie i obróbka danych}
+\subsection{Nagrywanie danych oddechowych}
+Żeby zapewnić dobre oznaczenie danych, etykietujemy je jeszcze w trakcie nagrywania dźwięku. 
+Osoba nagrywana naciska przycisk, żeby zasygnalizować, że przestała brać wdech i zaczyna wydychać 
+powietrze lub na odwrót. Pozyskane natężenie przy dalszej obróbce odszumiamy za pomocą dostępnej
+w Pythonie biblioteki $noisereduce$.
+
 \subsection{Średnia częstotliwość w czasie}
 Pierwotnie przyjętym założeniem było, że podczas wdechu średnia częstotliwość dźwięku jest wyższa niż
 gdy osoba wydycha. Z pliku w formacie .wav dla bloków próbek generujemy spektrogramy i obliczamy
@@ -62,20 +68,10 @@ Innym podejściem jest wzięcie całego spektrogramu (a przynajmniej jego częś
 modelu.  Podobnie jak ostatnio dzielimy dane na bloki ale tym razem nie liczymy średniej tylko zostawiamy
 całą taką klatkę.
 Metoda pochodzi od przypuszczenia, że człowiek rozpoznaje i rozróżnia wdech/wydech
-na podstawie barwy dźwięku. 
-
+na podstawie barwy dźwięku.  Wektor cech ma więc postać $\vec{x} = [I_{f_1}, I_{f_2}, ..., I_{f_n}]$.
+W dalszej części korzystamy z tego podejścia przyjmując $n=160$ oraz rozmiar bloku $=1024$ próbki.
 \section{Teoria}
 coś tu napisać
-
-
-\section{Implementacja}
-\subsection{Pozyskiwanie częstotliwości i polepszanie jakości danych}
-Danymi wejściowymi jest sygnał natężenia dźwięku (np. z mikrofonu, pliku .wav).
-Stosujemy FFT dla bloków po 128 próbek każdy, którą następnie uśredniamy i traktujemy jako 
-dane wejściowe do modelu (średnia częstotliwość w czasie).\\\\
-Do polepszenia jakości danych stosujemy filtr wygładzający Savitzky-Golay z parametrami 50,3.
-Filtr ten sekwencyjnie dopasowuje małe podzbiory próbek do wielomianu niskiego stopnia.
-
 
 
 

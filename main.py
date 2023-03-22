@@ -20,15 +20,16 @@ def record(file):
 
 
 if __name__ == '__main__':
-    # sp.svm_train(['e1', 'e2', 'e3', 'e4', 'e5', 'e7'])
 
-    rt.detection(
-        load('media/models/spectro_svm.joblib'),
-        load('media/models/spectro_svm_scaler.joblib'))
-
+    # rt.detection(
+    #     load('media/models/spectro_svm.joblib'),
+    #     load('media/models/spectro_svm_scaler.joblib'))
+    record('e10')
     # x, y = su.wav_to_sample_xy('media/train/e9.wav')
-    # timestamps, frames = sp.to_spectro(y, 44100)
+    # timestamps, frames = sp.to_spectro(y, sp.SAMPLE_FREQ)
     # labels = sp.spectro_labeled('media/train/e9.csv', timestamps)
+    #
+    # # timestamps, frames = sp.to_spectro(y, 44100)
     # clf = load('media/models/spectro_svm.joblib')
     # scaler = load('media/models/spectro_svm_scaler.joblib')
     #
