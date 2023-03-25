@@ -18,5 +18,6 @@ def record(file):
 
 
 if __name__ == '__main__':
-    svm.svm_train(['e1', 'e2', 'e3', 'e4', 'e5', 'e6', 'e7', 'e8', 'e10', 'e11'], 'svm_custom')
-    test_quantitative(['e9'], 'svm_custom')
+    svm.svm_train(['e1', 'e2', 'e3', 'e4', 'e5', 'e6', 'e7', 'e8', 'e10', 'e11'], 'svm_custom2')
+    test_quantitative(['e9'], 'svm_custom2')
+    test_qualitative('svm_custom2')
