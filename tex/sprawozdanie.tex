@@ -71,8 +71,25 @@ Metoda pochodzi od przypuszczenia, że człowiek rozpoznaje i rozróżnia wdech/
 na podstawie barwy dźwięku.  Wektor cech ma więc postać $\vec{x} = [I_{f_1}, I_{f_2}, ..., I_{f_n}]$.
 W dalszej części korzystamy z tego podejścia przyjmując $n=160$ oraz rozmiar bloku $=1024$ próbki.
 \section{Teoria}
-coś tu napisać
-
+\subsection{SVM}
+Pierwszy model, jakim dokonujemy klasyfikacji, jest oparty o SVM. Metoda ta polega na szukaniu optymalnych wag $\boldsymbol{w}, \boldsymbol{b}$.
+Następnie będziemy klasyfikować według funkcji maszyny uczącej 
+\begin{gather*}
+	f(x) = sgn(\boldsymbol{w}^T \boldsymbol{x})
+\end{gather*}
+jeśli $f$ zwraca 1 to traktujemy to jako jedną z binarnych decyzji (w naszym przypadku np. wdech) a jeśli zwraca -1 to drugą (czyli np. wydech).
+$\textbf{x}$ jest wektorem cech rozszerzonym o współrzędną 1 (w naszym przypadku $dim(\textbf{x}) = 160 + 1 \times 1$).  Znalezienie optymalnych wag będzie polegało na minimalizacji
+funkcji kosztu
+\begin{gather*}
+	J(\boldsymbol{w}) = \frac{1}{2}||\boldsymbol{w}||^2 + \frac{C}{N}\Sigma_x max\{0, 1 - y(\boldsymbol{w}^Tx)\}
+\end{gather*}
+gdzie C jest parametrem uregulowania. Funkcję będziemy minimalizować metodą spadku po gradiencie
+\begin{gather*}
+	\nabla J(\boldsymbol{w}) =( \boldsymbol{w} + \Sigma_x \begin{cases}
+		0; max\{0, 1 - y (\boldsymbol{w}x)\} = 0 \\
+		-Cyx; 
+	\end{cases})/N
+\end{gather*}
 
 
 
