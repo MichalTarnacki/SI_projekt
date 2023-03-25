@@ -1,14 +1,10 @@
-import matplotlib.pyplot as plt
 import noisereduce
 import numpy as np
 import pygame
 import pyaudio
-import sounddevice as sd
-import src.spectrogram as sp
+import src.data_engineering.spectrogram as sp
 
-from sklearn.preprocessing import StandardScaler
 from scipy.io.wavfile import write
-from threading import Lock
 
 
 def detection(model, scaler, chunk_size=352, input_size=40):

@@ -1,7 +1,7 @@
 import math
 import numpy as np
-import src.data_utils as du
-import src.signal_utils as su
+import src.data_engineering.data_utils as du
+import src.old.signal_utils as su
 
 from sklearn.svm import SVC
 from sklearn.preprocessing import StandardScaler

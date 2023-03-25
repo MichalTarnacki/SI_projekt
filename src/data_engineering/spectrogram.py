@@ -1,12 +1,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import src.signal_utils as su
 import noisereduce
-
-from sklearn.svm import SVC
-from sklearn.preprocessing import StandardScaler
-from joblib import dump, load
 
 
 CHUNK_SIZE = 1024
@@ -76,25 +71,3 @@ def pressure_labeled_plot(labels, time, pressure, chunk_size=CHUNK_SIZE):
     plt.legend(['in', 'out'])
     plt.show()
 
-
-def svm_train(filenames):
-    x_train = []
-    y_train = []
-
-    for filename in filenames:
-        file_csv = f'media/train/{filename}.csv'
-        file_wav = f'media/train/{filename}.wav'
-        x, y = su.wav_to_sample_xy(file_wav)
-        timestamps, frames = to_spectro(y, SAMPLE_FREQ)
-        labels = spectro_labeled(file_csv, timestamps)
-        x_train += frames
-        y_train += labels
-
-    scaler = StandardScaler()
-    x_train_std = scaler.fit_transform(x_train)
-    clf = SVC(kernel='linear', verbose=1)
-    clf.fit(x_train_std, y_train)
-    dump(clf, 'media/models/spectro_svm.joblib')
-    dump(scaler, 'media/models/spectro_svm_scaler.joblib')
-
-    return clf, scaler

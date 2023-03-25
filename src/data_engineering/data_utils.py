@@ -2,33 +2,17 @@ import time
 import pygame
 import sounddevice as sd
 import pandas as pd
-import src.signal_utils as su
+import numpy as np
+import src.old.signal_utils as su
 
 from scipy.io.wavfile import write
+from scipy.io import wavfile
 
 
-def buffer_get_labels(filename, timestamps):
-    all_data = pd.read_csv(filename, sep=',').values
-    current = 0
-    labels = []
-
-    for timestamp in timestamps:
-        if timestamp > all_data[current][1]:
-            current += 1
-        if current >= len(all_data): break
-        labels.append(all_data[current][0])
-
-    while len(labels) != len(timestamps):
-        labels.append('out' if all_data[current-1][0] == 'in' else 'in')
-
-    return labels
-
-
-def file_with_labels(file_csv, file_wav):
-    x, y = su.wav_to_sample_xy(file_wav)
-    t, f = su.to_dominant_freq(1/(x[1]-x[0]), y)
-
-    return buffer_get_labels(file_csv, t), t, su.signal_clean(f)
+def wav_to_sample_xy(filename):
+    sample_rate, pressure = wavfile.read(filename)
+    timestamps = np.arange(0, pressure.shape[0]/sample_rate, 1/sample_rate)
+    return timestamps, pressure
 
 
 def data_recorder(file_csv, file_wav):
