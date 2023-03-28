@@ -5,7 +5,7 @@ import src.models.dataset as dataset
 
 from sklearn.svm import SVC
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
-from sklearn.utils import shuffle
+from sklearn.base import TransformerMixin
 from joblib import dump
 
 import numpy as np
@@ -96,7 +96,7 @@ def library_svm_train(filenames, modelname):
     return clf, scaler
 
 
-def svm_train(filenames, modelname):
+def svm_train_basic(filenames, modelname):
     x_train, y_train = dataset.build_train(filenames)
 
     scaler = StandardScaler()
@@ -109,3 +109,30 @@ def svm_train(filenames, modelname):
 
     return clf, scaler
 
+
+def svm_train_with_previous_state(filenames, modelname):
+    x_train, y_train = dataset.build_train(filenames, True)
+
+    scaler = StandardScalerIgnorePreviousState()
+    x_train_std = scaler.fit(x_train).transform(x_train)
+    y_train = transform_to_binary(y_train)
+
+    clf = SVM()
+    clf.fit(x_train_std, y_train)
+    dump(clf, f'media/models/{modelname}_prevstate.joblib')
+    dump(scaler, f'media/models/{modelname}_prevstate_scaler.joblib')
+
+    return clf, scaler
+
+
+class StandardScalerIgnorePreviousState(TransformerMixin):
+    def __init__(self):
+        self.scaler = StandardScaler()
+
+    def fit(self, X):
+        self.scaler.fit(X[:, :-1])
+        return self
+
+    def transform(self, X):
+        X_head = self.scaler.transform(X[:, :-1])
+        return np.concatenate((X_head, X[:, -1:]), axis=1)

@@ -7,7 +7,7 @@ import src.data_engineering.spectrogram as sp
 from scipy.io.wavfile import write
 
 
-def detection(model, scaler, chunk_size=352, input_size=40):
+def detection(model, scaler, chunk_size=352, input_size=40, uses_previous_state=False):
     pygame.init()
     pygame.font.init()
     screen = pygame.display.set_mode((740, 480))
@@ -18,6 +18,7 @@ def detection(model, scaler, chunk_size=352, input_size=40):
     stream = p.open(format=pyaudio.paInt16, channels=1, rate=fs, input=True, frames_per_buffer=1024)
     samples = np.array([])
     state = 'in'
+    prev_state = 'in'
 
     while True:
         data = np.frombuffer(stream.read(1024, exception_on_overflow=False), dtype=np.int16)
@@ -32,6 +33,9 @@ def detection(model, scaler, chunk_size=352, input_size=40):
         if samples.shape[0] > chunk_size * (input_size + 200):
             clean = noisereduce.reduce_noise(samples, 44100)
             last_frame = abs(np.fft.rfft(clean[len(clean) - sp.CHUNK_SIZE:]))[:160]
+            if uses_previous_state:
+                last_frame = np.append(last_frame, 1 if prev_state == 'in' else -1)
+                prev_state = state
 
             last_frame_std = scaler.transform(last_frame.reshape(-1,1).T)
             state = model.predict(last_frame_std)

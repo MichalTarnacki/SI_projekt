@@ -50,3 +50,7 @@ def data_recorder(file_csv, file_wav):
                   'time_right': [y[1] for y in timestamps]
                   }).to_csv(file_csv, index=False)
     write(file_wav, sample_rate, rec)
+
+
+def scale_ignore_previous_state():
+    pass
