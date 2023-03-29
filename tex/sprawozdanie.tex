@@ -46,6 +46,27 @@
 Celem projektu było określanie chwil na nagraniu, w których osoba bierze wdech i wydech. 
 Dokonano oceny jakościowej za pomocą detekcji oddechu na żywo jak i ilościowej (przy wykorzystaniu
 dalej wymienionych metryk).
+
+\section{Teoria}
+\subsection{SVM}
+Pierwszy model, jakim dokonujemy klasyfikacji, jest oparty o SVM. Metoda ta polega na szukaniu optymalnych wag $\boldsymbol{w}, b$.
+Następnie będziemy klasyfikować według funkcji maszyny uczącej 
+\begin{gather*}
+	f(x) = sgn(\boldsymbol{w}^T \boldsymbol{x} + b)
+\end{gather*}
+jeśli $f$ zwraca 1 to traktujemy to jako jedną z binarnych decyzji (w naszym przypadku np. wdech) a jeśli zwraca -1 to drugą (czyli np. wydech).
+$\textbf{x}$ jest wektorem cech.  Znalezienie optymalnych wag będzie polegało na minimalizacji
+funkcji kosztu
+\begin{gather*}
+	J(\boldsymbol{w}) = \frac{1}{2}||\boldsymbol{w}||^2 + \frac{C}{N}\Sigma_x max\{0, 1 - y(\boldsymbol{w}^Tx + b)\}
+\end{gather*}
+gdzie C jest parametrem uregulowania. Funkcję będziemy minimalizować metodą spadku po gradiencie (wersję wsadową).
+\subsection{Ocena modeli}
+Dokładność ($accuracy$) definiujemy jako
+\begin{gather*}
+	accuracy = \frac{\# correct}{\# all}
+\end{gather*}
+
 \section{Zbieranie i obróbka danych}
 \subsection{Nagrywanie danych oddechowych}
 Żeby zapewnić dobre oznaczenie danych, etykietujemy je jeszcze w trakcie nagrywania dźwięku. 
@@ -69,22 +90,20 @@ modelu.  Podobnie jak ostatnio dzielimy dane na bloki ale tym razem nie liczymy 
 całą taką klatkę.
 Metoda pochodzi od przypuszczenia, że człowiek rozpoznaje i rozróżnia wdech/wydech
 na podstawie barwy dźwięku.  Wektor cech ma więc postać $\vec{x} = [I_{f_1}, I_{f_2}, ..., I_{f_n}]$.
-W dalszej części korzystamy z tego podejścia przyjmując $n=160$ oraz rozmiar bloku $=1024$ próbki.
-\section{Teoria}
-\subsection{SVM}
-Pierwszy model, jakim dokonujemy klasyfikacji, jest oparty o SVM. Metoda ta polega na szukaniu optymalnych wag $\boldsymbol{w}, b$.
-Następnie będziemy klasyfikować według funkcji maszyny uczącej 
-\begin{gather*}
-	f(x) = sgn(\boldsymbol{w}^T \boldsymbol{x} + b)
-\end{gather*}
-jeśli $f$ zwraca 1 to traktujemy to jako jedną z binarnych decyzji (w naszym przypadku np. wdech) a jeśli zwraca -1 to drugą (czyli np. wydech).
-$\textbf{x}$ jest wektorem cech (w naszym przypadku $dim(\textbf{x}) = 160 \times 1$).  Znalezienie optymalnych wag będzie polegało na minimalizacji
-funkcji kosztu
-\begin{gather*}
-	J(\boldsymbol{w}) = \frac{1}{2}||\boldsymbol{w}||^2 + \frac{C}{N}\Sigma_x max\{0, 1 - y(\boldsymbol{w}^Tx + b)\}
-\end{gather*}
-gdzie C jest parametrem uregulowania. Funkcję będziemy minimalizować metodą spadku po gradiencie (wersję wsadową).
+W dalszej części korzystamy z tego podejścia.
+\subsection{Ekstrakcja najistotniejszych częstotliwości}
+\subsection{Redukcja szumów}
+\subsection{Standaryzacja}
 
-
+\section{Implementacja modeli}
+\subsection{SVM ze spektrogramem}
+Naszym pierwszym podejściem był SVM, w którym wektor cech stanowił 160 poziomów częstotliwości, 
+tj. $\vec{x} = [I_{f_1}, I_{f_2}, ..., I_{f_160}]$.  Na tej podstawie uzyskaliśmy dokładność $\sim 70\%$ dla danych testowych. 
+Problemem było jednak, że często zdarzały się sytuacje, w których klasyfikator w połowie wdechu/wydechu "przeskakiwał" 
+na chwilę na przeciwną wartość, predykcje te były więc dosyć niestabilne.
+\subsection{Informacje o poprzednich stanach}
+Model z poprzedniego podpunktu rozszerzyliśmy o informację o wcześniej przewidzianym stanie, czyli 
+$\vec{x} = [I_{f_1}, I_{f_2}, ..., I_{f_160},  s]$, gdzie $s = 1$ jeśli poprzednio stwierdzono wdech, $s=-1$ jeśli poprzednio stwierdzono wydech.
+Takim podejściem otrzymaliśmy dokładność $\sim 99\%$ dla danych testowych oraz ograniczyliśmy przeskakiwanie przewidywań.
 
 \end{document}
