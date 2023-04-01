@@ -14,7 +14,7 @@ def wav_to_sample_xy(filename):
     return timestamps, pressure, sample_rate
 
 
-def data_recorder(filename):
+def data_recorder(filename, with_bg=True):
     record_time_s = 25
     record_bg_time_s = 10
     sample_rate = 44100
@@ -27,23 +27,24 @@ def data_recorder(filename):
     timestamps = []
     state = 'in'
 
-    rec = sd.rec(int(record_bg_time_s * sample_rate), samplerate=sample_rate, channels=channels)
-    t0 = time.time()
+    if with_bg:
+        rec = sd.rec(int(record_bg_time_s * sample_rate), samplerate=sample_rate, channels=channels)
+        t0 = time.time()
 
-    while time.time() - t0 < record_bg_time_s:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                return
+        while time.time() - t0 < record_bg_time_s:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    return
 
-        screen.fill((0, 0, 0))
-        text = font.render(f'Recording background, try not to breath: {(record_bg_time_s - time.time() + t0).__str__()}', True, (255, 255, 255))
-        screen.blit(text, (0, 0))
-        pygame.display.update()
+            screen.fill((0, 0, 0))
+            text = font.render(f'Recording background, try not to breath: {(record_bg_time_s - time.time() + t0).__str__()}', True, (255, 255, 255))
+            screen.blit(text, (0, 0))
+            pygame.display.update()
 
-  #  pygame.quit()
-    sd.stop()
-    write(filename + '.bgwav', sample_rate, rec)
+      #  pygame.quit()
+        sd.stop()
+        write(filename + '.bgwav', sample_rate, rec)
 
     rec = sd.rec(int(record_time_s * sample_rate), samplerate=sample_rate, channels=channels)
     t0 = time.time()

@@ -3,19 +3,20 @@ import src.data_engineering.data_utils as du
 import src.data_engineering.spectrogram as sp
 
 
-def build(filenames, dir, previous_state=False):
+def build(filenames, dir, previous_state=False, with_bg=True):
     x_set = []
     y_set = []
     for filename in filenames:
         file_csv = f'{dir}{filename}.csv'
         file_wav = f'{dir}{filename}.wav'
-        file_bg_wav = f'{dir}{filename}.bgwav'
         #x - timestamps y - pressure
         x, y, freq = du.wav_to_sample_xy(file_wav)
-        x_bg, y_bg, freq_bg = du.wav_to_sample_xy(file_wav)
 
-        x_bg = np.mean(x_bg)
-        x = [i if i>x_bg else 0 for i in x]
+        if with_bg:
+            file_bg_wav = f'{dir}{filename}.bgwav'
+            x_bg, y_bg, freq_bg = du.wav_to_sample_xy(file_wav)
+            x_bg = np.mean(x_bg)
+            x = [i if i>x_bg else 0 for i in x]
 
 
 
