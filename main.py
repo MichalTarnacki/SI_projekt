@@ -47,7 +47,7 @@ if __name__ == '__main__':
                     True)
             case '3':
                # test_quantitative_with_previous_state(['e9'], 'svm_custom_softmax_prevstate')
-                test_qualitative('svm_custom_softmax_prevstate', False)
+                test_qualitative('svm_custom_softmax_prevstate', with_previous_state=False)
             case '4':
                 x=input()
                 show_plot(f'{macros.train_path}{x}.csv', f'{macros.train_path}{x}.wav')
