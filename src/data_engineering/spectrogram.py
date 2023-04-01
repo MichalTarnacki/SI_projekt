@@ -68,14 +68,7 @@ def pressure_labeled_plot(labels, time, pressure, chunk_size=CHUNK_SIZE):
         else:
             x_out.append(time[i])
             y_out.append(pressure[i])
-    plt.ioff()
     plt.scatter(x_out, y_out, s=5)
     plt.scatter(x_in, y_in, s=5)
     plt.legend(['in', 'out'])
-
     plt.show()
-    gc.collect()
-   # fig1.canvas.mpl_connect('close_event', lambda _: fig1.canvas.manager.window.destroy())
-    #plt.close('all')
-    # plt.clf()
-    # plt.close('all')

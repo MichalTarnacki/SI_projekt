@@ -19,9 +19,10 @@ def test_quantitative(testfiles, modelfile, with_previous_state):
     print(f"accuracy: {accuracy_score(y_test, y_test_pred)}")
 
 
-def test_qualitative(modelfile, with_previous_state):
+def test_qualitative(modelfile, with_previous_state, with_bg):
     rt.detection(
         load(f'{macros.model_path}{modelfile}.joblib'),
         load(f'{macros.model_path}{modelfile}_scaler.joblib'),
-        uses_previous_state=with_previous_state
+        uses_previous_state=with_previous_state,
+        with_bg = with_bg
     )

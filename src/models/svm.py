@@ -112,8 +112,8 @@ def svm_train_basic(filenames, modelname):
     return clf, scaler
 
 
-def svm_train_with_previous_state(filenames, modelname, softmax=False):
-    x_train, y_train = dataset.build(filenames, macros.train_path, True)
+def svm_train_with_previous_state(filenames, modelname, softmax=False, with_bg=False):
+    x_train, y_train = dataset.build(filenames, macros.train_path, True, with_bg)
 
     scaler = StandardScalerIgnorePreviousState()
     x_train_std = scaler.fit(x_train).transform(x_train)
