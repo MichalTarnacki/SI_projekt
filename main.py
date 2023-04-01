@@ -15,10 +15,11 @@ def show_plot(file_csv, file_wav):
     labels = sp.spectro_labeled(file_csv, timestamps)
     sp.pressure_labeled_plot(labels, x, y)
 
-
+freg = re.compile(r'^e[0-9]+$')
 def record():
     folder = pl.Path(macros.train_path)
-    files = list(set([i.stem for i in folder.iterdir()]))
+    files = list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)]))
+
     if files == []:
         filename = f'{macros.train_path}e1'
     else:
@@ -42,7 +43,7 @@ if __name__ == '__main__':
             case '2':
                 folder = pl.Path(macros.train_path)
                 svm.svm_train_with_previous_state(
-                    list(set([i.stem for i in folder.iterdir()])),
+                    list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)])),
                     'svm_custom_softmax',
                     True)
             case '3':
