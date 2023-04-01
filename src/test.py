@@ -41,7 +41,7 @@ def test_quantitative_with_previous_state(testfiles, modelfile):
 
 def test_qualitative_with_previous_state(modelfile):
     rt.detection(
-        load(f'media/models/{modelfile}.joblib'),
-        load(f'media/models/{modelfile}_scaler.joblib'),
+        load(f'{macros.model_path}{modelfile}.joblib'),
+        load(f'{macros.model_path}{modelfile}_scaler.joblib'),
         uses_previous_state=True
     )

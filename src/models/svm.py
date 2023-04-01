@@ -106,8 +106,8 @@ def svm_train_basic(filenames, modelname):
     y_train = transform_to_binary(y_train)
     clf = SVM()
     clf.fit(x_train_std, y_train)
-    dump(clf, f'media/models/{modelname}.joblib')
-    dump(scaler, f'media/models/{modelname}_scaler.joblib')
+    dump(clf, f'{macros.model_path}{modelname}.joblib')
+    dump(scaler, f'{macros.model_path}{modelname}_scaler.joblib')
 
     return clf, scaler
 

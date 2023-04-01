@@ -8,11 +8,10 @@ import src.old.signal_utils as su
 from scipy.io.wavfile import write
 from scipy.io import wavfile
 
-
 def wav_to_sample_xy(filename):
     sample_rate, pressure = wavfile.read(filename)
     timestamps = np.arange(0, pressure.shape[0]/sample_rate, 1/sample_rate)
-    return timestamps, pressure
+    return timestamps, pressure, sample_rate
 
 
 def data_recorder(file_csv, file_wav):

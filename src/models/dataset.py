@@ -8,13 +8,14 @@ def build(filenames, dir, previous_state=False):
     y_set = []
     for filename in filenames:
         file_csv = f'{dir}{filename}.csv'
-        file_wav = f'{dir}/{filename}.wav'
-        x, y = du.wav_to_sample_xy(file_wav)
-        timestamps, frames = sp.to_spectro(y, sp.SAMPLE_FREQ)
+        file_wav = f'{dir}{filename}.wav'
+        #x - timestamps y - pressure
+        x, y, freq = du.wav_to_sample_xy(file_wav)
+        timestamps, frames = sp.to_spectro(y, freq)
         labels = sp.spectro_labeled(file_csv, timestamps)
 
         if previous_state:
-            frames[0] = np.append(frames[0], 1)
+            frames[0] = np.append(frames[0], 1) # TODO po co??
             for i in range(1, len(frames)):
                 frames[i] = np.append(frames[i], 1 if labels[i - 1] == 'in' else -1)
 
