@@ -14,8 +14,9 @@ def wav_to_sample_xy(filename):
     return timestamps, pressure, sample_rate
 
 
-def data_recorder(file_csv, file_wav):
+def data_recorder(filename):
     record_time_s = 25
+    record_bg_time_s = 10
     sample_rate = 44100
     channels = 1
 
@@ -25,6 +26,24 @@ def data_recorder(file_csv, file_wav):
     font = pygame.font.SysFont(None, 50)
     timestamps = []
     state = 'in'
+
+    rec = sd.rec(int(record_bg_time_s * sample_rate), samplerate=sample_rate, channels=channels)
+    t0 = time.time()
+
+    while time.time() - t0 < record_bg_time_s:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return
+
+        screen.fill((0, 0, 0))
+        text = font.render(f'Recording background, try not to breath: {(record_bg_time_s - time.time() + t0).__str__()}', True, (255, 255, 255))
+        screen.blit(text, (0, 0))
+        pygame.display.update()
+
+  #  pygame.quit()
+    sd.stop()
+    write(filename + '.bgwav', sample_rate, rec)
 
     rec = sd.rec(int(record_time_s * sample_rate), samplerate=sample_rate, channels=channels)
     t0 = time.time()
@@ -48,5 +67,5 @@ def data_recorder(file_csv, file_wav):
 
     pd.DataFrame({'type': [y[0] for y in timestamps],
                   'time_right': [y[1] for y in timestamps]
-                  }).to_csv(file_csv, index=False)
-    write(file_wav, sample_rate, rec)
+                  }).to_csv(filename + '.csv', index=False)
+    write(filename + '.wav', sample_rate, rec)
