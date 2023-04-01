@@ -8,7 +8,6 @@ import src.models.svm as svm
 import pathlib as pl
 
 from src.test import test_qualitative, test_quantitative
-from src.test import test_quantitative_with_previous_state, test_qualitative_with_previous_state
 
 def show_plot(file_csv, file_wav):
     x, y, sample_rate = du.wav_to_sample_xy(file_wav)
@@ -48,7 +47,7 @@ if __name__ == '__main__':
                     True)
             case '3':
                # test_quantitative_with_previous_state(['e9'], 'svm_custom_softmax_prevstate')
-                test_qualitative_with_previous_state('svm_custom_softmax_prevstate')
+                test_qualitative('svm_custom_softmax_prevstate', False)
             case '4':
                 x=input()
                 show_plot(f'{macros.train_path}{x}.csv', f'{macros.train_path}{x}.wav')
