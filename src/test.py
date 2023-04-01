@@ -1,3 +1,4 @@
+import macros
 import src.real_time as rt
 import src.models.dataset as dataset
 
@@ -29,7 +30,7 @@ def test_quantitative_with_previous_state(testfiles, modelfile):
     clf = load(f'media/models/{modelfile}.joblib')
     scaler = load(f'media/models/{modelfile}_scaler.joblib')
 
-    x_test, y_test = dataset.build_test(testfiles, True)
+    x_test, y_test = dataset.build(testfiles,macros.test_path, True)
     x_test_std = scaler.transform(x_test)
 
     y_test_pred = []

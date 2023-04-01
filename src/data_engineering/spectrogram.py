@@ -1,6 +1,9 @@
+import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('Qt5Agg')
 import noisereduce
 
 
@@ -66,7 +69,9 @@ def pressure_labeled_plot(labels, time, pressure, chunk_size=CHUNK_SIZE):
             x_out.append(time[i])
             y_out.append(pressure[i])
 
-    plt.scatter(x_in, y_in, s=5)
     plt.scatter(x_out, y_out, s=5)
     plt.legend(['in', 'out'])
     plt.show()
+
+    # plt.clf()
+    # plt.close('all')

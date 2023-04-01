@@ -1,6 +1,8 @@
 import math
 
 import numpy as np
+
+import macros
 import src.models.dataset as dataset
 
 from sklearn.svm import SVC
@@ -84,7 +86,7 @@ def extended(x):
 
 
 def library_svm_train(filenames, modelname):
-    x_train, y_train = dataset.build_train(filenames)
+    x_train, y_train = dataset.build(filenames, macros.train_path)
 
     scaler = StandardScaler()
     x_train_std = scaler.fit_transform(x_train)
@@ -97,7 +99,7 @@ def library_svm_train(filenames, modelname):
 
 
 def svm_train_basic(filenames, modelname):
-    x_train, y_train = dataset.build_train(filenames)
+    x_train, y_train = dataset.build(filenames, macros.train_path)
 
     scaler = StandardScaler()
     x_train_std = scaler.fit_transform(x_train)
@@ -111,7 +113,7 @@ def svm_train_basic(filenames, modelname):
 
 
 def svm_train_with_previous_state(filenames, modelname, softmax=False):
-    x_train, y_train = dataset.build_train(filenames, True)
+    x_train, y_train = dataset.build(filenames, macros.train_path, True)
 
     scaler = StandardScalerIgnorePreviousState()
     x_train_std = scaler.fit(x_train).transform(x_train)
@@ -123,8 +125,8 @@ def svm_train_with_previous_state(filenames, modelname, softmax=False):
         clf = SVM()
 
     clf.fit(x_train_std, y_train)
-    dump(clf, f'media/models/{modelname}_prevstate.joblib')
-    dump(scaler, f'media/models/{modelname}_prevstate_scaler.joblib')
+    dump(clf, f'{macros.model_path}{modelname}_prevstate.joblib')
+    dump(scaler, f'{macros.model_path}{modelname}_prevstate_scaler.joblib')
 
     return clf, scaler
 

@@ -12,5 +12,6 @@ pip install -r requirements.txt
 może być problem z pyAudio, przed zainstalowaniem
 ```
 brew install portaudio
+brew install python-tk
 ```
 

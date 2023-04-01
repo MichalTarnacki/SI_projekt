@@ -1,3 +1,5 @@
+import sys
+
 import noisereduce
 import numpy as np
 import pygame
@@ -29,6 +31,7 @@ def detection(model, scaler, chunk_size=352, input_size=40, uses_previous_state=
                 stream.close()
                 p.terminate()
                 write('test.wav', fs, samples)
+                pygame.quit()
                 return
         if samples.shape[0] > chunk_size * (input_size + 200):
             clean = noisereduce.reduce_noise(samples, 44100)

@@ -33,7 +33,8 @@ def data_recorder(file_csv, file_wav):
     while time.time() - t0 < record_time_s:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                break
+                pygame.quit()
+                return
             if event.type == pygame.KEYDOWN and event.key == pygame.K_F1:
                 timestamps.append((state, time.time() - t0))
                 state = 'in' if state == 'out' else 'out'
