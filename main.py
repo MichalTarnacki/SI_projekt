@@ -49,9 +49,8 @@ if __name__ == '__main__':
                 list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)])),
                 'svm_custom_softmax',
                 True, False)
-        elif x== '3':
-            # test_quantitative_with_previous_state(['e9'], 'svm_custom_softmax_prevstate')
-            test_qualitative('svm_custom_softmax_prevstate', with_previous_state=True, with_bg=False)
+        elif x == '3':
+            test_qualitative('svm_custom3_prevstate', with_previous_state=True, with_bg=False)
         elif x == '4':
             x = input()
             show_plot(f'{macros.train_path}{x}.csv', f'{macros.train_path}{x}.wav')
