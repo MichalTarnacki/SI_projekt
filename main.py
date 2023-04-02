@@ -6,6 +6,8 @@ import src.real_time as rt
 import src.data_engineering.spectrogram as sp
 import src.models.svm as svm
 import pathlib as pl
+
+from src.new_realtime import new_realtime
 from src.test import test_qualitative, test_quantitative
 
 
@@ -57,3 +59,5 @@ if __name__ == '__main__':
         elif x == '5':
             folder = pl.Path(macros.test_path)
             test_quantitative(list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)])), 'svm_custom_softmax_prevstate', True)
+        elif x == '7':
+            new_realtime('svm_custom3_prevstate')
