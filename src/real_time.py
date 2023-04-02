@@ -76,11 +76,11 @@ def detection(model, scaler, chunk_size=352, input_size=40, uses_previous_state=
                 pygame.quit()
                 return
         if samples.shape[0] > chunk_size * (input_size + 200):
-            lock.acquire()
+            # lock.acquire()
             if with_bg:
                 samples = [i if i > s else 0 for i in samples]
             clean = noisereduce.reduce_noise(samples, 44100)
-            lock.release()
+            # lock.release()
             last_frame = abs(np.fft.rfft(clean[len(clean) - sp.CHUNK_SIZE:]))[:160]
             if uses_previous_state:
                 last_frame = np.append(last_frame, 1 if prev_state == 'in' else -1)
