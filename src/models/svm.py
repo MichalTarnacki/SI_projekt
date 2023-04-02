@@ -152,9 +152,10 @@ class SoftmaxSVM:
 
     def fit(self, X, Y):
         print("breathe in SVM")
-        self.in_SVM.fit(X, Y)
+        self.in_SVM.fit(X[:, 80:], Y)
         print("breathe out SVM")
         self.out_SVM.fit(X, Y)
+        # self.out_SVM.fit(np.concatenate([X[,:80], [X[160]]]), Y)
         print("classifier SVM")
         X_new = np.array([self.to_softmax(x) for x in X])
         self.classifier_SVM.fit(X_new, Y, batch_size=100)
@@ -162,7 +163,7 @@ class SoftmaxSVM:
         return (self.in_SVM.w, self.in_SVM.b), (self.out_SVM.w, self.out_SVM.b)
 
     def to_softmax(self, X):
-        prediction_in = np.dot(X, self.in_SVM.w[0]) + self.in_SVM.b  # 1 - in, -1 - not in
+        prediction_in = np.dot(X.reshape(1, -1)[:, 80:], self.in_SVM.w[0]) + self.in_SVM.b  # 1 - in, -1 - not in
         prediction_out = -1 * (np.dot(X, self.out_SVM.w[0]) + self.out_SVM.b)  # 1 - out, -1 - not out
 
         e_in = math.exp(prediction_in - max(prediction_in, prediction_out))

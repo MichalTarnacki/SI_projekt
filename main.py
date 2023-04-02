@@ -40,21 +40,21 @@ def record():
 if __name__ == '__main__':
     while True:
         print("1.Record\n2.Train\n3.Realtime")
-        match input():
-            case '1':
-                record()
-            case '2':
-                folder = pl.Path(macros.train_path)
-                svm.svm_train_with_previous_state(
-                    list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)])),
-                    'svm_custom_softmax',
-                    True, False)
-            case '3':
-                # test_quantitative_with_previous_state(['e9'], 'svm_custom_softmax_prevstate')
-                test_qualitative('svm_custom_softmax_prevstate', with_previous_state=True, with_bg=False)
-            case '4':
-                x = input()
-                show_plot(f'{macros.train_path}{x}.csv', f'{macros.train_path}{x}.wav')
-            case '5':
-                folder = pl.Path(macros.test_path)
-                test_quantitative(list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)])), 'svm_custom_softmax_prevstate', True)
+        x = input()
+        if x == '1':
+            record()
+        elif x == '2':
+            folder = pl.Path(macros.train_path)
+            svm.svm_train_with_previous_state(
+                list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)])),
+                'svm_custom_softmax',
+                True, False)
+        elif x== '3':
+            # test_quantitative_with_previous_state(['e9'], 'svm_custom_softmax_prevstate')
+            test_qualitative('svm_custom_softmax_prevstate', with_previous_state=True, with_bg=False)
+        elif x == '4':
+            x = input()
+            show_plot(f'{macros.train_path}{x}.csv', f'{macros.train_path}{x}.wav')
+        elif x == '5':
+            folder = pl.Path(macros.test_path)
+            test_quantitative(list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)])), 'svm_custom_softmax_prevstate', True)

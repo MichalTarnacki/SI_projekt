@@ -1,5 +1,6 @@
 import sys
 import time
+import threading
 
 import noisereduce
 import numpy as np
@@ -11,6 +12,8 @@ import src.data_engineering.spectrogram as sp
 from scipy.io.wavfile import write
 
 
+
+
 def detection(model, scaler, chunk_size=352, input_size=40, uses_previous_state=False, with_bg=False):
     pygame.init()
     pygame.font.init()
@@ -20,6 +23,7 @@ def detection(model, scaler, chunk_size=352, input_size=40, uses_previous_state=
     fs = 44100
     record_bg_time_s = 10
     channels = 1
+
 
     s = 0
     if with_bg:
@@ -45,12 +49,24 @@ def detection(model, scaler, chunk_size=352, input_size=40, uses_previous_state=
 
     stream = p.open(format=pyaudio.paInt16, channels=1, rate=fs, input=True, frames_per_buffer=1024)
     samples = np.array([])
+
+    lock = threading.Lock()
+
+    def record_thread():
+        nonlocal stream
+        nonlocal samples
+        while True:
+            data = np.frombuffer(stream.read(1024, exception_on_overflow=False), dtype=np.int16)
+            lock.acquire()
+            samples = np.append(samples, data)
+            lock.release()
+    tr = threading.Thread(target=record_thread)
+    tr.start()
+
     state = 'in'
     prev_state = 'in'
 
     while True:
-        data = np.frombuffer(stream.read(1024, exception_on_overflow=False), dtype=np.int16)
-        samples = np.append(samples, data)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 stream.stop_stream()
@@ -60,9 +76,11 @@ def detection(model, scaler, chunk_size=352, input_size=40, uses_previous_state=
                 pygame.quit()
                 return
         if samples.shape[0] > chunk_size * (input_size + 200):
+            lock.acquire()
             if with_bg:
                 samples = [i if i > s else 0 for i in samples]
             clean = noisereduce.reduce_noise(samples, 44100)
+            lock.release()
             last_frame = abs(np.fft.rfft(clean[len(clean) - sp.CHUNK_SIZE:]))[:160]
             if uses_previous_state:
                 last_frame = np.append(last_frame, 1 if prev_state == 'in' else -1)
