@@ -47,19 +47,18 @@ def detection(model, scaler, chunk_size=352, input_size=40, uses_previous_state=
         s = [i[0] for i in rec]
         s = np.mean(s)
 
-    stream = p.open(format=pyaudio.paInt16, channels=1, rate=fs, input=True, frames_per_buffer=1024)
+    stream = p.open(format=pyaudio.paInt16, channels=1, rate=fs, input=True, frames_per_buffer=1)
     samples = np.array([])
 
-    lock = threading.Lock()
-
+    # lock = threading.Lock()
+    run_thread = True
     def record_thread():
         nonlocal stream
         nonlocal samples
-        while True:
-            data = np.frombuffer(stream.read(1024, exception_on_overflow=False), dtype=np.int16)
-            lock.acquire()
+        while run_thread:
+            data = np.frombuffer(stream.read(1, exception_on_overflow=False), dtype=np.int16)
             samples = np.append(samples, data)
-            lock.release()
+
     tr = threading.Thread(target=record_thread)
     tr.start()
 
@@ -67,8 +66,11 @@ def detection(model, scaler, chunk_size=352, input_size=40, uses_previous_state=
     prev_state = 'in'
 
     while True:
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                run_thread = False
+                tr.join()
                 stream.stop_stream()
                 stream.close()
                 p.terminate()
@@ -76,11 +78,9 @@ def detection(model, scaler, chunk_size=352, input_size=40, uses_previous_state=
                 pygame.quit()
                 return
         if samples.shape[0] > chunk_size * (input_size + 200):
-            # lock.acquire()
             if with_bg:
                 samples = [i if i > s else 0 for i in samples]
             clean = noisereduce.reduce_noise(samples, 44100)
-            # lock.release()
             last_frame = abs(np.fft.rfft(clean[len(clean) - sp.CHUNK_SIZE:]))[:160]
             if uses_previous_state:
                 last_frame = np.append(last_frame, 1 if prev_state == 'in' else -1)
