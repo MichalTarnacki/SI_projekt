@@ -14,7 +14,7 @@ def test_quantitative(testfiles, modelfile, with_previous_state):
     x_test_std = scaler.transform(x_test)
 
     y_test_pred = []
-    prev_pred = 1
+    prev_pred = 'in'
     for xt in x_test_std:
         xt[160] = 1 if prev_pred == "in" else -1
         prev_pred = clf.predict(xt.reshape(-1, 1).T)
