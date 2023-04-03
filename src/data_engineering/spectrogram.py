@@ -5,7 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib
 import noisereduce
-
+from scipy.signal import savgol_filter
 
 CHUNK_SIZE = 1024
 SAMPLE_FREQ = 44100
@@ -18,16 +18,21 @@ SAMPLE_FREQ = 44100
 # i.e. size = original_input_size/chunk_size
 # returns frame and timestamp for each frame
 def to_spectro(pressure, fs, chunk_size=CHUNK_SIZE):
-    pressure = noisereduce.reduce_noise(pressure, sr=fs)
+    # pressure = noisereduce.reduce_noise(pressure, sr=fs)
     frames = []
     chunked_timestamps = np.arange(0, pressure.shape[0] / fs, chunk_size / fs)
 
     for i in range(0, len(pressure), chunk_size):
         chunk = pressure[i:i + chunk_size]
         freq = abs(np.fft.rfft(chunk))[:160]
+        signal_clean(freq) # added
         frames.append(freq)
 
     return chunked_timestamps, frames
+
+
+def signal_clean(signal):
+    return savgol_filter(signal, 20, 5)
 
 
 # add labels to constructed spectrogram frames

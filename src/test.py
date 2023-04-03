@@ -14,8 +14,11 @@ def test_quantitative(testfiles, modelfile, with_previous_state):
     x_test_std = scaler.transform(x_test)
 
     y_test_pred = []
+    prev_pred = 'in'
     for xt in x_test_std:
-        y_test_pred.append(clf.predict(xt.reshape(-1, 1).T))
+        xt[160] = 1 if prev_pred == "in" else -1
+        prev_pred = clf.predict(xt.reshape(-1, 1).T)
+        y_test_pred.append(prev_pred)
     print(f"accuracy: {accuracy_score(y_test, y_test_pred)}")
 
 

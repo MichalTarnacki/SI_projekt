@@ -151,12 +151,16 @@ class SoftmaxSVM:
         self.classifier_SVM = SVM()
 
     def fit(self, X, Y):
-        self.in_SVM.fit(X, Y)
+        modified = np.array([np.concatenate([x[:30], x[50:]]) for x in X])
+        # self.in_SVM.fit(np.concatenate([X[:, :30], X[:, 50:]]), Y)
+        self.in_SVM.fit(modified, Y)
         return (self.in_SVM.w, self.in_SVM.b)
-        # print("brea.he in SVM")
-        # self.in_SVM.fit(X, Y)
+        # print("breathe in SVM")
+        # Xin = X[:, 70:]
+        # self.in_SVM.fit(Xin, Y)
         # print("breathe out SVM")
-        # self.out_SVM.fit(X, Y)
+        # Xout = np.concatenate([X[:, :30], [X[:, 160]]])
+        # self.out_SVM.fit(Xout, Y)
         # # self.out_SVM.fit(np.concatenate([X[,:80], [X[160]]]), Y)
         # print("classifier SVM")
         # X_new = np.array([self.to_softmax(x) for x in X])
@@ -174,7 +178,8 @@ class SoftmaxSVM:
         return e_in/su, e_out/su
 
     def predict(self, X):
-        return self.in_SVM.predict(X)
+        modified = np.array([np.concatenate([x[:30], x[50:]]) for x in X])
+        return self.in_SVM.predict(modified)
         # softmax_in, softmax_out = self.to_softmax(X)
         # prediction = np.dot(np.array([softmax_in, softmax_out]), self.classifier_SVM.w[0]) + self.classifier_SVM.b
 
