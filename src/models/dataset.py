@@ -3,7 +3,7 @@ import src.data_engineering.data_utils as du
 import src.data_engineering.spectrogram as sp
 
 
-def build(filenames, dir, previous_state=False, with_bg=True):
+def build(filenames, dir, previous_state=False, with_bg=False):
     x_set = []
     y_set = []
     for filename in filenames:
