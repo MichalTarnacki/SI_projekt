@@ -41,7 +41,7 @@ def record():
 
 if __name__ == '__main__':
     while True:
-        print("1.Record\n2.Train\n3.Realtime")
+        print("1. Record\n2. Train\n3. Realtime\n4. Show plot\n5. Test quantitative\n7. New real time")
         x = input()
         if x == '1':
             record()
@@ -54,7 +54,7 @@ if __name__ == '__main__':
         elif x == '3':
             test_qualitative('svm_custom3_prevstate', with_previous_state=True, with_bg=False)
         elif x == '4':
-            x = input()
+            x = input('Filename: ')
             show_plot(f'{macros.train_path}{x}.csv', f'{macros.train_path}{x}.wav')
         elif x == '5':
             folder = pl.Path(macros.test_path)
