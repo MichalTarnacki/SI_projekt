@@ -46,6 +46,7 @@ def detection(model, scaler, chunk_size=352, input_size=40, uses_previous_state=
 
     state = 'in'
     prev_state = 'in'
+    print_state = 'cisza'
 
     while True:
 
@@ -62,24 +63,33 @@ def detection(model, scaler, chunk_size=352, input_size=40, uses_previous_state=
         screen.fill((0, 0, 0))
 
         if samples.shape[0] > chunk_size * (input_size + 200):
-            # clean = noisereduce.reduce_noise(samples[-1024:], 44100)
-
             clean = samples
             last_frame = abs(np.fft.rfft(clean[len(clean) - sp.CHUNK_SIZE:]))[:160]
             last_frame = sp.signal_clean(last_frame)
+
+            if sum(last_frame) < 1500:
+                print_state = "cisza"
+            else:
+                print_state = ""
+
             if uses_previous_state:
                 last_frame = np.append(last_frame, 1 if prev_state == 'in' else -1)
                 prev_state = state
-            # clean_frame = sp.signal_clean(last_frame[:-1])
+
             for x, y in enumerate(last_frame[:-1]):
-                pygame.draw.line(screen, (255, 0, 0) if state == 'in' else (0, 255, 0), (x*3, 480 - y), (x*3 + 3, 480 - last_frame[x+1]))
+                color = (255, 0, 0)
+                if print_state == "cisza":
+                    color = (0, 255, 0)
+                elif state == "out":
+                    color = (0,0,255)
+                pygame.draw.line(screen, color, (x*3, 480 - y), (x*3 + 3, 480 - last_frame[x+1]))
 
             last_frame_std = scaler.transform(last_frame.reshape(-1, 1).T)
             state = model.predict(last_frame_std)
 
-            # if samples.shape[0] > 44100:
-                # samples = samples[1024:]
-
-        text = font.render('teraz wdychasz' if state == 'in' else 'teraz wydychasz', True, (255, 255, 255))
-        screen.blit(text, (0, 0))
+        # if print_state == "cisza":
+        #     text = font.render('cisza', True, (255, 255, 255))
+        # else:
+        #     text = font.render('teraz wdychasz' if state == 'in' else 'teraz wydychasz', True, (255, 255, 255))
+        # screen.blit(text, (0, 0))
         pygame.display.update()

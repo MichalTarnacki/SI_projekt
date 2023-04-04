@@ -25,14 +25,14 @@ def to_spectro(pressure, fs, chunk_size=CHUNK_SIZE):
     for i in range(0, len(pressure), chunk_size):
         chunk = pressure[i:i + chunk_size]
         freq = abs(np.fft.rfft(chunk))[:160]
-        signal_clean(freq) # added
+        freq = signal_clean(freq) # added
         frames.append(freq)
 
     return chunked_timestamps, frames
 
 
-def signal_clean(signal):
-    return savgol_filter(signal, 20, 5)
+def signal_clean(signal, window=5):
+    return savgol_filter(signal, window, 2)
 
 
 # add labels to constructed spectrogram frames
