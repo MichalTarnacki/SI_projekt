@@ -32,24 +32,24 @@ def soundPlot(stream, ax1, ax2, model, scaler):
     t1=time.time()
     waveData = np.frombuffer(stream.read(CHUNK, exception_on_overflow=False), dtype=np.int16)
 
-    waveData_t = waveData.copy()
+    # waveData_t = waveData.copy()
 
-    #waveData =  [float(i)/32767.0 * 1000 for i in waveData]
+    waveData =  [float(i)/32767.0 * 1000 for i in waveData]
 
 
-    npArrayData_t = np.array(waveData_t)
-    indata_t = npArrayData_t*window
-    fftData_t = noisereduce.reduce_noise(indata_t, 44100)
-    fftData_t = np.abs(np.fft.rfft(fftData_t))
-    fftData_t = fftData_t[fftData_t.__len__() - 161:]
+    # npArrayData_t = np.array(waveData_t)
+    # indata_t = npArrayData_t*window
+    # fftData_t = noisereduce.reduce_noise(indata_t, 44100)
+    # fftData_t = np.abs(np.fft.rfft(fftData_t))
+    # fftData_t = fftData_t[fftData_t.__len__() - 161:]
 
 
     #waveData = wave.#.unpack("%dh"%(CHUNK), data)
     npArrayData = np.array(waveData)
     indata = npArrayData*window
     #write('test.wav', RATE, indata)
-    fftData = noisereduce.reduce_noise(indata, 44100)
-    fftData = np.abs(np.fft.rfft(fftData))
+    # fftData = noisereduce.reduce_noise(indata, 44100)
+    fftData = np.abs(np.fft.rfft(indata))
     fftData = fftData[fftData.__len__() - 160:]
     fftTime = np.fft.rfftfreq(CHUNK, 1. / RATE)
     fftTime = fftTime[fftTime.__len__() - 161:]
@@ -71,10 +71,10 @@ def soundPlot(stream, ax1, ax2, model, scaler):
 
     #Plot frequency domain graph
     ax2.cla()
-    ax2.plot(fftTime,fftData_t, 'g' if prev_state == 'in' else 'r')
+    ax2.plot(fftTime,fftData, 'g' if prev_state == 'in' else 'r')
     ax2.grid()
     ax2.axis([0,5000,0,10**6])
-    plt.pause(0.01)
+    plt.pause(0.0001)
     print("took %.02f ms"%((time.time()-t1)*1000))
     # use quadratic interpolation around the max
     if which != len(fftData)-1:
