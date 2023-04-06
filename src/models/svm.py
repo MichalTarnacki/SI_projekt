@@ -151,8 +151,8 @@ class SoftmaxSVM:
         self.classifier_SVM = SVM()
 
     def fit(self, X, Y):
-        # modified = np.array([np.concatenate([x[:30], x[50:]]) for x in X])
-        modified = X
+        modified = np.array([np.concatenate([x[:30], x[80:]]) for x in X])
+        # modified = X
         # self.in_SVM.fit(np.concatenate([X[:, :30], X[:, 50:]]), Y)
         self.in_SVM.fit(modified, Y)
         return (self.in_SVM.w, self.in_SVM.b)
@@ -179,8 +179,8 @@ class SoftmaxSVM:
         return e_in/su, e_out/su
 
     def predict(self, X):
-        # modified = np.array([np.concatenate([x[:30], x[50:]]) for x in X])
-        modified = X
+        modified = np.array([np.concatenate([x[:30], x[80:]]) for x in X])
+        # modified = X
         return self.in_SVM.predict(modified)
         # softmax_in, softmax_out = self.to_softmax(X)
         # prediction = np.dot(np.array([softmax_in, softmax_out]), self.classifier_SVM.w[0]) + self.classifier_SVM.b
