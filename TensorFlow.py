@@ -98,7 +98,7 @@ class TensorFlow:
         commands = commands[commands != 'desktop.ini']
         print('Commands:', commands)
 
-        filenames = tf.io.gfile.glob(str(data_dir) + '*/*')
+        filenames = tf.io.gfile.glob(str(data_dir) + '/*/*')
         filenames = tf.random.shuffle(filenames)
 
         # train_files = filenames[:int(len(filenames)*8/10)]
@@ -121,16 +121,16 @@ class TensorFlow:
         cols = 3
         n = rows * cols
         fig, axes = plt.subplots(rows, cols, figsize=(10, 12))
-        k = enumerate(waveform_ds.take(1))
+        k = enumerate(waveform_ds.take(rows*cols))
         for i, (audio, label) in k:
             pass
-            # r = i // cols
-            # c = i % cols
-            # ax = axes[r][c]
-            # ax.plot(audio.numpy())
-            # ax.set_yticks(np.arange(-1.2, 1.2, 0.2))
-            # label = label.numpy().decode('utf-8')
-            # ax.set_title(label)
+            r = i // cols
+            c = i % cols
+            ax = axes[r][c]
+            ax.plot(audio.numpy())
+            ax.set_yticks(np.arange(-1.2, 1.2, 0.2))
+            label = label.numpy().decode('utf-8')
+            ax.set_title(label)
 
         plt.show()
 
