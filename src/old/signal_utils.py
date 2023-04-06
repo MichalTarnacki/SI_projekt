@@ -8,7 +8,7 @@ import src.data_engineering.data_utils as du
 from scipy.signal import savgol_filter
 
 
-matplotlib.use("MacOSX")
+#  matplotlib.use("MacOSX")
 
 
 def file_with_labels(file_csv, file_wav):
