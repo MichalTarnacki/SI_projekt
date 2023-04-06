@@ -1,3 +1,6 @@
-train_path = "media/train_edited/"
+train_path = "media/train/"
 test_path = "media/test/"
 model_path = "media/models/"
+train_breaths = "media/sorted/in/"
+train_exhales = "media/sorted/out/"
+sorted_path = "media/sorted"

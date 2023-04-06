@@ -14,7 +14,7 @@ def wav_to_sample_xy(filename):
     return timestamps, pressure, sample_rate
 
 
-def data_recorder(filename, with_bg=True):
+def data_recorder(filename, with_bg=True, seperate=False):
     record_time_s = 25
     record_bg_time_s = 10
     sample_rate = 44100
@@ -66,7 +66,10 @@ def data_recorder(filename, with_bg=True):
     pygame.quit()
     sd.wait()
 
-    pd.DataFrame({'type': [y[0] for y in timestamps],
-                  'time_right': [y[1] for y in timestamps]
-                  }).to_csv(filename + '.csv', index=False)
-    write(filename + '.wav', sample_rate, rec)
+    if not seperate:
+        pd.DataFrame({'type': [y[0] for y in timestamps],
+                      'time_right': [y[1] for y in timestamps]
+                      }).to_csv(filename + '.csv', index=False)
+        write(filename + '.wav', sample_rate, rec)
+    else:
+        pass

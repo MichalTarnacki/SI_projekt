@@ -32,7 +32,7 @@ def record():
         for i in files:
             filename.append(int(re.split('e', i)[1]))
         filename = macros.train_path + 'e' + (max(filename) + 1).__str__()
-    du.data_recorder(filename, with_bg=False)
+    du.data_recorder(filename, with_bg=False, seperate=True)
 
     if pl.Path.exists(pl.Path(filename + '.wav')):
         #   show_plot(filename + '.csv', filename + '.wav')

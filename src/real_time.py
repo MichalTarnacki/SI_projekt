@@ -63,11 +63,12 @@ def detection(model, scaler, chunk_size=352, input_size=40, uses_previous_state=
         screen.fill((0, 0, 0))
 
         if samples.shape[0] > chunk_size * (input_size + 200):
-            clean = samples
+            clean = noisereduce.reduce_noise(samples[-176400:], 44100)
+
             last_frame = abs(np.fft.rfft(clean[len(clean) - sp.CHUNK_SIZE:]))[:160]
             last_frame = sp.signal_clean(last_frame)
 
-            if sum(last_frame) < 1500:
+            if sum(last_frame) < 1000:
                 print_state = "cisza"
             else:
                 print_state = ""
@@ -75,7 +76,6 @@ def detection(model, scaler, chunk_size=352, input_size=40, uses_previous_state=
             if uses_previous_state:
                 last_frame = np.append(last_frame, 1 if prev_state == 'in' else -1)
                 prev_state = state
-
             for x, y in enumerate(last_frame[:-1]):
                 color = (255, 0, 0)
                 if print_state == "cisza":
