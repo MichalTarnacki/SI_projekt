@@ -19,14 +19,10 @@ from IPython import display
 from scipy.io import wavfile
 
 import macros
-
-
-# Set the seed value for experiment reproducibility.
-
-
 class TensorFlow:
 
     data_dir = pathlib.Path(macros.sorted_path)
+    test_data_dir = pathlib.Path(macros.test_sorted_path)
     commands = np.array(tf.io.gfile.listdir(str(data_dir)))
     commands = commands[commands != 'README.md']
     commands = commands[commands != 'desktop.ini']
@@ -43,7 +39,7 @@ class TensorFlow:
         # self.commands = self.commands[self.commands != 'desktop.ini']
 
     @staticmethod
-    def generate_seperate_files():
+    def generate_seperate_files(ratio=8/10):
         freg = re.compile(r'^e[0-9]+$')
         folder = pl.Path(macros.train_path)
 
@@ -53,8 +49,15 @@ class TensorFlow:
         os.mkdir(macros.sorted_path)
         os.mkdir(macros.train_exhales)
         os.mkdir(macros.train_breaths)
+        if os.path.exists(macros.test_sorted_path):
+            folder2 = pl.Path(macros.test_sorted_path)
+            shutil.rmtree(folder2)
+        os.mkdir(macros.test_sorted_path)
+        os.mkdir(macros.test_exhales)
+        os.mkdir(macros.test_breaths)
 
-        for file in list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)])):
+        files = list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)]))
+        for file in files:
             pressure, sample_rate = soundfile.read(macros.train_path+file+'.wav')
             all_data = pd.read_csv(macros.train_path+file+'.csv', sep=',').values
             iterator = 0
@@ -64,10 +67,18 @@ class TensorFlow:
                 while iterator < i[1]*sample_rate:
                     new_file.append(pressure[iterator])
                     iterator+=1
-                if i[0] == 'in':
-                    soundfile.write(macros.train_breaths + file + f'{k}.wav',  np.array(new_file),sample_rate, subtype='PCM_16')
+                if k<int(len(files)*ratio):
+                    if i[0] == 'in':
+                        soundfile.write(macros.train_breaths + file + f'{k}.wav',  np.array(new_file),sample_rate, subtype='PCM_16')
+                    else:
+                        soundfile.write(macros.train_exhales + file + f'{k}.wav',  np.array(new_file),sample_rate, subtype='PCM_16')
                 else:
-                    soundfile.write(macros.train_exhales + file + f'{k}.wav',  np.array(new_file),sample_rate, subtype='PCM_16')
+                    if i[0] == 'in':
+                        soundfile.write(macros.test_breaths + file + f'{k}.wav', np.array(new_file), sample_rate,
+                                        subtype='PCM_16')
+                    else:
+                        soundfile.write(macros.test_exhales + file + f'{k}.wav', np.array(new_file), sample_rate,
+                                        subtype='PCM_16')
                 k+=1
 
     @staticmethod
@@ -149,20 +160,21 @@ class TensorFlow:
             map_func=TensorFlow.get_spectrogram_and_label_id,
             num_parallel_calls=TensorFlow.AUTOTUNE)
         return output_ds
-    def cos(self):
+    def cos(self, ratio=8/10):
 
         print('Commands:', self.commands)
 
         filenames = tf.io.gfile.glob(str(self.data_dir) + '/*/*')
         filenames = tf.random.shuffle(filenames)
 
-        # train_files = filenames[:int(len(filenames)*8/10)]
-        # val_files = filenames[int(len(filenames)*8/10): int(len(filenames)*8/10 + len(filenames)*1/10)]
-        # test_files = filenames[int(-len(filenames)*1/10):]
-
-        train_files = filenames[:60]
-        val_files = filenames[60: 70]
-        test_files = filenames[-8:]
+        test_filenames = tf.io.gfile.glob(str(self.data_dir) + '/*/*')
+        train_files = filenames[:int(len(filenames)*ratio)]
+        val_files = filenames[int(len(filenames)*ratio):]
+        test_files = test_filenames
+        #
+        # train_files = filenames[:60]
+        # val_files = filenames[60: 70]
+        # test_files = filenames[-8:]
 
 
 
@@ -324,6 +336,6 @@ class TensorFlow:
 
 
 
-#TensorFlow.generate_seperate_files()
-i = TensorFlow()
-i.cos()
+TensorFlow.generate_seperate_files()
+#i = TensorFlow()
+#i.cos()
