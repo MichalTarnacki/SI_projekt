@@ -1,6 +1,7 @@
 import os
 import pathlib
 import re
+from random import shuffle
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -57,6 +58,8 @@ class TensorFlow:
         os.mkdir(macros.test_breaths)
 
         files = list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)]))
+        l = 0
+        shuffle(files)
         for file in files:
             pressure, sample_rate = soundfile.read(macros.train_path+file+'.wav')
             all_data = pd.read_csv(macros.train_path+file+'.csv', sep=',').values
@@ -67,7 +70,7 @@ class TensorFlow:
                 while iterator < i[1]*sample_rate:
                     new_file.append(pressure[iterator])
                     iterator+=1
-                if k<int(len(files)*ratio):
+                if l<int(len(files)*ratio):
                     if i[0] == 'in':
                         soundfile.write(macros.train_breaths + file + f'{k}.wav',  np.array(new_file),sample_rate, subtype='PCM_16')
                     else:
@@ -80,6 +83,7 @@ class TensorFlow:
                         soundfile.write(macros.test_exhales + file + f'{k}.wav', np.array(new_file), sample_rate,
                                         subtype='PCM_16')
                 k+=1
+            l+=1
 
     @staticmethod
     def decode_audio(audio_binary):
@@ -316,8 +320,14 @@ class TensorFlow:
 
     @staticmethod
     def predict_percentage(model, audio_array):
+        if os.path.exists(f'media/trash'):
+            folder = pl.Path(f'media/trash')
+            shutil.rmtree(folder)
+        os.mkdir('media/trash')
         soundfile.write('media/trash/temp.wav',  np.array(audio_array), 44100, subtype='PCM_16')
-        sample_ds = TensorFlow.preprocess_dataset2([str('media/sorted_test/in/e28.wav')])
+
+
+        sample_ds = TensorFlow.preprocess_dataset2([str('media/trash/temp.wav')])
         for spectrogram in sample_ds.batch(1):
             prediction = model(spectrogram)
             percentage = tf.nn.softmax(prediction[0])

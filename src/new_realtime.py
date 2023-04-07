@@ -38,7 +38,7 @@ def new_realtime(modelfile, with_bg=False):
     p = None
     stream = None
     contin = True
-    saved_chunks = 30
+    saved_chunks = 50
 
 
 

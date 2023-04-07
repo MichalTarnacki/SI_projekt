@@ -21,9 +21,9 @@ def new_realtime_tensor(with_bg=False):
     FORMAT = pyaudio.paInt16
     CHANNELS = 1
     RATE = 44100
-    CHUNK = 512
+    CHUNK = 1024
     RECORD_SECONDS = 3
-    window = np.blackman(sp.CHUNK_SIZE)
+    window = np.blackman(CHUNK)
     model = models.load_model(f'{macros.model_path}tensorflow')
     avgnoise=0
     plt.ion()
@@ -36,17 +36,18 @@ def new_realtime_tensor(with_bg=False):
     p = None
     stream = None
     contin = True
+    saved_chunks = 1
 
 
 
-
-    def record_thread(saved_chunks=3):
+    def record_thread():
         nonlocal stream
         nonlocal saved
         nonlocal contin
+        nonlocal saved_chunks
         p = pyaudio.PyAudio()
         stream = p.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True,
-                        frames_per_buffer=sp.CHUNK_SIZE)
+                        frames_per_buffer=CHUNK)
         while contin:
             waveData = np.frombuffer(stream.read(CHUNK, exception_on_overflow=False), dtype=np.int16)
             # sd.play(waveData, 44100)
@@ -61,29 +62,28 @@ def new_realtime_tensor(with_bg=False):
         nonlocal saved
 
     def soundPlot():
-        nonlocal saved, window, ax1, ax3, model, avgnoise
+        nonlocal saved, window, ax1, ax3, model, avgnoise, saved_chunks
         i = 0
         k=0
         while True:
             #t1 = time.time()
-            if saved.__len__() >= 3*CHUNK:
+            if saved.__len__() >= saved_chunks*CHUNK:
                 data = sp.signal_clean(saved)
-                npArrayData = np.array([i if i>avgnoise else 0 for i in saved[saved.__len__() - sp.CHUNK_SIZE:]])
-                npArrayData_reduced = np.array([i if i>avgnoise else 0 for i in data[data.__len__() - sp.CHUNK_SIZE:]])
+                npArrayData = np.array([i if i>avgnoise else 0 for i in saved[saved.__len__() - CHUNK:]])
+                npArrayData_reduced = np.array([i if i>avgnoise else 0 for i in data[data.__len__() - CHUNK:]])
 
                 t_pred = copy.deepcopy(npArrayData)
                 commands, pred  = TensorFlow.predict_percentage(model,t_pred)
 
                 indata = npArrayData * window
                 fftData = np.abs(np.fft.rfft(indata))
-                fftData = fftData[fftData.__len__() - 161:]
-                fftTime = np.fft.rfftfreq(sp.CHUNK_SIZE, 1. / RATE)
-                fftTime = fftTime[fftTime.__len__() - 161:]
 
-                indata2 = npArrayData_reduced * window
-                fftData2 = np.abs(np.fft.rfft(indata2))
-                fftData2 = fftData2[fftData2.__len__() - 161:]
-                which = fftData[1:].argmax() + 1
+                fftTime = np.fft.rfftfreq(CHUNK, 1. / RATE)
+
+                # indata2 = npArrayData_reduced * window
+                # fftData2 = np.abs(np.fft.rfft(indata2))
+                # fftData2 = fftData2[fftData2.__len__() - 161:]
+                # which = fftData[1:].argmax() + 1
 
                 color = None
                 if pred[0] > 0.8:
@@ -98,7 +98,7 @@ def new_realtime_tensor(with_bg=False):
                 ax1.plot(indata, color)
                 ax1.grid()
                 # ax3.cla()
-                ax1.plot(indata2, color)
+                # ax1.plot(indata2, color)
                 # ax3.grid()
                 if np.mean(fftData) > avgnoise:
                     ax1.set_title(('in' if color == 'g' else 'out') + k.__str__())

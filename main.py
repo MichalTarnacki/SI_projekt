@@ -72,5 +72,8 @@ if __name__ == '__main__':
         elif x == '9':
             TensorFlow.generate_seperate_files()
         elif x == '10':
+
+            TensorFlow.train(int(input('epochs')))
+        elif x == '11':
             x = input('Filename: ')
             show_spectrograms(f'{macros.train_path}{x}.wav', x)
