@@ -9,7 +9,7 @@ import pathlib as pl
 
 from src.new_realtime import new_realtime
 from src.test import test_qualitative, test_quantitative
-
+from src.new_realtime_tensor import new_realtime_tensor
 
 def show_plot(file_csv, file_wav):
     x, y, sample_rate = du.wav_to_sample_xy(file_wav)
@@ -37,7 +37,7 @@ def record():
         for i in files:
             filename.append(int(re.split('e', i)[1]))
         filename = macros.train_path + 'e' + (max(filename) + 1).__str__()
-    du.data_recorder(filename, with_bg=False)
+    du.data_recorder(filename, with_bg=False, seperate=True)
 
     if pl.Path.exists(pl.Path(filename + '.wav')):
         #   show_plot(filename + '.csv', filename + '.wav')
@@ -66,6 +66,8 @@ if __name__ == '__main__':
             test_quantitative(list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)])), 'svm_custom_softmax_prevstate', True)
         elif x == '7':
             new_realtime('svm_custom3_prevstate')
+        elif x == '8':
+            new_realtime_tensor()
         elif x == '10':
             x = input('Filename: ')
             show_spectrograms(f'{macros.train_path}{x}.wav', x)
