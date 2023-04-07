@@ -7,6 +7,7 @@ import src.data_engineering.spectrogram as sp
 import src.models.svm as svm
 import pathlib as pl
 
+from TensorFlow import TensorFlow
 from src.new_realtime import new_realtime
 from src.test import test_qualitative, test_quantitative
 from src.new_realtime_tensor import new_realtime_tensor
@@ -68,6 +69,8 @@ if __name__ == '__main__':
             new_realtime('svm_custom_softmax_prevstate')
         elif x == '8':
             new_realtime_tensor()
+        elif x == '9':
+            TensorFlow.generate_seperate_files()
         elif x == '10':
             x = input('Filename: ')
             show_spectrograms(f'{macros.train_path}{x}.wav', x)
