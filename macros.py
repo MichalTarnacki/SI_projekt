@@ -1,4 +1,4 @@
-train_path = "media/train_edited/"
+train_path = "media/train/"
 test_path = "media/test/"
 model_path = "media/models/"
 

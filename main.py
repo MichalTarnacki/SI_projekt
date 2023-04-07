@@ -46,7 +46,7 @@ def record():
 
 if __name__ == '__main__':
     while True:
-        print("1. Record\n2. Train\n3. Realtime\n4. Show plot\n5. Test quantitative\n7. New real time\n8. Show spectrograms")
+        print("1. Record\n2. Train\n3. Realtime\n4. Show plot\n5. Test quantitative\n7. New real time\n10. Show spectrograms")
         x = input()
         if x == '1':
             record()
@@ -66,6 +66,6 @@ if __name__ == '__main__':
             test_quantitative(list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)])), 'svm_custom_softmax_prevstate', True)
         elif x == '7':
             new_realtime('svm_custom3_prevstate')
-        elif x == '8':
+        elif x == '10':
             x = input('Filename: ')
             show_spectrograms(f'{macros.train_path}{x}.wav', x)

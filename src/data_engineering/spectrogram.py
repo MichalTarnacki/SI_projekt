@@ -46,10 +46,15 @@ def show_spectrograms(pressure, sample_rate, filename):
             most_intense_freq_intensity = np.max(freq)
             most_intense_freq = np.where(freq == most_intense_freq_intensity)[0][0]
 
-            print(f"Most intense freq: {most_intense_freq}")
+            chunk_start_time = round(chunk_index * CHUNK_SIZE / sample_rate, 2)
+            chunk_end_time = round((chunk_index + 1) * CHUNK_SIZE / sample_rate, 2)
+
+            print(f"Most intense freq in chunk {chunk_start_time}-{chunk_end_time} s: {most_intense_freq} SFU"
+                  f" = {round(43.0789 * most_intense_freq - 2.8174, 2)} Hz")
 
             plt.plot([i for i in range(len(freq))], freq)
-            plt.scatter(most_intense_freq, most_intense_freq_intensity, c='r', s=20)
+            plt.scatter(most_intense_freq, most_intense_freq_intensity, c='r', s=10)
+            plt.title(f'Spectrogram for chunk {chunk_start_time}-{chunk_end_time} s')
             plt.savefig(f'{macros.spectros_path}spectro_{filename}_{chunk_index}.png')
             plt.close()
 
