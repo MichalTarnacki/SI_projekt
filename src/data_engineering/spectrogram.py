@@ -105,5 +105,5 @@ def pressure_labeled_plot(labels, time, pressure, chunk_size=CHUNK_SIZE):
             y_out.append(pressure[i])
     plt.scatter(x_out, y_out, s=5)
     plt.scatter(x_in, y_in, s=5)
-    plt.legend(['in', 'out'])
+    plt.legend(['out', 'in'])
     plt.show()

@@ -37,7 +37,7 @@ def record():
         for i in files:
             filename.append(int(re.split('e', i)[1]))
         filename = macros.train_path + 'e' + (max(filename) + 1).__str__()
-    du.data_recorder(filename, with_bg=False, seperate=True)
+    du.data_recorder(filename, with_bg=False, seperate=False)
 
     if pl.Path.exists(pl.Path(filename + '.wav')):
         #   show_plot(filename + '.csv', filename + '.wav')
@@ -57,7 +57,7 @@ if __name__ == '__main__':
                 'svm_custom_softmax',
                 True, False)
         elif x == '3':
-            test_qualitative('svm_custom3_prevstate', with_previous_state=True, with_bg=False)
+            test_qualitative('svm_custom_softmax_prevstate', with_previous_state=True, with_bg=False)
         elif x == '4':
             x = input('Filename: ')
             show_plot(f'{macros.train_path}{x}.csv', f'{macros.train_path}{x}.wav')
@@ -65,7 +65,7 @@ if __name__ == '__main__':
             folder = pl.Path(macros.test_path)
             test_quantitative(list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)])), 'svm_custom_softmax_prevstate', True)
         elif x == '7':
-            new_realtime('svm_custom3_prevstate')
+            new_realtime('svm_custom_softmax_prevstate')
         elif x == '8':
             new_realtime_tensor()
         elif x == '10':
