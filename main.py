@@ -18,6 +18,11 @@ def show_plot(file_csv, file_wav):
     sp.pressure_labeled_plot(labels, x, y)
 
 
+def show_spectrograms(file_wav, filename):
+    x, y, sample_rate = du.wav_to_sample_xy(file_wav)
+    sp.show_spectrograms(y, sample_rate, filename)
+
+
 freg = re.compile(r'^e[0-9]+$')
 
 
@@ -41,7 +46,7 @@ def record():
 
 if __name__ == '__main__':
     while True:
-        print("1. Record\n2. Train\n3. Realtime\n4. Show plot\n5. Test quantitative\n7. New real time")
+        print("1. Record\n2. Train\n3. Realtime\n4. Show plot\n5. Test quantitative\n7. New real time\n10. Show spectrograms")
         x = input()
         if x == '1':
             record()
@@ -63,3 +68,6 @@ if __name__ == '__main__':
             new_realtime('svm_custom3_prevstate')
         elif x == '8':
             new_realtime_tensor()
+        elif x == '10':
+            x = input('Filename: ')
+            show_spectrograms(f'{macros.train_path}{x}.wav', x)
