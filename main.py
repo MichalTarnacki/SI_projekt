@@ -9,7 +9,7 @@ import pathlib as pl
 
 from src.new_realtime import new_realtime
 from src.test import test_qualitative, test_quantitative
-
+from src.new_realtime_tensor import new_realtime_tensor
 
 def show_plot(file_csv, file_wav):
     x, y, sample_rate = du.wav_to_sample_xy(file_wav)
@@ -61,3 +61,5 @@ if __name__ == '__main__':
             test_quantitative(list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)])), 'svm_custom_softmax_prevstate', True)
         elif x == '7':
             new_realtime('svm_custom3_prevstate')
+        elif x == '8':
+            new_realtime_tensor()

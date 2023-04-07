@@ -8,25 +8,23 @@ import time
 import wave
 import matplotlib.pyplot as plt
 import pygame
-from joblib import load
+from keras import models
 from scipy.io.wavfile import write
 import src.data_engineering.spectrogram as sp
 import sounddevice as sd
+from TensorFlow import TensorFlow
 
 import macros
 
 
-def new_realtime(modelfile, with_bg=False):
+def new_realtime_tensor(with_bg=False):
     FORMAT = pyaudio.paInt16
     CHANNELS = 1
     RATE = 44100
     CHUNK = 512
     RECORD_SECONDS = 3
     window = np.blackman(sp.CHUNK_SIZE)
-    state = 'in'
-    prev_state = 'in'
-    model = load(f'{macros.model_path}{modelfile}.joblib')
-    scaler = load(f'{macros.model_path}{modelfile}_scaler.joblib')
+    model = models.load_model(f'{macros.model_path}tensorflow')
     avgnoise=0
     plt.ion()
     fig = plt.figure(figsize=(10, 8))
@@ -38,15 +36,14 @@ def new_realtime(modelfile, with_bg=False):
     p = None
     stream = None
     contin = True
-    saved_chunks = 30
 
 
 
-    def record_thread():
+
+    def record_thread(saved_chunks=3):
         nonlocal stream
         nonlocal saved
         nonlocal contin
-        nonlocal saved_chunks
         p = pyaudio.PyAudio()
         stream = p.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True,
                         frames_per_buffer=sp.CHUNK_SIZE)
@@ -64,23 +61,18 @@ def new_realtime(modelfile, with_bg=False):
         nonlocal saved
 
     def soundPlot():
-        nonlocal state, prev_state, saved, window, state, prev_state, ax1, ax3, model, scaler, avgnoise
+        nonlocal saved, window, ax1, ax3, model, avgnoise
         i = 0
         k=0
         while True:
             #t1 = time.time()
-            if saved.__len__() >= (saved_chunks)*CHUNK:
+            if saved.__len__() >= 3*CHUNK:
                 data = sp.signal_clean(saved)
                 npArrayData = np.array([i if i>avgnoise else 0 for i in saved[saved.__len__() - sp.CHUNK_SIZE:]])
                 npArrayData_reduced = np.array([i if i>avgnoise else 0 for i in data[data.__len__() - sp.CHUNK_SIZE:]])
 
                 t_pred = copy.deepcopy(npArrayData)
-                t_pred = [i for i in t_pred]
-                #t_pred = [i for i in t_pred]
-                #t_pred = noisereduce.reduce_noise(t_pred, 44100)
-                t_pred = np.abs(np.fft.rfft(t_pred))
-                t_pred = t_pred[t_pred.__len__() - 160:]
-                t_pred = np.append(t_pred, [1 if prev_state == 'in' else -1])
+                commands, pred  = TensorFlow.predict_percentage(model,t_pred)
 
                 indata = npArrayData * window
                 fftData = np.abs(np.fft.rfft(indata))
@@ -91,20 +83,25 @@ def new_realtime(modelfile, with_bg=False):
                 indata2 = npArrayData_reduced * window
                 fftData2 = np.abs(np.fft.rfft(indata2))
                 fftData2 = fftData2[fftData2.__len__() - 161:]
-
-                scaled = scaler.transform(t_pred.reshape(-1, 1).T)
-                state = model.predict(scaled)
                 which = fftData[1:].argmax() + 1
+
+                color = None
+                if pred[0] > 0.8:
+                    color = 'g'
+                elif pred[1] > 0.8:
+                    color = 'r'
+                else:
+                    color = 'b'
 
                 # Plot time domain
                 ax1.cla()
-                ax1.plot(indata, 'g' if prev_state == 'in' else 'r')
+                ax1.plot(indata, color)
                 ax1.grid()
                 # ax3.cla()
-                ax1.plot(indata2, 'b' if prev_state == 'in' else 'y')
+                ax1.plot(indata2, color)
                 # ax3.grid()
                 if np.mean(fftData) > avgnoise:
-                    ax1.set_title(('in' if prev_state == 'in' else 'out') + k.__str__())
+                    ax1.set_title(('in' if color == 'g' else 'out') + k.__str__())
                 else:
                     ax1.set_title('none')
                 ax1.axis([0, sp.CHUNK_SIZE, -1000, 1000])
@@ -119,23 +116,6 @@ def new_realtime(modelfile, with_bg=False):
                 # ax3.grid()
                 # ax3.axis([0, 5000, 0, 10 ** 6])
                 plt.pause(0.001)
-                # print("took %.02f ms" % ((time.time() - t1) * 1000))
-                # # use quadratic interpolation around the max
-                # if which != len(fftData) - 1:
-                #     y0, y1, y2 = np.log(fftData[which - 1:which + 2:])
-                #     x1 = (y2 - y0) * .5 / (2 * y1 - y2 - y0)
-                #     # find the frequency and output it
-                #     thefreq = (which + x1) * RATE / CHUNK
-                #     print("The freq is %f Hz." % (thefreq))
-                # else:
-                #     thefreq = which * RATE / CHUNK
-                #     print("The freq is %f Hz." % (thefreq))
-
-                prev_state = state
-                # i += 1
-                # k+=100
-                # if i == 1000:
-                #     break
 
 
     if with_bg:
