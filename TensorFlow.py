@@ -333,6 +333,15 @@ class TensorFlow:
             percentage = tf.nn.softmax(prediction[0])
             return TensorFlow.commands, percentage
 
+    @staticmethod
+    def new_predict(model, audio_array):
+        waveform = [i/32768 for i in audio_array]
+        waveform = tf.convert_to_tensor(waveform, dtype= tf.float32)
+        spec = TensorFlow.get_spectrogram(waveform)
+        spec = tf.expand_dims(spec, 0)
+        prediction = model(spec)
+        percentage = tf.nn.softmax(prediction[0])
+        return TensorFlow.commands, percentage
 
     @staticmethod
     def train(epochs):

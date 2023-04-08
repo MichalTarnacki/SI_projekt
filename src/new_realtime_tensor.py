@@ -34,7 +34,7 @@ def new_realtime_tensor():
     p = None
     stream = None
     contin = True
-    saved_chunks = 150
+    saved_chunks = 200
 
 
 
@@ -65,7 +65,7 @@ def new_realtime_tensor():
         while True:
             if saved.__len__() >= saved_chunks*CHUNK:
                 #x = sp.signal_clean(saved)
-                commands, pred  = TensorFlow.predict_percentage(model,saved)
+                commands, pred  = TensorFlow.new_predict(model,saved)
                 indata = saved[saved.__len__()-CHUNK:] * window
                 fftData = np.abs(np.fft.rfft(indata))
 
@@ -73,10 +73,10 @@ def new_realtime_tensor():
 
                 color = None
                 title = None
-                if pred[0] > 0.80: #and pred[1]<10:
+                if pred[1] > 0.80: #and pred[1]<10:
                     color = 'g' #if commands[0] == 'in' else 'r'
                     title = 'in' #if commands[0] == 'in' else 'out'
-                elif pred[1] > 0.80:# and pred[0]<10:
+                elif pred[0] > 0.80:# and pred[0]<10:
                     color = 'r'# if commands[1] == 'out' else 'g'
                     title = 'out'# if commands[1] == 'out' else 'in'
                 else:
