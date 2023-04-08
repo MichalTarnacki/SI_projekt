@@ -13,7 +13,7 @@ from scipy.io.wavfile import write
 import soundfile
 import shutil
 import sounddevice as sd
-
+import  src.data_engineering.spectrogram as sp
 from keras import layers
 from keras import models
 from IPython import display
@@ -70,6 +70,7 @@ class TensorFlow:
                 while iterator < i[1]*sample_rate:
                     new_file.append(pressure[iterator])
                     iterator+=1
+                new_file=sp.signal_clean(new_file)
                 if l<int(len(files)*ratio):
                     if i[0] == 'in':
                         soundfile.write(macros.train_breaths + file + f'{k}.wav',  np.array(new_file),sample_rate, subtype='PCM_16')
@@ -335,7 +336,9 @@ class TensorFlow:
 
     @staticmethod
     def new_predict(model, audio_array):
+        audio_array = sp.signal_clean(audio_array)
         waveform = [i/32768 for i in audio_array]
+
         waveform = tf.convert_to_tensor(waveform, dtype= tf.float32)
         spec = TensorFlow.get_spectrogram(waveform)
         spec = tf.expand_dims(spec, 0)
