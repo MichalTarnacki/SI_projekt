@@ -50,7 +50,8 @@ if __name__ == '__main__':
         print("1. Record\n2. Train\n3. Realtime\n4. Show plot\n5. Test quantitative\n7. New real time\n10. Show spectrograms")
         x = input()
         if x == '1':
-            record()
+            for i in range(10):
+                record()
         elif x == '2':
             folder = pl.Path(macros.train_path)
             svm.svm_train_with_previous_state(
@@ -72,5 +73,8 @@ if __name__ == '__main__':
         elif x == '9':
             TensorFlow.generate_seperate_files()
         elif x == '10':
+
+            TensorFlow.train(int(input('epochs')))
+        elif x == '11':
             x = input('Filename: ')
             show_spectrograms(f'{macros.train_path}{x}.wav', x)

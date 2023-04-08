@@ -15,7 +15,7 @@ def wav_to_sample_xy(filename):
 
 
 def data_recorder(filename, with_bg=True, seperate=False):
-    record_time_s = 25
+    record_time_s = 60
     record_bg_time_s = 10
     sample_rate = 44100
     channels = 1
@@ -54,7 +54,7 @@ def data_recorder(filename, with_bg=True, seperate=False):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 return
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_F1:
+            if event.type == pygame.KEYDOWN and (event.key == pygame.K_F1 or event.key == pygame.K_RIGHT):
                 timestamps.append((state, time.time() - t0))
                 state = 'in' if state == 'out' else 'out'
 
