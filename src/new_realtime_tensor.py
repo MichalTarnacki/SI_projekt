@@ -66,7 +66,6 @@ def new_realtime_tensor():
             if saved.__len__() >= saved_chunks*CHUNK:
                 #x = sp.signal_clean(saved)
                 commands, pred  = TensorFlow.predict_percentage(model,saved)
-
                 indata = saved[saved.__len__()-CHUNK:] * window
                 fftData = np.abs(np.fft.rfft(indata))
 
@@ -89,7 +88,6 @@ def new_realtime_tensor():
                 ax1.grid()
                 ax1.set_title(title)
                 ax1.axis([0, sp.CHUNK_SIZE, -1000, 1000])
-
                 plt.pause(0.01)
 
     tr = threading.Thread(target=record_thread)
