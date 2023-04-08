@@ -46,13 +46,20 @@ def record():
 
 if __name__ == '__main__':
     while True:
-        print("1. Record\n2. Train\n3. Realtime\n4. Show plot\n5. Test quantitative\n7. New real time\n10. Show spectrograms")
+        print("1. Record\n2. Train\n2.1. Train with wide spectrogram\n3. Realtime\n4. Show plot\n"
+              "5. Test quantitative\n7. New real time\n8. Real time tensor\n10. Show spectrograms")
         x = input()
         if x == '1':
             record()
         elif x == '2':
             folder = pl.Path(macros.train_path)
             svm.svm_train_with_previous_state(
+                list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)])),
+                'svm_custom_softmax',
+                True, False)
+        elif x == '2.1':
+            folder = pl.Path(macros.train_path)
+            svm.svm_train_with_previous_state_with_wide_spectro(
                 list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)])),
                 'svm_custom_softmax',
                 True, False)

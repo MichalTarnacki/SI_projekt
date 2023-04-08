@@ -131,6 +131,25 @@ def svm_train_with_previous_state(filenames, modelname, softmax=False, with_bg=F
     return clf, scaler
 
 
+def svm_train_with_previous_state_with_wide_spectro(filenames, modelname, softmax=False, with_bg=False):
+    x_train, y_train = dataset.build_wide_spectro(filenames, macros.train_path, True, with_bg)
+
+    scaler = StandardScalerIgnorePreviousState()
+    x_train_std = scaler.fit(x_train).transform(x_train)
+    y_train = transform_to_binary(y_train)
+
+    if softmax:
+        clf = SoftmaxSVM()
+    else:
+        clf = SVM()
+
+    clf.fit(x_train_std, y_train)
+    dump(clf, f'{macros.model_path}{modelname}_prevstate.joblib')
+    dump(scaler, f'{macros.model_path}{modelname}_prevstate_scaler.joblib')
+
+    return clf, scaler
+
+
 class StandardScalerIgnorePreviousState(TransformerMixin):
     def __init__(self):
         self.scaler = StandardScaler()

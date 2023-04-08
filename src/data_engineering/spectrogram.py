@@ -33,6 +33,21 @@ def to_spectro(pressure, fs, chunk_size=CHUNK_SIZE):
     return chunked_timestamps, frames
 
 
+def to_wide_spectro(pressure, fs, chunk_size=CHUNK_SIZE):
+    pressure = noisereduce.reduce_noise(pressure, sr=fs)
+    frames = []
+    chunked_timestamps = np.arange(0, pressure.shape[0] / fs, chunk_size / fs)
+
+    for i in range(0, len(pressure), chunk_size):
+        if i + chunk_size <= len(pressure):  # if there's enough elements in pressure to form a full chunk
+            chunk = pressure[i:i + chunk_size]
+            freq = abs(np.fft.rfft(chunk))
+            freq = signal_clean(freq)
+            frames.append(freq)
+
+    return chunked_timestamps, frames, chunk_size
+
+
 def show_spectrograms(pressure, sample_rate, filename):
     pressure = noisereduce.reduce_noise(pressure, sr=sample_rate)
     chunk_index = 0
@@ -75,7 +90,8 @@ def spectro_labeled(label_file, timestamps):
     for timestamp in timestamps:
         if timestamp > all_data[current][1]:
             current += 1
-        if current >= len(all_data): break
+        if current >= len(all_data):
+            break
         labels.append(all_data[current][0])
 
     while len(labels) != len(timestamps):
