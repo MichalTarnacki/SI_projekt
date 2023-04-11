@@ -13,6 +13,9 @@
 \usepackage{amssymb}
 \usepackage{esvect}
 \usepackage{graphicx}
+\usepackage{caption}
+\usepackage{hyperref}
+\usepackage{float}
 
 \graphicspath{ {./obrazy/} }
 
@@ -37,6 +40,13 @@
   tabsize=3
 }
 
+\newcommand*{\captionsource}[2]{%
+  \caption[{#1}]{%
+    #1%
+    \\\hspace{\linewidth}%
+    \textbf{Źródło:} #2%
+  }%
+}
 
 \begin{document}
 
@@ -45,11 +55,27 @@
 \section{Wstęp}
 Celem projektu było określanie chwil na nagraniu, w których osoba bierze wdech i wydech. 
 Dokonano oceny jakościowej za pomocą detekcji oddechu na żywo jak i ilościowej (przy wykorzystaniu
-dalej wymienionych metryk).
+dalej wymienionej metryk).
 
 \section{Teoria}
+\subsection{DFT}
+W celu przejścia z dziedziny natężenia od czasu do dziedziny częstotliwości stosujemy dyskretną transformatę
+Fouriera. Funkcję natężenia w czasie przedstawiamy jako 
+\begin{gather*}
+	I(t) = \Sigma_{\omega} I_{\omega}(t)sin(\omega t)
+\end{gather*}
+stąd dla danego momentu w czasie jesteśmy w stanie stworzyć wektor natężeń
+\begin{gather*}
+	\boldsymbol{I} = [I_{f_1}, I_{f_2}, ..., I_{f_n}]
+\end{gather*}
+W dalszych rozważaniach wykorzystujemy także średnią częstotliwość, którą liczymy ze wzoru
+\begin{gather*}
+	\bar{f} = \frac{\Sigma_ffI_f}{I}
+\end{gather*}
+Wykorzystujemy implementację transformaty z biblioteki $numpy$.
+
 \subsection{SVM}
-Pierwszy model, jakim dokonujemy klasyfikacji, jest oparty o SVM. Metoda ta polega na szukaniu optymalnych wag $\boldsymbol{w}, b$.
+Pierwszym modelem, jakim dokonujemy klasyfikacji, jest SVM. Metoda ta polega na szukaniu optymalnych wag $\boldsymbol{w}, b$.
 Następnie będziemy klasyfikować według funkcji maszyny uczącej 
 \begin{gather*}
 	f(x) = sgn(\boldsymbol{w}^T \boldsymbol{x} + b)
@@ -60,50 +86,137 @@ funkcji kosztu
 \begin{gather*}
 	J(\boldsymbol{w}) = \frac{1}{2}||\boldsymbol{w}||^2 + \frac{C}{N}\Sigma_x max\{0, 1 - y(\boldsymbol{w}^Tx + b)\}
 \end{gather*}
-gdzie C jest parametrem uregulowania. Funkcję będziemy minimalizować metodą spadku po gradiencie (wersję wsadową).
+gdzie C jest parametrem uregulowania. Funkcję będziemy minimalizować metodą spadku po gradiencie.
+W projekcie użyliśmy własnej implementacji SVM-a.
+
+\subsection{Bramka szumów}
+Głowna metoda odszumiana, z której korzystamy to bramka szumów.  Pierw wyznaczany jest
+spektrogram sygnału i tworzony jest próg szumu dla każdej częstotliwości spektrogramu.
+Częstotliwości progowe służą to stworzenia maski, której potem używamy do usunięcia niechcianych dźwięków.
+Następnie ze spektrogramu tworzymy z powrotem natężenie $I(t)$. W projekcie wykorzystujemy gotową implementację bramki szumów z biblioteki $noisereduce$.
+
+\subsection{Filtr Savitzky-Golay}
+Filtru Savitzky-Golay używamy do wygładzenia funkcji.  Polega on na dopasowywaniu zbioru sąsiadujących
+punktów do wielomianu niskiego stopnia za pomocą metody najmniejszych kwadratów.
+Te fragmenty wielomianów są potem łączone w wygładzoną funkcję. Korzystamy z gotowej implementacji
+z biblioteki $scipy$.
+
 \subsection{Ocena modeli}
 Dokładność ($accuracy$) definiujemy jako
 \begin{gather*}
 	accuracy = \frac{\# correct}{\# all}
 \end{gather*}
+czyli \textbf{ilości próbek} poprawnych do wszystkich.
 
-\section{Zbieranie i obróbka danych}
-\subsection{Nagrywanie danych oddechowych}
+\subsection{Standaryzacja}
+Dane wejściowe do modelu zawsze standaryzujemy, czyli
+\begin{gather*}
+	\tilde X = \frac{X - EX}{\sigma_X}
+\end{gather*}
+stosujemy gotową implementację z $scikit-learn$.
+\section{Nagrywanie danych oddechowych}
 Żeby zapewnić dobre oznaczenie danych, etykietujemy je jeszcze w trakcie nagrywania dźwięku. 
 Osoba nagrywana naciska przycisk, żeby zasygnalizować, że przestała brać wdech i zaczyna wydychać 
-powietrze lub na odwrót. Pozyskane natężenie przy dalszej obróbce odszumiamy za pomocą dostępnej
-w Pythonie biblioteki $noisereduce$.
+powietrze lub na odwrót. Momenty przejścia z wdechu na wydech i w drugą stronę zapisywane są w pliku
+.csv, a dźwięk w pliku .wav. Częstotliwość próbkowania ustalamy na $44,1$ kHz.
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=10cm]{nagrywanie}
+	\caption{Przykładowe nagrane dane, in-wdech, out-wydech. Jak widać dane oznaczone na żywo są bardzo dokładne, być może nie bylibyśmy w stanie osiągnąć takiej
+dokładności oznaczając ręcznie (lub byłoby to bardzo żmudne).}
+\end{figure}
 
-\subsection{Średnia częstotliwość w czasie}
+
+\section{Przyjęty model oddechu}
+Na początku przyjmujemy model "sportowego" oddychania, czyli wdech nosem i wydech ustami.
+Uproszczenie to polega na tym, że wydawane dźwięki są dosyć różne, dopiero potem sprawdzamy jak nasze podejście będzie się sprawować
+przy innych metodach oddychania.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=3cm]{model_oddechu}
+  	\caption{Ilustracja przyjętego modelu,  \href{https://www.quora.com/Should-I-exhale-from-the-mouth-or-nose-while-deep-breathing}{źródło}}
+\end{figure}
+
+
+\section{Średnia częstotliwość w czasie}
+\subsection{Metoda}
 Pierwotnie przyjętym założeniem było, że podczas wdechu średnia częstotliwość dźwięku jest wyższa niż
-gdy osoba wydycha. Z pliku w formacie .wav dla bloków próbek generujemy spektrogramy i obliczamy
-średnią ważoną częstotliwość (czyli znacznie redukujemy rozmiar danych tj. $nowy = stary/rozmiar_{bloku}$).
-Cechami, na podstawie których
-dokonywana byłaby predykcja mogłyby być na przykład $\vec{x} = [\bar{f}(t_0), \bar{f}(t_1), ..., \bar{f}(t_n)]$.
-Podejście to jednak jak i pierwotne założenie jest mylne - dla niektórych osób 
-dźwięk wydechu jest bowiem wyższy
-niż wdechu. Ponadto, stosując to podejście, ograniczylibyśmy się tylko do niektórych typów oddechu (np. 
-wdychanie przez nos i wydychanie przez usta).  Biorąc pod uwagę wszystkie wady podejście zostało odrzucone.
-\subsection{Dane wejściowe ze spektrogramu}
-Innym podejściem jest wzięcie całego spektrogramu (a przynajmniej jego części) jako dane wejściowe do 
-modelu.  Podobnie jak ostatnio dzielimy dane na bloki ale tym razem nie liczymy średniej tylko zostawiamy
-całą taką klatkę.
+gdy osoba wydycha. Z pliku w formacie .wav dla bloków próbek pobieramy natężenie, które następnie odszumiamy za pomocą $noisereduce$ (przy testach jakościowych stosujemy bramkę szumów dla 3 ostatnich sekund) . Dzielimy próbki na bloki, dla których tworzymy spektrogramy i obliczamy
+średnią ważoną częstotliwość.
+Cechami, na podstawie których dokonywana jest predykcja są  
+\begin{gather*}
+\boldsymbol x (t_n) = [\bar{f}(t_0), \bar{f}(t_1), ..., \bar{f}(t_n)]
+\end{gather*}
+czyli średnie częstotliwości z kilku przeszłych chwil.
+Dla danych testowych spełniających powyższe założenie i modelu wytrenowanego SVM-em dawało nam to dokładność $\sim 60\%$.
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=10cm]{porownanie_srednie}
+	\caption{Przykładowe działanie modelu dla danych spełniających założenie: wyższy wdech, niższy wydech.
+	W pewnych momentach podobnie wyglądające fragmenty krzywej powinny być wdechem, w innych wydechem, mamy więc możliwy underfitting.}
+\end{figure}
+\subsection{Problemy}
+Podejście to jednak mocno ograniczna nasze dalsze pole do rozwoju.  Zmniejszenie całego 
+spektrogramu do pojedynczej wartości częstotliwości daje nam mniej informacji, przez co 
+być może ograniczylibyśmy się tylko do przyjętego przez nas modelu (tj.  wdech - nos, wydech - usta) - w innych
+modelach różnica średnich częstotliwości między wdechem a wydechem może nie być taka wyraźna.  Ponadto, dla niektórych osób zaobserwowaliśmy, 
+że zależność między wdechem a wydechem jest niekoniecznie tak prosta jak założyliśmy. Obserwowana metoda
+była również bardzo niestabilna jeżeli chodzi o testy jakościowe (klasyfikację na żywo).
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=10cm]{problem_srednie}
+	\caption{Nieoczywista zależność między wdechem a wydechem.}
+\end{figure}
+
+\section{Dane wejściowe ze spektrogramu + SVM}
+\subsection{Metoda}
+Kolejnym przyjętym przez nas podejściem było wzięcie całego spektrogramu (a przynajmniej jego części) jako dane wejściowe do SVM-a.  
 Metoda pochodzi od przypuszczenia, że człowiek rozpoznaje i rozróżnia wdech/wydech
-na podstawie barwy dźwięku.  Wektor cech ma więc postać $\vec{x} = [I_{f_1}, I_{f_2}, ..., I_{f_n}]$.
-W dalszej części korzystamy z tego podejścia.
-\subsection{Ekstrakcja najistotniejszych częstotliwości}
-\subsection{Redukcja szumów}
-\subsection{Standaryzacja}
+na podstawie barwy dźwięku.  Podobnie jak ostatnio pierw odszumiamy sygnał z pliku za pomocą $noisereduce$. \textbf{Dzielimy dane na bloki
+rozmiaru 1024 próbek, tworzymy dla każdego bloku spektrogram} ale tym razem nie liczymy średniej tylko zostawiamy całą taką klatkę. Wektor cech ma więc postać 
+\begin{gather*}
+\boldsymbol{x} = [I_{f_1}, I_{f_2}, ..., I_{f_n}]
+\end{gather*}
+Nie są nam 
+potrzebne wszystkie częstotliwości zwracane przez algorytm DFT, więc stosujemy ograniczenie podobne
+do tego stosowanego w telefonii komórkowej -  \textbf{używamy 160 częstotliwości z przedziału do 6,9 kHz}.
+Stosując to podejście dla danych testowych otrzymaliśmy $\sim 70\%$ dokładności. W testach
+jakościowych jednak zaobserwować było można "przeskakiwanie" z jednej
+wartości na drugą i spowrotem np. w połowie brania wdechu, wydychania.
+
+
+\subsection{Poprzedni stan}
+W celu pozbycia się "przeskakiwania", dane z poprzedniego podpunktu rozszerzyliśmy o informację o \textbf{wcześniej przewidzianym stanie}, czyli 
+\begin{gather*}
+	\boldsymbol{x} = [I_{f_1}, I_{f_2}, ..., I_{f_160},  s]
+\end{gather*}
+ gdzie $s = 1$ jeśli poprzednio stwierdzono wdech, $s=-1$ jeśli poprzednio stwierdzono wydech.
+Dodatkowo przeprowadziliśmy jeszcze \textbf{wygładzenie spektrogramu filtrem Savitzky-Golay}.
+Takim podejściem otrzymaliśmy dokładność $\sim 99\%$ dla danych testowych jednak wymagało to 
+od nas modyfikacji naszych testów - jako wartość $s$ stanu poprzedniego stosowaliśmy tą wziętą z
+danych testowych, czyli zakładaliśmy za każdym razem, że nasz model przewidzi dobrze poprzedni stan.
+Przypadek ten nie jest realny, ponieważ nie będzie znał poprawnej poprzedniej klasyfikacji tylko 
+zakładał, że to co sam stwierdził jest poprawne.  Biorąc poprzedni stan nie z danych testowych a z poprzedniej
+klasyfikacji modelu otrzymujemy mniejszą dokładność, bo $\sim 80\%$. Wniosek z tego jest taki, że model
+z wysokim prawdopodobieństwem przewidzi dobrze kolejny stan, jeżeli dobrze porzewidział poprzedni. 
+Warto dodać, że rzeczywiście metoda z poprzednim stanem pozwoliła nam ograniczyć "przeskakiwanie" 
+w testach jakościowych.
+\subsection{Problemy}
+W poprzednim podpunkcie wyszedł główny mankament tej metody - konieczność założenia, że poprzednio
+przewidziany stan jest dobry co nie zawsze jest prawdą. W testach jakościowych zaobserwować można było
+"wariowanie" modelu, czyli sekwencję źle przewidzianych stanów.
+
+\section{Spektrogram i sieć neuronowa}
+
+\section{Przejście na inny model oddychania}
+
+\section{Douczanie}
+
+\section{Wnioski}
 
 \section{Implementacja modeli}
 \subsection{SVM ze spektrogramem}
-Naszym pierwszym podejściem był SVM, w którym wektor cech stanowił 160 poziomów częstotliwości, 
-tj. $\vec{x} = [I_{f_1}, I_{f_2}, ..., I_{f_160}]$.  Na tej podstawie uzyskaliśmy dokładność $\sim 70\%$ dla danych testowych. 
-Problemem było jednak, że często zdarzały się sytuacje, w których klasyfikator w połowie wdechu/wydechu "przeskakiwał" 
-na chwilę na przeciwną wartość, predykcje te były więc dosyć niestabilne.
-\subsection{Informacje o poprzednich stanach}
-Model z poprzedniego podpunktu rozszerzyliśmy o informację o wcześniej przewidzianym stanie, czyli 
-$\vec{x} = [I_{f_1}, I_{f_2}, ..., I_{f_160},  s]$, gdzie $s = 1$ jeśli poprzednio stwierdzono wdech, $s=-1$ jeśli poprzednio stwierdzono wydech.
-Takim podejściem otrzymaliśmy dokładność $\sim 99\%$ dla danych testowych oraz ograniczyliśmy przeskakiwanie przewidywań.
+
 
 \end{document}
