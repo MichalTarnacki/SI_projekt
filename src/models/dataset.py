@@ -35,9 +35,11 @@ def build(filenames, dir, previous_state=False, with_bg=False):
     return x_set, y_set
 
 
-def build_with_wide_spectro(filenames, dir, previous_state=False, with_bg=False):
+def build_wide_spectro(filenames, dir, previous_state=False, with_bg=False):
     x_set = []
     y_set = []
+    chunk_size = None
+
     for filename in filenames:
         file_csv = f'{dir}{filename}.csv'
         file_wav = f'{dir}{filename}.wav'
@@ -62,6 +64,6 @@ def build_with_wide_spectro(filenames, dir, previous_state=False, with_bg=False)
         y_set += labels
 
     if previous_state:
-        return np.array(x_set), y_set
+        return np.array(x_set), y_set, chunk_size
 
-    return x_set, y_set
+    return x_set, y_set, chunk_size

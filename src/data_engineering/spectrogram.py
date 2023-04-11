@@ -27,7 +27,7 @@ def to_spectro(pressure, fs, chunk_size=CHUNK_SIZE):
     for i in range(0, len(pressure), chunk_size):
         chunk = pressure[i:i + chunk_size]
         freq = abs(np.fft.rfft(chunk))[:160]
-        freq = signal_clean(freq)  # added
+        freq = signal_clean(freq)
         frames.append(freq)
 
     return chunked_timestamps, frames
@@ -36,14 +36,18 @@ def to_spectro(pressure, fs, chunk_size=CHUNK_SIZE):
 def to_wide_spectro(pressure, fs, chunk_size=CHUNK_SIZE):
     pressure = noisereduce.reduce_noise(pressure, sr=fs)
     frames = []
-    chunked_timestamps = np.arange(0, pressure.shape[0] / fs, chunk_size / fs)
+    chunked_timestamps = []
+    chunk_index = 0
 
     for i in range(0, len(pressure), chunk_size):
         if i + chunk_size <= len(pressure):  # if there's enough elements in pressure to form a full chunk
             chunk = pressure[i:i + chunk_size]
             freq = abs(np.fft.rfft(chunk))
             freq = signal_clean(freq)
+
             frames.append(freq)
+            chunked_timestamps.append(chunk_size / fs * chunk_index)
+            chunk_index += 1
 
     return chunked_timestamps, frames, chunk_size
 

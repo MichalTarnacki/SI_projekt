@@ -132,14 +132,14 @@ def svm_train_with_previous_state(filenames, modelname, softmax=False, with_bg=F
 
 
 def svm_train_with_previous_state_with_wide_spectro(filenames, modelname, softmax=False, with_bg=False):
-    x_train, y_train = dataset.build_wide_spectro(filenames, macros.train_path, True, with_bg)
+    x_train, y_train, chunk_size = dataset.build_wide_spectro(filenames, macros.train_path, True, with_bg)
 
     scaler = StandardScalerIgnorePreviousState()
     x_train_std = scaler.fit(x_train).transform(x_train)
     y_train = transform_to_binary(y_train)
 
     if softmax:
-        clf = SoftmaxSVM()
+        clf = SoftmaxSvmWithWideSpectro()
     else:
         clf = SVM()
 
@@ -171,7 +171,6 @@ class SoftmaxSVM:
 
     def fit(self, X, Y):
         modified = np.array([np.concatenate([x[:30], x[80:]]) for x in X])
-        # modified = X
         # self.in_SVM.fit(np.concatenate([X[:, :30], X[:, 50:]]), Y)
         self.in_SVM.fit(modified, Y)
         return (self.in_SVM.w, self.in_SVM.b)
@@ -200,6 +199,47 @@ class SoftmaxSVM:
     def predict(self, X):
         modified = np.array([np.concatenate([x[:30], x[80:]]) for x in X])
         # modified = X
+        return self.in_SVM.predict(modified)
+        # softmax_in, softmax_out = self.to_softmax(X)
+        # prediction = np.dot(np.array([softmax_in, softmax_out]), self.classifier_SVM.w[0]) + self.classifier_SVM.b
+
+        # return 'in' if np.sign(prediction) == 1 else 'out'
+
+
+class SoftmaxSvmWithWideSpectro:
+    def __init__(self):
+        self.in_SVM = SVM()
+        self.out_SVM = SVM()
+        self.classifier_SVM = SVM()
+
+    def fit(self, X, Y):
+        modified = np.array([np.concatenate([x[:197], x[232:371], [x[len(x) - 1]]]) for x in X])
+        self.in_SVM.fit(modified, Y)
+        return (self.in_SVM.w, self.in_SVM.b)
+        # print("breathe in SVM")
+        # Xin = X[:, 70:]
+        # self.in_SVM.fit(Xin, Y)
+        # print("breathe out SVM")
+        # Xout = np.concatenate([X[:, :30], [X[:, 160]]])
+        # self.out_SVM.fit(Xout, Y)
+        # # self.out_SVM.fit(np.concatenate([X[,:80], [X[160]]]), Y)
+        # print("classifier SVM")
+        # X_new = np.array([self.to_softmax(x) for x in X])
+        # self.classifier_SVM.fit(X_new, Y, batch_size=100)
+
+        # return (self.in_SVM.w, self.in_SVM.b), (self.out_SVM.w, self.out_SVM.b)
+
+    def to_softmax(self, X):
+        prediction_in = np.dot(X, self.in_SVM.w[0]) + self.in_SVM.b  # 1 - in, -1 - not in
+        prediction_out = -1 * (np.dot(X, self.out_SVM.w[0]) + self.out_SVM.b)  # 1 - out, -1 - not out
+
+        e_in = math.exp(prediction_in - max(prediction_in, prediction_out))
+        e_out = math.exp(prediction_out - max(prediction_in, prediction_out))
+        su = e_in + e_out
+        return e_in/su, e_out/su
+
+    def predict(self, X):
+        modified = np.array([np.concatenate([x[:197], x[232:371], [x[len(x) - 1]]]) for x in X])
         return self.in_SVM.predict(modified)
         # softmax_in, softmax_out = self.to_softmax(X)
         # prediction = np.dot(np.array([softmax_in, softmax_out]), self.classifier_SVM.w[0]) + self.classifier_SVM.b

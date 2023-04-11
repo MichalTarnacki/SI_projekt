@@ -8,7 +8,7 @@ import src.models.svm as svm
 import pathlib as pl
 
 from src.new_realtime import new_realtime
-from src.test import test_qualitative, test_quantitative
+from src.test import test_qualitative, test_quantitative, test_quantitative_with_wide_spectro
 from src.new_realtime_tensor import new_realtime_tensor
 
 def show_plot(file_csv, file_wav):
@@ -47,7 +47,8 @@ def record():
 if __name__ == '__main__':
     while True:
         print("1. Record\n2. Train\n2.1. Train with wide spectrogram\n3. Realtime\n4. Show plot\n"
-              "5. Test quantitative\n7. New real time\n8. Real time tensor\n10. Show spectrograms")
+              "5. Test quantitative\n5.1 Test quantitative with wide spectrogram\n7. New real time\n"
+              "8. Real time tensor\n10. Show spectrograms")
         x = input()
         if x == '1':
             record()
@@ -61,18 +62,23 @@ if __name__ == '__main__':
             folder = pl.Path(macros.train_path)
             svm.svm_train_with_previous_state_with_wide_spectro(
                 list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)])),
-                'svm_custom_softmax',
+                'svm_custom_softmax_wide_spectro',
                 True, False)
         elif x == '3':
-            test_qualitative('svm_custom_softmax_prevstate', with_previous_state=True, with_bg=False)
+            test_qualitative('svm_custom_softmax', with_previous_state=True, with_bg=False)
         elif x == '4':
             x = input('Filename: ')
             show_plot(f'{macros.train_path}{x}.csv', f'{macros.train_path}{x}.wav')
         elif x == '5':
             folder = pl.Path(macros.test_path)
-            test_quantitative(list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)])), 'svm_custom_softmax_prevstate', True)
+            test_quantitative(list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)])),
+                              'svm_custom_softmax_prevstate', True)
+        elif x == '5.1':
+            folder = pl.Path(macros.test_path)
+            test_quantitative_with_wide_spectro(list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)])),
+                                                'svm_custom_softmax_wide_spectro_prevstate', True)
         elif x == '7':
-            new_realtime('svm_custom_softmax_prevstate')
+            new_realtime('svm_custom_softmax')
         elif x == '8':
             new_realtime_tensor()
         elif x == '10':
