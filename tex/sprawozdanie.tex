@@ -131,18 +131,16 @@ dokładności oznaczając ręcznie (lub byłoby to bardzo żmudne).}
 Na początku przyjmujemy model "sportowego" oddychania, czyli wdech nosem i wydech ustami.
 Uproszczenie to polega na tym, że wydawane dźwięki są dosyć różne, dopiero potem sprawdzamy jak nasze podejście będzie się sprawować
 przy innych metodach oddychania.
-
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=3cm]{model_oddechu}
   	\caption{Ilustracja przyjętego modelu,  \href{https://www.quora.com/Should-I-exhale-from-the-mouth-or-nose-while-deep-breathing}{źródło}}
 \end{figure}
-
-
 \section{Średnia częstotliwość w czasie}
 \subsection{Metoda}
 Pierwotnie przyjętym założeniem było, że podczas wdechu średnia częstotliwość dźwięku jest wyższa niż
-gdy osoba wydycha. Z pliku w formacie .wav dla bloków próbek pobieramy natężenie, które następnie odszumiamy za pomocą $noisereduce$ (przy testach jakościowych stosujemy bramkę szumów dla 3 ostatnich sekund) . Dzielimy próbki na bloki, dla których tworzymy spektrogramy i obliczamy
+gdy osoba wydycha. Z pliku w formacie .wav pobieramy natężenie, które następnie\textbf{odszumiamy} za pomocą $noisereduce$ (przy testach jakościowych stosujemy bramkę szumów dla 3 ostatnich sekund) . 
+\textbf{Dzielimy próbki na bloki, dla których tworzymy spektrogramy} i obliczamy
 średnią ważoną częstotliwość.
 Cechami, na podstawie których dokonywana jest predykcja są  
 \begin{gather*}
@@ -170,10 +168,19 @@ była również bardzo niestabilna jeżeli chodzi o testy jakościowe (klasyfika
 \end{figure}
 
 \section{Dane wejściowe ze spektrogramu + SVM}
-\subsection{Metoda}
+\subsection{Założenie}
 Kolejnym przyjętym przez nas podejściem było wzięcie całego spektrogramu (a przynajmniej jego części) jako dane wejściowe do SVM-a.  
 Metoda pochodzi od przypuszczenia, że człowiek rozpoznaje i rozróżnia wdech/wydech
-na podstawie barwy dźwięku.  Podobnie jak ostatnio pierw odszumiamy sygnał z pliku za pomocą $noisereduce$. \textbf{Dzielimy dane na bloki
+na podstawie barwy dźwięku.  
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=10cm]{wdech_wydech_spektro}
+  	\caption{Nie są istotne dokładne kształty powyższych spektrogramów, tylko fakt, że wydech
+jest pojedynczym pikiem $\in (0, 1)$ kHz a wdech częstotliwościami z natężeniem
+o mniejszym odchyleniu $\in (2, 7)$ kHz.  Zbliżoną zależność zaobserwowano dla paru osób.}.
+\end{figure}
+\subsection{Metoda}
+Podobnie jak ostatnio pierw odszumiamy sygnał z pliku za pomocą $noisereduce$. \textbf{Dzielimy dane na bloki
 rozmiaru 1024 próbek, tworzymy dla każdego bloku spektrogram} ale tym razem nie liczymy średniej tylko zostawiamy całą taką klatkę. Wektor cech ma więc postać 
 \begin{gather*}
 \boldsymbol{x} = [I_{f_1}, I_{f_2}, ..., I_{f_n}]
@@ -184,21 +191,24 @@ do tego stosowanego w telefonii komórkowej -  \textbf{używamy 160 częstotliwo
 Stosując to podejście dla danych testowych otrzymaliśmy $\sim 70\%$ dokładności. W testach
 jakościowych jednak zaobserwować było można "przeskakiwanie" z jednej
 wartości na drugą i spowrotem np. w połowie brania wdechu, wydychania.
-
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=10cm]{przeskakiwanie}
+  	\caption{Dane z rysunku 1. oznaczone, jak widać, występują przeskoki z jednej wartości na drugą.}
+\end{figure}
 
 \subsection{Poprzedni stan}
-W celu pozbycia się "przeskakiwania", dane z poprzedniego podpunktu rozszerzyliśmy o informację o \textbf{wcześniej przewidzianym stanie}, czyli 
+W celu pozbycia się "przeskakiwania" i ogólnej poprawy działania dane z poprzedniego podpunktu rozszerzyliśmy o informację o \textbf{wcześniej przewidzianym stanie}, czyli 
 \begin{gather*}
 	\boldsymbol{x} = [I_{f_1}, I_{f_2}, ..., I_{f_160},  s]
 \end{gather*}
  gdzie $s = 1$ jeśli poprzednio stwierdzono wdech, $s=-1$ jeśli poprzednio stwierdzono wydech.
 Dodatkowo przeprowadziliśmy jeszcze \textbf{wygładzenie spektrogramu filtrem Savitzky-Golay}.
-Takim podejściem otrzymaliśmy dokładność $\sim 99\%$ dla danych testowych jednak wymagało to 
-od nas modyfikacji naszych testów - jako wartość $s$ stanu poprzedniego stosowaliśmy tą wziętą z
+Takim sposobem otrzymaliśmy dokładność $\sim 99\%$ dla danych testowych w sytuacji idealnej - jako wartość $s$ stanu poprzedniego stosowaliśmy tą wziętą z
 danych testowych, czyli zakładaliśmy za każdym razem, że nasz model przewidzi dobrze poprzedni stan.
-Przypadek ten nie jest realny, ponieważ nie będzie znał poprawnej poprzedniej klasyfikacji tylko 
+Przypadek ten nie jest realny, ponieważ model nie będzie znał poprawnej poprzedniej klasyfikacji tylko 
 zakładał, że to co sam stwierdził jest poprawne.  Biorąc poprzedni stan nie z danych testowych a z poprzedniej
-klasyfikacji modelu otrzymujemy mniejszą dokładność, bo $\sim 80\%$. Wniosek z tego jest taki, że model
+klasyfikacji modelu otrzymujemy mniejszą dokładność $\sim 80\%$. Wniosek z tego jest taki, że model
 z wysokim prawdopodobieństwem przewidzi dobrze kolejny stan, jeżeli dobrze porzewidział poprzedni. 
 Warto dodać, że rzeczywiście metoda z poprzednim stanem pozwoliła nam ograniczyć "przeskakiwanie" 
 w testach jakościowych.
@@ -210,13 +220,15 @@ przewidziany stan jest dobry co nie zawsze jest prawdą. W testach jakościowych
 \section{Spektrogram i sieć neuronowa}
 
 \section{Przejście na inny model oddychania}
+Kolejnym krokiem będzie przeniesienie wyżej wspomnianych metod na model oddychania nos-nos. 
+Będzie to być może wymagało wzięcia innych częstotliwości.
+
+\section{Działanie modelu a hałas z otoczenia}
 
 \section{Douczanie}
 
 \section{Wnioski}
 
-\section{Implementacja modeli}
-\subsection{SVM ze spektrogramem}
 
 
 \end{document}
