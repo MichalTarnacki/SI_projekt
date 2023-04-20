@@ -151,7 +151,7 @@ powietrze lub na odwrót. Momenty przejścia z wdechu na wydech i w drugą stron
 .csv, a dźwięk w pliku .wav. Częstotliwość próbkowania ustalamy na $44,1$ kHz.
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=10cm]{nagrywanie}
+	\includegraphics[width=10cm]{nagrywanie_ozn}
 	\caption{Przykładowe nagrane dane, in-wdech, out-wydech. Jak widać dane oznaczone na żywo są bardzo dokładne, być może nie bylibyśmy w stanie osiągnąć takiej
 dokładności oznaczając ręcznie (lub byłoby to bardzo żmudne).}
 \end{figure}
@@ -202,7 +202,7 @@ modelach różnica średnich częstotliwości między wdechem a wydechem może n
 była również bardzo niestabilna jeżeli chodzi o testy jakościowe (klasyfikację na żywo).
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=10cm]{problem_srednie}
+	\includegraphics[width=10cm]{problem_srednie_ozn}
 	\caption{Nieoczywista zależność między wdechem a wydechem.}
 \end{figure}
 
@@ -232,14 +232,14 @@ jakościowych jednak zaobserwować było można "przeskakiwanie" z jednej
 wartości na drugą i spowrotem np. w połowie brania wdechu, wydychania.
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=10cm]{przeskakiwanie}
+	\includegraphics[width=10cm]{przeskakiwanie_ozn}
   	\caption{Dane z rysunku 1. oznaczone, jak widać, występują przeskoki z jednej wartości na drugą.}
 \end{figure}
 
 \subsection{Poprzedni stan}
 W celu pozbycia się "przeskakiwania" i ogólnej poprawy działania dane z poprzedniego podpunktu rozszerzyliśmy o informację o \textbf{wcześniej przewidzianym stanie}, czyli 
 \begin{gather*}
-	\boldsymbol{x} = [I_{f_1}, I_{f_2}, ..., I_{f_160},  s]
+	\boldsymbol{x} = [I_{f_1}, I_{f_2}, ..., I_{f_{160}},  s]
 \end{gather*}
  gdzie $s = 1$ jeśli poprzednio stwierdzono wdech, $s=-1$ jeśli poprzednio stwierdzono wydech.
 Dodatkowo przeprowadziliśmy jeszcze \textbf{wygładzenie spektrogramu filtrem Savitzky-Golay}.
