@@ -213,7 +213,7 @@ class SoftmaxSvmWithWideSpectro:
         self.classifier_SVM = SVM()
 
     def fit(self, X, Y):
-        modified = np.array([np.concatenate([x[:197], x[232:371], [x[len(x) - 1]]]) for x in X])
+        modified = np.array([np.concatenate([x[:371], [x[len(x) - 1]]]) for x in X])
         self.in_SVM.fit(modified, Y)
         return (self.in_SVM.w, self.in_SVM.b)
         # print("breathe in SVM")
@@ -239,7 +239,7 @@ class SoftmaxSvmWithWideSpectro:
         return e_in/su, e_out/su
 
     def predict(self, X):
-        modified = np.array([np.concatenate([x[:197], x[232:371], [x[len(x) - 1]]]) for x in X])
+        modified = np.array([np.concatenate([x[:371], [x[len(x) - 1]]]) for x in X])
         return self.in_SVM.predict(modified)
         # softmax_in, softmax_out = self.to_softmax(X)
         # prediction = np.dot(np.array([softmax_in, softmax_out]), self.classifier_SVM.w[0]) + self.classifier_SVM.b

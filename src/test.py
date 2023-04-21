@@ -43,5 +43,14 @@ def test_qualitative(modelfile, with_previous_state, with_bg):
         load(f'{macros.model_path}{modelfile}.joblib'),
         load(f'{macros.model_path}{modelfile}_scaler.joblib'),
         uses_previous_state=with_previous_state,
-        with_bg = with_bg
+        with_bg=with_bg
+    )
+
+
+def test_qualitative_with_wide_spectro(modelfile, with_previous_state, with_bg):
+    rt.detection_with_wide_spectro(
+        load(f'{macros.model_path}{modelfile}.joblib'),
+        load(f'{macros.model_path}{modelfile}_scaler.joblib'),
+        uses_previous_state=with_previous_state,
+        with_bg=with_bg
     )
