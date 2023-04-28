@@ -9,8 +9,9 @@ import pathlib as pl
 
 from TensorFlow import TensorFlow
 from src.new_realtime import new_realtime
-from src.test import test_qualitative, test_quantitative
+from src.test import test_quantitative, test_qualitative
 from src.new_realtime_tensor import new_realtime_tensor
+
 
 def show_plot(file_csv, file_wav):
     x, y, sample_rate = du.wav_to_sample_xy(file_wav)
@@ -47,7 +48,9 @@ def record():
 
 if __name__ == '__main__':
     while True:
-        print("1. Record\n2. Train\n3. Realtime\n4. Show plot\n5. Test quantitative\n7. New real time\n10. Show spectrograms")
+        print("1. Record\n2. Train with SVM\n3. Realtime with SVM"
+              "\n4. Show pressure plot\n5. Test quantitative with SVM\n7. New real time with SVM"
+              "\n8. Real time tensor\n10. Show spectrograms")
         x = input()
         if x == '1':
             for i in range(10):
@@ -59,15 +62,17 @@ if __name__ == '__main__':
                 'svm_custom_softmax',
                 True, False)
         elif x == '3':
-            test_qualitative('svm_custom_softmax_prevstate', with_previous_state=True, with_bg=False)
+            test_qualitative('svm_custom_softmax_prevstate', with_previous_state=True,
+                             with_bg=False)
         elif x == '4':
             x = input('Filename: ')
             show_plot(f'{macros.train_path}{x}.csv', f'{macros.train_path}{x}.wav')
         elif x == '5':
             folder = pl.Path(macros.test_path)
-            test_quantitative(list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)])), 'svm_custom_softmax_prevstate', True)
+            test_quantitative(list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)])),
+                              'svm_custom_softmax_prevstate', True)
         elif x == '7':
-            new_realtime('svm_custom_softmax_prevstate')
+            new_realtime('svm_custom_softmax')
         elif x == '8':
             new_realtime_tensor()
         elif x == '9':

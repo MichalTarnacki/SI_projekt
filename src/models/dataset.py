@@ -3,9 +3,11 @@ import src.data_engineering.data_utils as du
 import src.data_engineering.spectrogram as sp
 
 
-def build(filenames, dir, previous_state=False, with_bg=False):
+def build_spectro(filenames, dir, previous_state=False, with_bg=False):
     x_set = []
     y_set = []
+    chunk_size = None
+
     for filename in filenames:
         file_csv = f'{dir}{filename}.csv'
         file_wav = f'{dir}{filename}.wav'
@@ -18,7 +20,7 @@ def build(filenames, dir, previous_state=False, with_bg=False):
             x_bg = np.mean(x_bg)
             x = [i if i > x_bg else 0 for i in x]
 
-        timestamps, frames = sp.to_spectro(y, freq)
+        timestamps, frames, chunk_size = sp.to_wide_spectro(y, freq)
         labels = sp.spectro_labeled(file_csv, timestamps)
 
         if previous_state:
@@ -30,6 +32,6 @@ def build(filenames, dir, previous_state=False, with_bg=False):
         y_set += labels
 
     if previous_state:
-        return np.array(x_set), y_set
+        return np.array(x_set), y_set, chunk_size
 
-    return x_set, y_set
+    return x_set, y_set, chunk_size

@@ -69,7 +69,7 @@ def detection(model, scaler, chunk_size=352, input_size=40, uses_previous_state=
         if samples.shape[0] > chunk_size * (input_size + 200):
             clean = noisereduce.reduce_noise(samples[-176400:], 44100)
 
-            last_frame = abs(np.fft.rfft(clean[len(clean) - sp.CHUNK_SIZE:]))[:160]
+            last_frame = abs(np.fft.rfft(clean[len(clean) - sp.CHUNK_SIZE:]))
             last_frame = sp.signal_clean(last_frame)
 
             if sum(last_frame) < 1000:

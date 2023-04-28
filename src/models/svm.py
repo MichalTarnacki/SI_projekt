@@ -113,14 +113,14 @@ def svm_train_basic(filenames, modelname):
 
 
 def svm_train_with_previous_state(filenames, modelname, softmax=False, with_bg=False):
-    x_train, y_train = dataset.build(filenames, macros.train_path, True, with_bg)
+    x_train, y_train, chunk_size = dataset.build_spectro(filenames, macros.train_path, True, with_bg)
 
     scaler = StandardScalerIgnorePreviousState()
     x_train_std = scaler.fit(x_train).transform(x_train)
     y_train = transform_to_binary(y_train)
 
     if softmax:
-        clf = SoftmaxSVM()
+        clf = SoftmaxSvm()
     else:
         clf = SVM()
 
@@ -144,16 +144,14 @@ class StandardScalerIgnorePreviousState(TransformerMixin):
         return np.concatenate((X_head, X[:, -1:]), axis=1)
 
 
-class SoftmaxSVM:
+class SoftmaxSvm:
     def __init__(self):
         self.in_SVM = SVM()
         self.out_SVM = SVM()
         self.classifier_SVM = SVM()
 
     def fit(self, X, Y):
-        modified = np.array([np.concatenate([x[:30], x[80:]]) for x in X])
-        # modified = X
-        # self.in_SVM.fit(np.concatenate([X[:, :30], X[:, 50:]]), Y)
+        modified = np.array([np.concatenate([x[:371], [x[len(x) - 1]]]) for x in X])
         self.in_SVM.fit(modified, Y)
         return (self.in_SVM.w, self.in_SVM.b)
         # print("breathe in SVM")
@@ -179,8 +177,7 @@ class SoftmaxSVM:
         return e_in/su, e_out/su
 
     def predict(self, X):
-        modified = np.array([np.concatenate([x[:30], x[80:]]) for x in X])
-        # modified = X
+        modified = np.array([np.concatenate([x[:371], [x[len(x) - 1]]]) for x in X])
         return self.in_SVM.predict(modified)
         # softmax_in, softmax_out = self.to_softmax(X)
         # prediction = np.dot(np.array([softmax_in, softmax_out]), self.classifier_SVM.w[0]) + self.classifier_SVM.b
