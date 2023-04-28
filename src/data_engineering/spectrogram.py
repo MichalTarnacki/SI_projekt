@@ -19,20 +19,6 @@ SAMPLE_FREQ = 44100
 # so size of original input is decreased
 # i.e. size = original_input_size/chunk_size
 # returns frame and timestamp for each frame
-def to_spectro(pressure, fs, chunk_size=CHUNK_SIZE):
-    pressure = noisereduce.reduce_noise(pressure, sr=fs)
-    frames = []
-    chunked_timestamps = np.arange(0, pressure.shape[0] / fs, chunk_size / fs)
-
-    for i in range(0, len(pressure), chunk_size):
-        chunk = pressure[i:i + chunk_size]
-        freq = abs(np.fft.rfft(chunk))[:160]
-        freq = signal_clean(freq)
-        frames.append(freq)
-
-    return chunked_timestamps, frames
-
-
 def to_wide_spectro(pressure, fs, chunk_size=CHUNK_SIZE):
     pressure = noisereduce.reduce_noise(pressure, sr=fs)
     frames = []

@@ -8,8 +8,9 @@ import src.models.svm as svm
 import pathlib as pl
 
 from src.new_realtime import new_realtime
-from src.test import test_qualitative, test_quantitative, test_quantitative_with_wide_spectro, test_qualitative_with_wide_spectro
+from src.test import test_quantitative, test_qualitative
 from src.new_realtime_tensor import new_realtime_tensor
+
 
 def show_plot(file_csv, file_wav):
     x, y, sample_rate = du.wav_to_sample_xy(file_wav)
@@ -46,9 +47,9 @@ def record():
 
 if __name__ == '__main__':
     while True:
-        print("1. Record\n2. Train\n2.1. Train with wide spectrogram\n3. Realtime\n3.1. Realtime with wide spectrogram"
-              "\n4. Show plot\n5. Test quantitative\n5.1 Test quantitative with wide spectrogram\n7. New real time\n"
-              "8. Real time tensor\n10. Show spectrograms")
+        print("1. Record\n2. Train with SVM\n3. Realtime with SVM"
+              "\n4. Show pressure plot\n5. Test quantitative with SVM\n7. New real time with SVM"
+              "\n8. Real time tensor\n10. Show spectrograms")
         x = input()
         if x == '1':
             record()
@@ -58,17 +59,9 @@ if __name__ == '__main__':
                 list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)])),
                 'svm_custom_softmax',
                 True, False)
-        elif x == '2.1':
-            folder = pl.Path(macros.train_path)
-            svm.svm_train_with_previous_state_with_wide_spectro(
-                list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)])),
-                'svm_custom_softmax_wide_spectro',
-                True, False)
         elif x == '3':
-            test_qualitative('svm_custom_softmax_prevstate', with_previous_state=True, with_bg=False)
-        elif x == '3.1':
-            test_qualitative_with_wide_spectro('svm_custom_softmax_wide_spectro_prevstate', with_previous_state=True,
-                                               with_bg=False)
+            test_qualitative('svm_custom_softmax_prevstate', with_previous_state=True,
+                             with_bg=False)
         elif x == '4':
             x = input('Filename: ')
             show_plot(f'{macros.train_path}{x}.csv', f'{macros.train_path}{x}.wav')
@@ -76,10 +69,6 @@ if __name__ == '__main__':
             folder = pl.Path(macros.test_path)
             test_quantitative(list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)])),
                               'svm_custom_softmax_prevstate', True)
-        elif x == '5.1':
-            folder = pl.Path(macros.test_path)
-            test_quantitative_with_wide_spectro(list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)])),
-                                                'svm_custom_softmax_wide_spectro_prevstate', True)
         elif x == '7':
             new_realtime('svm_custom_softmax')
         elif x == '8':
