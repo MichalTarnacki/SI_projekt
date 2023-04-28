@@ -1,6 +1,7 @@
 import os
 import pathlib
 import re
+from random import shuffle
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -12,7 +13,7 @@ from scipy.io.wavfile import write
 import soundfile
 import shutil
 import sounddevice as sd
-
+import  src.data_engineering.spectrogram as sp
 from keras import layers
 from keras import models
 from IPython import display
@@ -57,6 +58,8 @@ class TensorFlow:
         os.mkdir(macros.test_breaths)
 
         files = list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)]))
+        l = 0
+        shuffle(files)
         for file in files:
             pressure, sample_rate = soundfile.read(macros.train_path+file+'.wav')
             all_data = pd.read_csv(macros.train_path+file+'.csv', sep=',').values
@@ -67,7 +70,8 @@ class TensorFlow:
                 while iterator < i[1]*sample_rate:
                     new_file.append(pressure[iterator])
                     iterator+=1
-                if k<int(len(files)*ratio):
+                new_file=sp.signal_clean(new_file)
+                if l<int(len(files)*ratio):
                     if i[0] == 'in':
                         soundfile.write(macros.train_breaths + file + f'{k}.wav',  np.array(new_file),sample_rate, subtype='PCM_16')
                     else:
@@ -80,6 +84,7 @@ class TensorFlow:
                         soundfile.write(macros.test_exhales + file + f'{k}.wav', np.array(new_file), sample_rate,
                                         subtype='PCM_16')
                 k+=1
+            l+=1
 
     @staticmethod
     def decode_audio(audio_binary):
@@ -316,13 +321,30 @@ class TensorFlow:
 
     @staticmethod
     def predict_percentage(model, audio_array):
+        if os.path.exists(f'media/trash'):
+            folder = pl.Path(f'media/trash')
+            shutil.rmtree(folder)
+        os.mkdir('media/trash')
         soundfile.write('media/trash/temp.wav',  np.array(audio_array), 44100, subtype='PCM_16')
-        sample_ds = TensorFlow.preprocess_dataset2([str('media/sorted_test/in/e28.wav')])
+
+
+        sample_ds = TensorFlow.preprocess_dataset2([str('media/trash/temp.wav')])
         for spectrogram in sample_ds.batch(1):
             prediction = model(spectrogram)
             percentage = tf.nn.softmax(prediction[0])
             return TensorFlow.commands, percentage
 
+    @staticmethod
+    def new_predict(model, audio_array):
+        audio_array = sp.signal_clean(audio_array)
+        waveform = [i/32768 for i in audio_array]
+
+        waveform = tf.convert_to_tensor(waveform, dtype= tf.float32)
+        spec = TensorFlow.get_spectrogram(waveform)
+        spec = tf.expand_dims(spec, 0)
+        prediction = model(spec)
+        percentage = tf.nn.softmax(prediction[0])
+        return TensorFlow.commands, percentage
 
     @staticmethod
     def train(epochs):
@@ -331,7 +353,7 @@ class TensorFlow:
         files_ds, waveform_ds, spectrogram_ds = TensorFlow.create_ds(train_files)
         #TensorFlow.waveform_plot(waveform_ds)
         #TensorFlow.spectro_plot(waveform_ds, alldata=True, take_num=2)
-        #TensorFlow.spectro_plots(spectrogram_ds)
+        TensorFlow.spectro_plots(spectrogram_ds)
 
         train_ds = spectrogram_ds
         val_ds = TensorFlow.preprocess_dataset(val_files)

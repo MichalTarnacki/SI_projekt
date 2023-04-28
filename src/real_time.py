@@ -21,7 +21,10 @@ from scipy.io.wavfile import write
 def detection(model, scaler, chunk_size=352, input_size=40, uses_previous_state=False, with_bg=False):
     pygame.init()
     pygame.font.init()
-    screen = pygame.display.set_mode((740, 480))
+
+    width = 740
+    height = 480
+    screen = pygame.display.set_mode((width, height))
     font = pygame.font.SysFont(None, 50)
     p = pyaudio.PyAudio()
     fs = 44100
@@ -48,6 +51,7 @@ def detection(model, scaler, chunk_size=352, input_size=40, uses_previous_state=
     prev_state = 'in'
     print_state = 'cisza'
 
+    radius = 100
     while True:
 
         for event in pygame.event.get():
@@ -76,13 +80,20 @@ def detection(model, scaler, chunk_size=352, input_size=40, uses_previous_state=
             if uses_previous_state:
                 last_frame = np.append(last_frame, 1 if prev_state == 'in' else -1)
                 prev_state = state
-            for x, y in enumerate(last_frame[:-1]):
+
+            color = (0, 0, 255)
+            if print_state == "cisza":
+                color = (0, 255, 0)
+            elif state == "out":
                 color = (255, 0, 0)
-                if print_state == "cisza":
-                    color = (0, 255, 0)
-                elif state == "out":
-                    color = (0, 0, 255)
-                pygame.draw.line(screen, color, (x*3, 480 - y), (x*3 + 3, 480 - last_frame[x+1]))
+                radius -= 1
+            else:
+                radius += 1
+
+            # for x, y in enumerate(last_frame[:-1]):
+            #     pygame.draw.line(screen, color, (x*3, 480 - y), (x*3 + 3, 480 - last_frame[x+1]))
+
+            pygame.draw.circle(screen, color, (width/2, height/2), radius)
 
             last_frame_std = scaler.transform(last_frame.reshape(-1, 1).T)
             state = model.predict(last_frame_std)

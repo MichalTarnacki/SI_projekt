@@ -17,7 +17,7 @@ import macros
 
 
 def new_realtime(modelfile, with_bg=False):
-    FORMAT = pyaudio.paInt16
+    FORMAT = pyaudio.paFloat32
     CHANNELS = 1
     RATE = 44100
     CHUNK = 512
@@ -38,7 +38,7 @@ def new_realtime(modelfile, with_bg=False):
     p = None
     stream = None
     contin = True
-    saved_chunks = 30
+    saved_chunks = 50
 
 
 
@@ -51,7 +51,7 @@ def new_realtime(modelfile, with_bg=False):
         stream = p.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True,
                         frames_per_buffer=sp.CHUNK_SIZE)
         while contin:
-            waveData = np.frombuffer(stream.read(CHUNK, exception_on_overflow=False), dtype=np.int16)
+            waveData = np.frombuffer(stream.read(CHUNK, exception_on_overflow=False), dtype=np.float)
             # sd.play(waveData, 44100)
             saved = saved + list(waveData)
             if saved.__len__() >= (saved_chunks+1)*CHUNK:
