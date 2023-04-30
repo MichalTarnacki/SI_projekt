@@ -95,12 +95,12 @@ W celu wyznaczenia sposobu zamiany częstotliwości otrzymanej za pomocą DFT na
 	\includegraphics[width=10cm]{przeliczanie_dft_hz}
 	\caption{}
 \end{figure}
-\noindent Po zaobserwowaniu w przybliżeniu liniowego charakteru tej relacji zastosowaliśmy metodę najmniejszych kwadratów do wyznaczenie najlepiej dopasowanej prostej. Otrzymaliśmy następujące wyniki:
+\noindent Po zaobserwowaniu w przybliżeniu liniowego charakteru tej relacji zastosowaliśmy metodę najmniejszych kwadratów do wyznaczenia najlepiej dopasowanej prostej. Otrzymaliśmy następujące wyniki:
 \begin{gather*}
-	1\,\unit{Hz}\approx0,0912\,\unit{FU_{DFT}},\\
-	1\,\unit{FU_{DFT}}\approx40,2615\,\unit{Hz},
+	[\unit{Hz}]\approx43,0789\,[\unit{FU_{DFT}}]-2,8174,\\
+	[\unit{FU_{DFT}}]\approx0,0232\,[\unit{Hz}]+0,068,
 \end{gather*}
-gdzie \unit{FU_{DFT}} to jednostka częstotliwości, w której otrzymuje się wynik DFT.
+gdzie [\unit{FU_{DFT}}] to wartość liczbowa częstotliwości w jednostkach, w której otrzymuje się wynik DFT, natomiast [\unit{Hz}] to wartość liczbowa częstotliwości w \unit{Hz}.
 \subsection{Bramka szumów}
 Głowna metoda odszumiana, z której korzystamy to $Spectral$ $Gating$ (rodzaj bramki szumów).  Pierw wyznaczany jest spektrogram sygnału za pomocą $DFT$ i 
 tworzony jest próg szumu dla każdej jego częstotliwości.
@@ -189,7 +189,7 @@ przy innych metodach oddychania.
 \section{Średnia częstotliwość w czasie}
 \subsection{Metoda}
 Pierwotnie przyjętym założeniem było, że podczas wdechu średnia częstotliwość dźwięku jest wyższa niż
-gdy osoba wydycha. Z pliku w formacie .wav pobieramy natężenie, które następnie\textbf{odszumiamy} za pomocą $noisereduce$ (przy testach jakościowych stosujemy bramkę szumów dla 3 ostatnich sekund) . 
+gdy osoba wydycha. Z pliku w formacie .wav pobieramy natężenie, które następnie \textbf{odszumiamy} za pomocą $noisereduce$ (przy testach jakościowych stosujemy bramkę szumów dla 3 ostatnich sekund) . 
 \textbf{Dzielimy próbki na bloki, dla których tworzymy spektrogramy} i obliczamy
 średnią ważoną częstotliwość.
 Cechami, na podstawie których dokonywana jest predykcja są  
@@ -254,24 +254,47 @@ W celu pozbycia się "przeskakiwania" i ogólnej poprawy działania dane z poprz
 \end{gather*}
  gdzie $s = 1$ jeśli poprzednio stwierdzono wdech, $s=-1$ jeśli poprzednio stwierdzono wydech.
 Dodatkowo przeprowadziliśmy jeszcze \textbf{wygładzenie spektrogramu filtrem Savitzky-Golay}.
-Takim sposobem otrzymaliśmy dokładność $\sim 99\%$ dla danych testowych w sytuacji idealnej - jako wartość $s$ stanu poprzedniego stosowaliśmy tą wziętą z
+Takim sposobem otrzymaliśmy dokładność $\sim 99\%$ dla danych testowych w sytuacji idealnej - jako wartość $s$ stanu poprzedniego stosowaliśmy tę wziętą z
 danych testowych, czyli zakładaliśmy za każdym razem, że nasz model przewidzi dobrze poprzedni stan.
 Przypadek ten nie jest realny, ponieważ model nie będzie znał poprawnej poprzedniej klasyfikacji tylko 
 zakładał, że to co sam stwierdził jest poprawne.  Biorąc poprzedni stan nie z danych testowych a z poprzedniej
 klasyfikacji modelu otrzymujemy mniejszą dokładność $\sim 80\%$. Wniosek z tego jest taki, że model
-z wysokim prawdopodobieństwem przewidzi dobrze kolejny stan, jeżeli dobrze porzewidział poprzedni. 
+z wysokim prawdopodobieństwem przewidzi dobrze kolejny stan, jeżeli dobrze przewidział poprzedni. 
 Warto dodać, że rzeczywiście metoda z poprzednim stanem pozwoliła nam ograniczyć "przeskakiwanie" 
 w testach jakościowych.
 \subsection{Problemy}
 W poprzednim podpunkcie wyszedł główny mankament tej metody - konieczność założenia, że poprzednio
 przewidziany stan jest dobry co nie zawsze jest prawdą. W testach jakościowych zaobserwować można było
 "wariowanie" modelu, czyli sekwencję źle przewidzianych stanów.
+\subsection{Szerszy spektrogram}
+W celu poprawy działania modelu postanowiliśmy dokładniej przeanalizować, które częstotliwości są kluczowe dla poprawnej oceny fazy oddechu. W oparciu o obserwację spektrogramów wybraliśmy kilka możliwych zakresów, w których różnice między wdechem i wydechem są dobrze widoczne:
+\begin{itemize}
+	\setlength\itemsep{-0.25em}
+	\item[--] 0--1\,300 \unit{Hz} i 3\,400--22\,000 \unit{Hz},
+	\item[--] 0--14\,000 \unit{Hz},
+	\item[--] 0--1\,300 \unit{Hz} i 3\,400--14\,000 \unit{Hz},
+	\item[--] 0--8\,500 \unit{Hz} i 10\,000--14\,000 \unit{Hz},
+	\item[--] 0--16\,000 \unit{Hz},
+	\item[--] 0--1\,300 \unit{Hz} i 3\,400--16\,000 \unit{Hz},
+	\item[--] 0--1\,300 \unit{Hz}, 3\,400--8\,500 \unit{Hz} i 10\,000 \unit{Hz}--16\,000 \unit{Hz},
+	\item[--] 0--8\,500 \unit{Hz} i 10\,000--16\,000 \unit{Hz}.
+\end{itemize}
+Dla każdego wyboru przeprowadziliśmy testy. W przypadku ostatniego uzyskaliśmy względny wzrost dokładności predykcji o $\sim8\%$ względem początkowego podejścia. Taki wybór częstotliwości przyjęliśmy zatem dla modelu rozpoznającego wdech nosem i wydech ustami.
 
 \section{Spektrogram i sieć neuronowa}
 
 \section{Przejście na inny model oddychania}
-Kolejnym krokiem będzie przeniesienie wyżej wspomnianych metod na model oddychania nos-nos. 
-Będzie to być może wymagało wzięcia innych częstotliwości.
+\subsection{Wydech nosem}
+Kolejnym krokiem było przeniesienie wypracowanej metody uczenia na rozpoznawanie wdechu oraz wydechu nosem. W takim przypadku różnice między fazami oddechu są mniej zauważalne, co wymagało kolejnych udoskonaleń.
+\subsection{Szerszy spektrogram}
+Ponownie dokonaliśmy obserwacji spektrogramów, tym razem wyznaczonych dla wdechów i wydechów nosem. Zauważyliśmy kilka zakresów, w których różnice między fazami oddechu są zauważalne:
+\begin{itemize}
+	\setlength\itemsep{-0.25em}
+	\item[--] 0--8\,500 \unit{Hz} i 10\,000--16\,000 \unit{Hz},
+	\item[--] 0--3\,000 \unit{Hz} i 6\,000--16\,000 \unit{Hz},
+	\item[--] 0--16\,000 \unit{Hz}.
+\end{itemize}
+Testy pokazały, iż ostatni z powyższych wybór częstotliwości spowodował względny wzrost dokładności o kolejne $\sim7\%$. Taki zatem pozostawiliśmy do dalszej pracy.
 
 \section{Działanie modelu a hałas z otoczenia}
 
