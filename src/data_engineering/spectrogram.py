@@ -19,7 +19,7 @@ SAMPLE_FREQ = 44100
 # so size of original input is decreased
 # i.e. size = original_input_size/chunk_size
 # returns frame and timestamp for each frame
-def to_wide_spectro(pressure, fs, chunk_size=CHUNK_SIZE):
+def to_spectro(pressure, fs, chunk_size=CHUNK_SIZE):
     pressure = noisereduce.reduce_noise(pressure, sr=fs)
     frames = []
     chunked_timestamps = []
@@ -38,25 +38,50 @@ def to_wide_spectro(pressure, fs, chunk_size=CHUNK_SIZE):
     return chunked_timestamps, frames, chunk_size
 
 
+def to_spectro_loudonly(pressure, fs, chunk_size=CHUNK_SIZE):
+    pressure = noisereduce.reduce_noise(pressure, sr=fs)
+    frames = []
+    chunked_timestamps = []
+    chunk_index = 0
+
+    for i in range(0, len(pressure), chunk_size):
+        if i + chunk_size <= len(pressure):  # if there's enough elements in pressure to form a full chunk
+            chunk = pressure[i:i + chunk_size]
+            freq = abs(np.fft.rfft(chunk))
+            freq = signal_clean(freq)
+
+            if sum(freq) > 0.05:
+                frames.append(freq)
+                chunked_timestamps.append(chunk_size / fs * chunk_index)
+            chunk_index += 1
+
+    return chunked_timestamps, frames, chunk_size
+
+
+# Saves first 30 spectrograms in specified spectro directory, prints most intense frequency for every frame,
+# prints intensity sums for every frame
 def show_spectrograms(pressure, sample_rate, filename):
     pressure = noisereduce.reduce_noise(pressure, sr=sample_rate)
     chunk_index = 0
 
     for i in range(0, len(pressure), CHUNK_SIZE):
+        chunk = pressure[i:i + CHUNK_SIZE]
+        freq = abs(np.fft.rfft(chunk))
+        freq = signal_clean(freq)
+
+        most_intense_freq_intensity = np.max(freq)
+        most_intense_freq = np.where(freq == most_intense_freq_intensity)[0][0]
+        intensity_sum = sum(freq)
+
+        chunk_start_time = round(chunk_index * CHUNK_SIZE / sample_rate, 2)
+        chunk_end_time = round((chunk_index + 1) * CHUNK_SIZE / sample_rate, 2)
+
+        print(f"Chunk {chunk_start_time}-{chunk_end_time} s:\n"
+              f"\tmost intense frequency: {most_intense_freq} FU_DFT"
+              f" = {round(43.0789 * most_intense_freq - 2.8174, 2)} Hz\n"
+              f"\tintensity sum: {round(intensity_sum, 2)} FU_DFT")
+
         if chunk_index < 30:
-            chunk = pressure[i:i + CHUNK_SIZE]
-            freq = abs(np.fft.rfft(chunk))
-            freq = signal_clean(freq)
-
-            most_intense_freq_intensity = np.max(freq)
-            most_intense_freq = np.where(freq == most_intense_freq_intensity)[0][0]
-
-            chunk_start_time = round(chunk_index * CHUNK_SIZE / sample_rate, 2)
-            chunk_end_time = round((chunk_index + 1) * CHUNK_SIZE / sample_rate, 2)
-
-            print(f"Most intense freq in chunk {chunk_start_time}-{chunk_end_time} s: {most_intense_freq} SFU"
-                  f" = {round(43.0789 * most_intense_freq - 2.8174, 2)} Hz")
-
             plt.plot([i for i in range(len(freq))], freq)
             plt.scatter(most_intense_freq, most_intense_freq_intensity, c='r', s=10)
             plt.title(f'Spectrogram for chunk {chunk_start_time}-{chunk_end_time} s')
@@ -82,6 +107,31 @@ def spectro_labeled(label_file, timestamps):
             current += 1
         if current >= len(all_data):
             break
+        labels.append(all_data[current][0])
+
+    while len(labels) != len(timestamps):
+        labels.append('out' if all_data[current - 1][0] == 'in' else 'in')
+
+    return labels
+
+
+def spectro_labeled_loudonly(label_file, timestamps):
+    all_data = pd.read_csv(label_file, sep=',').values
+    labels = []
+    current = 0
+
+    for timestamp in timestamps:
+        to_break = False
+
+        while timestamp >= all_data[current][1]:
+            current += 1
+            if current >= len(all_data):
+                to_break = True
+                break
+
+        if to_break:
+            break
+
         labels.append(all_data[current][0])
 
     while len(labels) != len(timestamps):
