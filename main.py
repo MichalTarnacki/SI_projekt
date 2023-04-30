@@ -9,7 +9,7 @@ import pathlib as pl
 
 from TensorFlow import TensorFlow
 from src.new_realtime import new_realtime
-from src.test import test_quantitative, test_qualitative
+from src.test import test_quantitative, test_qualitative, test_quantitative_loudonly, test_qualitative_loudonly
 from src.new_realtime_tensor import new_realtime_tensor
 
 
@@ -48,9 +48,10 @@ def record():
 
 if __name__ == '__main__':
     while True:
-        print("1. Record\n2. Train with SVM\n3. Realtime with SVM"
-              "\n4. Show pressure plot\n5. Test quantitative with SVM\n7. New real time with SVM"
-              "\n8. Real time tensor\n10. Show spectrograms")
+        print("1. Record\n2. Train with SVM\n2.1 Train with loud-only SVM\n3. Realtime with SVM"
+              "\n3.1 Realtime with loud-only SVM\n4. Show pressure plot\n5. Test quantitative with SVM"
+              "\n5.1 Test quantitative with loud-only SVM\n7. New real time with SVM"
+              "\n8. Real time tensor\n11. Show spectrograms")
         x = input()
         if x == '1':
             for i in range(10):
@@ -61,8 +62,17 @@ if __name__ == '__main__':
                 list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)])),
                 'svm_custom_softmax',
                 True, False)
+        elif x == '2.1':
+            folder = pl.Path(macros.train_path)
+            svm.svm_train_with_previous_state_loudonly(
+                list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)])),
+                'svm_custom_softmax_loudonly',
+                True, False)
         elif x == '3':
             test_qualitative('svm_custom_softmax_prevstate', with_previous_state=True,
+                             with_bg=False)
+        elif x == '3.1':
+            test_qualitative_loudonly('svm_custom_softmax_loudonly_prevstate', with_previous_state=True,
                              with_bg=False)
         elif x == '4':
             x = input('Filename: ')
@@ -71,6 +81,10 @@ if __name__ == '__main__':
             folder = pl.Path(macros.test_path)
             test_quantitative(list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)])),
                               'svm_custom_softmax_prevstate', True)
+        elif x == '5.1':
+            folder = pl.Path(macros.test_path)
+            test_quantitative_loudonly(list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)])),
+                                       'svm_custom_softmax_loudonly_prevstate', True)
         elif x == '7':
             new_realtime('svm_custom_softmax')
         elif x == '8':
@@ -78,7 +92,6 @@ if __name__ == '__main__':
         elif x == '9':
             TensorFlow.generate_seperate_files()
         elif x == '10':
-
             TensorFlow.train(int(input('epochs')))
         elif x == '11':
             x = input('Filename: ')
