@@ -27,11 +27,11 @@ def new_realtime(modelfile, with_bg=False):
     prev_state = 'in'
     model = load(f'{macros.model_path}{modelfile}.joblib')
     scaler = load(f'{macros.model_path}{modelfile}_scaler.joblib')
-    avgnoise=0
+    avgnoise = 0
     plt.ion()
     fig = plt.figure(figsize=(10, 8))
     ax1 = fig.add_subplot(211)
-   # ax2 = fig.add_subplot(212)
+    # ax2 = fig.add_subplot(212)
     ax3 = fig.add_subplot(212)
 
     saved = []
@@ -39,8 +39,6 @@ def new_realtime(modelfile, with_bg=False):
     stream = None
     contin = True
     saved_chunks = 50
-
-
 
     def record_thread():
         nonlocal stream
@@ -54,7 +52,7 @@ def new_realtime(modelfile, with_bg=False):
             waveData = np.frombuffer(stream.read(CHUNK, exception_on_overflow=False), dtype=np.float)
             # sd.play(waveData, 44100)
             saved = saved + list(waveData)
-            if saved.__len__() >= (saved_chunks+1)*CHUNK:
+            if saved.__len__() >= (saved_chunks + 1) * CHUNK:
                 saved = saved[CHUNK:]
         stream.stop_stream()
         stream.close()
@@ -66,18 +64,19 @@ def new_realtime(modelfile, with_bg=False):
     def soundPlot():
         nonlocal state, prev_state, saved, window, state, prev_state, ax1, ax3, model, scaler, avgnoise
         i = 0
-        k=0
+        k = 0
         while True:
-            #t1 = time.time()
-            if saved.__len__() >= (saved_chunks)*CHUNK:
+            # t1 = time.time()
+            if saved.__len__() >= (saved_chunks) * CHUNK:
                 data = sp.signal_clean(saved)
-                npArrayData = np.array([i if i>avgnoise else 0 for i in saved[saved.__len__() - sp.CHUNK_SIZE:]])
-                npArrayData_reduced = np.array([i if i>avgnoise else 0 for i in data[data.__len__() - sp.CHUNK_SIZE:]])
+                npArrayData = np.array([i if i > avgnoise else 0 for i in saved[saved.__len__() - sp.CHUNK_SIZE:]])
+                npArrayData_reduced = np.array(
+                    [i if i > avgnoise else 0 for i in data[data.__len__() - sp.CHUNK_SIZE:]])
 
                 t_pred = copy.deepcopy(npArrayData)
                 t_pred = [i for i in t_pred]
-                #t_pred = [i for i in t_pred]
-                #t_pred = noisereduce.reduce_noise(t_pred, 44100)
+                # t_pred = [i for i in t_pred]
+                # t_pred = noisereduce.reduce_noise(t_pred, 44100)
                 t_pred = np.abs(np.fft.rfft(t_pred))
                 t_pred = t_pred[t_pred.__len__() - 160:]
                 t_pred = np.append(t_pred, [1 if prev_state == 'in' else -1])
@@ -108,7 +107,7 @@ def new_realtime(modelfile, with_bg=False):
                 else:
                     ax1.set_title('none')
                 ax1.axis([0, sp.CHUNK_SIZE, -1000, 1000])
-              #  ax3.axis([0, sp.CHUNK_SIZE, -5000, 5000])
+                #  ax3.axis([0, sp.CHUNK_SIZE, -5000, 5000])
                 # Plot frequency domain graph
                 # ax2.cla()
                 # ax2.plot(fftTime, fftData, 'g' if prev_state == 'in' else 'r')
@@ -136,7 +135,6 @@ def new_realtime(modelfile, with_bg=False):
                 # k+=100
                 # if i == 1000:
                 #     break
-
 
     if with_bg:
         record_time_s = 25
@@ -170,7 +168,7 @@ def new_realtime(modelfile, with_bg=False):
         pygame.quit()
         avgnoise = np.mean(saved)
         saved = []
-        #sd.stop()
+        # sd.stop()
     contin = True
 
     tr = threading.Thread(target=record_thread)

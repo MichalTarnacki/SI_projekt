@@ -1,49 +1,74 @@
 import os
 import pathlib
-import re
 from random import shuffle
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
 import tensorflow as tf
 import pathlib as pl
-from scipy.io.wavfile import write
 import soundfile
 import shutil
 import sounddevice as sd
-import  src.data_engineering.spectrogram as sp
+import src.data_engineering.spectrogram as sp
 from keras import layers
 from keras import models
-from IPython import display
-from scipy.io import wavfile
-
+from macros import freg
 import macros
-class TensorFlow:
 
+
+class TensorFlow:
+    # Stworzenie etykiet na podstawie folderów
     data_dir = pathlib.Path(macros.sorted_path)
     test_data_dir = pathlib.Path(macros.test_sorted_path)
     commands = np.array(tf.io.gfile.listdir(str(data_dir)))
-    commands = commands[commands != 'README.md']
-    commands = commands[commands != 'desktop.ini']
+    commands = commands[[tf.io.gfile.isdir(macros.sorted_path + '/' + i) for i in commands]]
+
+    # Liczba elementów do pobrania z wyprzedzeniem powinna być równa (lub być może większa niż)
+    # liczbie partii zużywanych przez pojedynczy krok uczenia. Można albo ręcznie dostroić tę wartość,
+    # albo ustawić ją na tf.data.AUTOTUNE , co spowoduje, że środowisko wykonawcze tf.data będzie dostroić
+    # wartość dynamicznie w czasie wykonywania.
     AUTOTUNE = tf.data.AUTOTUNE
 
-    def __init__(self):
-        pass
-        # self.data_dir = pathlib.Path(macros.sorted_path)
-        # self.seed = 42
-        # tf.random.set_seed(self.seed)
-        # np.random.seed(self.seed)
-        # self.commands = np.array(tf.io.gfile.listdir(str(self.data_dir)))
-        # self.commands = self.commands[self.commands != 'README.md']
-        # self.commands = self.commands[self.commands != 'desktop.ini']
+    @staticmethod
+    def save_files(files, path):
+        if path == macros.train_path:
+            in_dest = macros.train_breaths
+            out_dest = macros.train_exhales
+        else:
+            in_dest = macros.test_breaths
+            out_dest = macros.test_exhales
+
+        shuffle(files)
+        k = 0
+        l = 0
+        for file in files:
+            pressure, sample_rate = soundfile.read(path + file + '.wav')
+            all_data = pd.read_csv(path + file + '.csv', sep=',').values
+            iterator = 0
+
+            for i in all_data:
+                new_file = []
+                while iterator < i[1] * sample_rate:
+                    new_file.append(pressure[iterator])
+                    iterator += 1
+
+                # Oczyszczanie sygnału
+                new_file = sp.signal_clean(new_file)
+
+                if i[0] == 'in':
+                    soundfile.write(in_dest + f'e{k}.wav', np.array(new_file), sample_rate,
+                                    subtype='PCM_16')
+                    k+=1
+                else:
+                    soundfile.write(out_dest + f'e{l}.wav', np.array(new_file), sample_rate,
+                                    subtype='PCM_16')
+                    l+=1
 
     @staticmethod
-    def generate_seperate_files(ratio=8/10):
-        freg = re.compile(r'^e[0-9]+$')
-        folder = pl.Path(macros.train_path)
+    def generate_seperate_files(ratio=8 / 10):
 
+        # Jeśli istnieją pliki to je usuwa i tworzy nowe
         if os.path.exists(macros.sorted_path):
             folder2 = pl.Path(macros.sorted_path)
             shutil.rmtree(folder2)
@@ -57,42 +82,20 @@ class TensorFlow:
         os.mkdir(macros.test_exhales)
         os.mkdir(macros.test_breaths)
 
+        # Stworzenie plików z danych treningowych i testowych
+        folder = pl.Path(macros.train_path)
         files = list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)]))
-        l = 0
-        shuffle(files)
-        for file in files:
-            pressure, sample_rate = soundfile.read(macros.train_path+file+'.wav')
-            all_data = pd.read_csv(macros.train_path+file+'.csv', sep=',').values
-            iterator = 0
-            k=0
-            for i in all_data:
-                new_file = []
-                while iterator < i[1]*sample_rate:
-                    new_file.append(pressure[iterator])
-                    iterator+=1
-                new_file=sp.signal_clean(new_file)
-                if l<int(len(files)*ratio):
-                    if i[0] == 'in':
-                        soundfile.write(macros.train_breaths + file + f'{k}.wav',  np.array(new_file),sample_rate, subtype='PCM_16')
-                    else:
-                        soundfile.write(macros.train_exhales + file + f'{k}.wav',  np.array(new_file),sample_rate, subtype='PCM_16')
-                else:
-                    if i[0] == 'in':
-                        soundfile.write(macros.test_breaths + file + f'{k}.wav', np.array(new_file), sample_rate,
-                                        subtype='PCM_16')
-                    else:
-                        soundfile.write(macros.test_exhales + file + f'{k}.wav', np.array(new_file), sample_rate,
-                                        subtype='PCM_16')
-                k+=1
-            l+=1
+        TensorFlow.save_files(files, macros.train_path)
+        folder = pl.Path(macros.test_path)
+        files = list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)]))
+        TensorFlow.save_files(files, macros.test_path)
 
     @staticmethod
     def decode_audio(audio_binary):
-        # Decode WAV-encoded audio files to `float32` tensors, normalized
-        # to the [-1.0, 1.0] range. Return `float32` audio and a sample rate.
+        # Normalizacja i zamiana w float32, 1 kanał.
         audio, _ = tf.audio.decode_wav(contents=audio_binary, desired_channels=1)
-        # Since all the data is single channel (mono), drop the `channels`
-        # axis from the array.
+
+        # Usunięcie zbędnych kanałów
         return tf.squeeze(audio, axis=-1)
 
     @staticmethod
@@ -100,8 +103,8 @@ class TensorFlow:
         parts = tf.strings.split(
             input=file_path,
             sep=os.path.sep)
-        # Note: You'll use indexing here instead of tuple unpacking to enable this
-        # to work in a TensorFlow graph.
+
+        # in lub out
         return parts[-2]
 
     @staticmethod
@@ -113,12 +116,10 @@ class TensorFlow:
 
     @staticmethod
     def get_waveform(file_path):
-        audio_binary = tf.io.read_file(file_path)
-        waveform = TensorFlow.decode_audio(audio_binary)
+        waveform, _ = TensorFlow.get_waveform_and_label(file_path)
         return waveform
 
-
-
+    # TODO sprawdzic
     @staticmethod
     def get_spectrogram(waveform):
         # Zero-padding for an audio waveform with less than 16,000 samples.
@@ -157,6 +158,7 @@ class TensorFlow:
         X = np.linspace(0, np.size(spectrogram), num=width, dtype=int)
         Y = range(height)
         ax.pcolormesh(X, Y, log_spec)
+
     @staticmethod
     def get_spectrogram_and_label_id(audio, label):
         spectrogram = TensorFlow.get_spectrogram(audio)
@@ -197,7 +199,7 @@ class TensorFlow:
         test_files = test_filenames
         return train_files, val_files, test_files
 
-        #return waveform_ds, spectrogram_ds
+        # return waveform_ds, spectrogram_ds
 
     @staticmethod
     def create_ds(train_files):
@@ -216,7 +218,7 @@ class TensorFlow:
         if alldata:
             number_of_el = list(waveform_ds).__len__()
             rows = int(np.sqrt(number_of_el))
-            cols = int(np.sqrt(number_of_el))+(number_of_el-rows*rows)//rows + 1
+            cols = int(np.sqrt(number_of_el)) + (number_of_el - rows * rows) // rows + 1
         n = rows * cols
         fig, axes = plt.subplots(rows, cols, figsize=(10, 12))
         for r in range(rows):
@@ -224,13 +226,13 @@ class TensorFlow:
                 ax = axes[r][c]
                 ax.axis('off')
 
-        k = enumerate(waveform_ds.take(rows*cols))
+        k = enumerate(waveform_ds.take(rows * cols))
         for i, (audio, label) in k:
             r = i // cols
             c = i % cols
             ax = axes[r][c]
             ax.plot(audio.numpy())
-           # ax.set_yticks(np.arange(-1.2, 1.2, 0.2))
+            # ax.set_yticks(np.arange(-1.2, 1.2, 0.2))
             label = label.numpy().decode('utf-8')
             ax.set_title(label)
         plt.show()
@@ -238,7 +240,7 @@ class TensorFlow:
     @staticmethod
     def spectro_plot(waveform_ds, alldata=True, take_num=1):
         if alldata:
-            take_num=list(waveform_ds).__len__()
+            take_num = list(waveform_ds).__len__()
         for waveform, label in waveform_ds.take(take_num):
             plt.ion()
             label = label.numpy().decode('utf-8')
@@ -254,6 +256,7 @@ class TensorFlow:
             print('Spectrogram shape:', spectrogram.shape)
             sd.play(waveform)
             plt.show(block=True)
+
     @staticmethod
     def spectro_plots(spectrogram_ds, alldata=True, rows=3, cols=3):
         if alldata:
@@ -308,6 +311,7 @@ class TensorFlow:
         plt.xlabel('Prediction')
         plt.ylabel('Label')
         plt.show()
+
     @staticmethod
     def predict_file(model):
         sample_file = TensorFlow.data_dir / 'in/e10.wav'
@@ -325,8 +329,7 @@ class TensorFlow:
             folder = pl.Path(f'media/trash')
             shutil.rmtree(folder)
         os.mkdir('media/trash')
-        soundfile.write('media/trash/temp.wav',  np.array(audio_array), 44100, subtype='PCM_16')
-
+        soundfile.write('media/trash/temp.wav', np.array(audio_array), 44100, subtype='PCM_16')
 
         sample_ds = TensorFlow.preprocess_dataset2([str('media/trash/temp.wav')])
         for spectrogram in sample_ds.batch(1):
@@ -336,10 +339,10 @@ class TensorFlow:
 
     @staticmethod
     def new_predict(model, audio_array):
+        #Oczyszczanie sygnału
         audio_array = sp.signal_clean(audio_array)
-        waveform = [i/32768 for i in audio_array]
-
-        waveform = tf.convert_to_tensor(waveform, dtype= tf.float32)
+        waveform = [i / 32768 for i in audio_array]
+        waveform = tf.convert_to_tensor(waveform, dtype=tf.float32)
         spec = TensorFlow.get_spectrogram(waveform)
         spec = tf.expand_dims(spec, 0)
         prediction = model(spec)
@@ -351,8 +354,8 @@ class TensorFlow:
 
         train_files, val_files, test_files = TensorFlow.get_files()
         files_ds, waveform_ds, spectrogram_ds = TensorFlow.create_ds(train_files)
-        #TensorFlow.waveform_plot(waveform_ds)
-        #TensorFlow.spectro_plot(waveform_ds, alldata=True, take_num=2)
+        # TensorFlow.waveform_plot(waveform_ds)
+        # TensorFlow.spectro_plot(waveform_ds, alldata=True, take_num=2)
         TensorFlow.spectro_plots(spectrogram_ds)
 
         train_ds = spectrogram_ds
@@ -368,7 +371,7 @@ class TensorFlow:
 
         for spectrogram, _ in spectrogram_ds.take(1):
             input_shape = spectrogram.shape
-       # print('Input shape:', input_shape)
+        # print('Input shape:', input_shape)
         num_labels = len(TensorFlow.commands)
 
         # Instantiate the `tf.keras.layers.Normalization` layer.
@@ -377,7 +380,7 @@ class TensorFlow:
         # with `Normalization.adapt`.
         norm_layer.adapt(data=spectrogram_ds.map(map_func=lambda spec, label: spec))
 
-        #Warstwy
+        # Warstwy
         model = models.Sequential([
             layers.Input(shape=input_shape),
             # Downsample the input.
@@ -414,11 +417,6 @@ class TensorFlow:
             shutil.rmtree(folder)
         model.save(f'{macros.model_path}tensorflow')
 
-
-
-
-
-
-#TensorFlow.generate_seperate_files()
-#i = TensorFlow()
-#TensorFlow.predict_file(models.load_model(f'{macros.model_path}tensorflow'))
+# TensorFlow.generate_seperate_files()
+# i = TensorFlow()
+# TensorFlow.predict_file(models.load_model(f'{macros.model_path}tensorflow'))

@@ -1,12 +1,10 @@
-import re
-
+from macros import freg
 import macros
 import src.data_engineering.data_utils as du
 import src.real_time as rt
 import src.data_engineering.spectrogram as sp
 import src.models.svm as svm
 import pathlib as pl
-
 from TensorFlow import TensorFlow
 from src.new_realtime import new_realtime
 from src.test import test_quantitative, test_qualitative, test_quantitative_loudonly, test_qualitative_loudonly
@@ -23,9 +21,6 @@ def show_plot(file_csv, file_wav):
 def show_spectrograms(file_wav, filename):
     x, y, sample_rate = du.wav_to_sample_xy(file_wav)
     sp.show_spectrograms(y, sample_rate, filename)
-
-
-freg = re.compile(r'^e[0-9]+$')
 
 
 def record():
