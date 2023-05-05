@@ -15,7 +15,7 @@ import re
 
 def show_plot(file_csv, file_wav):
     x, y, sample_rate = du.wav_to_sample_xy(file_wav)
-    timestamps, frames = sp.to_spectro(y, sample_rate)
+    timestamps, frames, chunk_size = sp.to_spectro(y, sample_rate)
     labels = sp.spectro_labeled(file_csv, timestamps)
     sp.pressure_labeled_plot(labels, x, y)
 
