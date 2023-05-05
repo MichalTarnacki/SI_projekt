@@ -48,7 +48,7 @@ if __name__ == '__main__':
         print("1. Record\n2. Train with SVM\n2.1 Train with loud-only SVM\n3. Realtime with SVM"
               "\n3.1 Realtime with loud-only SVM\n4. Show pressure plot\n5. Test quantitative with SVM"
               "\n5.1 Test quantitative with loud-only SVM\n7. New real time with SVM"
-              "\n8. Real time tensor\n11. Show spectrograms")
+              "\n8. Real time tensor\n10. Train with Tensorflow\n11. Show spectrograms")
         x = input()
         if x == '1':
             record()
@@ -69,7 +69,7 @@ if __name__ == '__main__':
                              with_bg=False)
         elif x == '3.1':
             test_qualitative_loudonly('svm_custom_softmax_loudonly_prevstate', with_previous_state=True,
-                             with_bg=False)
+                                      with_bg=False)
         elif x == '4':
             x = input('Filename: ')
             show_plot(f'{macros.train_path}{x}.csv', f'{macros.train_path}{x}.wav')

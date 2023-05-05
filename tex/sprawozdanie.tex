@@ -279,6 +279,11 @@ W celu poprawy działania modelu postanowiliśmy dokładniej przeanalizować, kt
 	\item[--] 0--1\,300 \unit{Hz}, 3\,400--8\,500 \unit{Hz} i 10\,000 \unit{Hz}--16\,000 \unit{Hz},
 	\item[--] 0--8\,500 \unit{Hz} i 10\,000--16\,000 \unit{Hz}.
 \end{itemize}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=13cm]{spektrogram_wydech_ustami}
+	\caption{Spektrogramy dwóch nagrań oddechu z wdechem nosem i wydechem ustami uzyskane przy użyciu program Audacity.}
+\end{figure}
 Dla każdego wyboru przeprowadziliśmy testy. W przypadku ostatniego uzyskaliśmy względny wzrost dokładności predykcji o $\sim8\%$ względem początkowego podejścia. Taki wybór częstotliwości przyjęliśmy zatem dla modelu rozpoznającego wdech nosem i wydech ustami.
 
 \section{Spektrogram i sieć neuronowa}
@@ -294,6 +299,11 @@ Ponownie dokonaliśmy obserwacji spektrogramów, tym razem wyznaczonych dla wdec
 	\item[--] 0--3\,000 \unit{Hz} i 6\,000--16\,000 \unit{Hz},
 	\item[--] 0--16\,000 \unit{Hz}.
 \end{itemize}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=13cm]{spektrogram_wydech_nosem}
+	\caption{Spektrogramy dwóch nagrań oddechu z wdechem i wydechem nosem uzyskane przy użyciu program Audacity.}
+\end{figure}
 Testy pokazały, iż ostatni z powyższych wybór częstotliwości spowodował względny wzrost dokładności o kolejne $\sim7\%$. Taki zatem pozostawiliśmy do dalszej pracy.
 
 \section{Działanie modelu a hałas z otoczenia}
