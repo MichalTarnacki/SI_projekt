@@ -1,44 +1,59 @@
 import copy
+import sys
+import time
 import threading
 
-import noisereduce
-import pyaudio
-import numpy as np
-import time
-import wave
 import matplotlib.pyplot as plt
+import noisereduce
+import numpy as np
 import pygame
-from joblib import load
-from scipy.io.wavfile import write
-import src.data_engineering.spectrogram as sp
+import pyaudio
 import sounddevice as sd
+import soundcard as sc
+from keras import models
+from scipy.signal import savgol_filter
 
+from TensorFlow import TensorFlow
 import macros
+import src.data_engineering.spectrogram as sp
+
+from pydub import effects
+from scipy.io.wavfile import write
 
 
-def new_realtime(modelfile, with_bg=False):
-    FORMAT = pyaudio.paFloat32
+def new_realtime():
+    FORMAT = pyaudio.paInt16
     CHANNELS = 1
     RATE = 44100
-    CHUNK = 512
+    CHUNK = 1024
     RECORD_SECONDS = 3
-    window = np.blackman(sp.CHUNK_SIZE)
-    state = 'in'
-    prev_state = 'in'
-    model = load(f'{macros.model_path}{modelfile}.joblib')
-    scaler = load(f'{macros.model_path}{modelfile}_scaler.joblib')
-    avgnoise = 0
+    window = np.blackman(CHUNK)
+    model = models.load_model(f'{macros.model_path}tensorflow')
     plt.ion()
     fig = plt.figure(figsize=(10, 8))
     ax1 = fig.add_subplot(211)
-    # ax2 = fig.add_subplot(212)
-    ax3 = fig.add_subplot(212)
 
     saved = []
     p = None
     stream = None
     contin = True
-    saved_chunks = 50
+    saved_chunks = 100
+
+    pygame.init()
+    pygame.font.init()
+
+    width = 740
+    height = 480
+    screen = pygame.display.set_mode((width, height))
+    font = pygame.font.SysFont(None, 50)
+    p = pyaudio.PyAudio()
+    fs = 44100
+
+    samples = np.array([])
+
+    stream = p.open(format=pyaudio.paInt16, channels=1, rate=fs, input=True, frames_per_buffer=1024)
+
+    run_thread = True
 
     def record_thread():
         nonlocal stream
@@ -47,136 +62,147 @@ def new_realtime(modelfile, with_bg=False):
         nonlocal saved_chunks
         p = pyaudio.PyAudio()
         stream = p.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True,
-                        frames_per_buffer=sp.CHUNK_SIZE)
+                        frames_per_buffer=CHUNK)
         while contin:
-            waveData = np.frombuffer(stream.read(CHUNK, exception_on_overflow=False), dtype=np.float)
-            # sd.play(waveData, 44100)
-            saved = saved + list(waveData)
+            waveData = np.frombuffer(stream.read(CHUNK, exception_on_overflow=False), dtype=np.int16)
+
+            saved.extend(waveData)
             if saved.__len__() >= (saved_chunks + 1) * CHUNK:
+                sd.play(saved, 44100)
                 saved = saved[CHUNK:]
         stream.stop_stream()
         stream.close()
         p.terminate()
 
-    def write_thread():
-        nonlocal saved
+    tr = threading.Thread(target=record_thread)
+    tr.start()
 
-    def soundPlot():
-        nonlocal state, prev_state, saved, window, state, prev_state, ax1, ax3, model, scaler, avgnoise
-        i = 0
-        k = 0
-        while True:
-            # t1 = time.time()
-            if saved.__len__() >= (saved_chunks) * CHUNK:
-                data = sp.signal_clean(saved)
-                npArrayData = np.array([i if i > avgnoise else 0 for i in saved[saved.__len__() - sp.CHUNK_SIZE:]])
-                npArrayData_reduced = np.array(
-                    [i if i > avgnoise else 0 for i in data[data.__len__() - sp.CHUNK_SIZE:]])
+    radius = 100
+    while True:
 
-                t_pred = copy.deepcopy(npArrayData)
-                t_pred = [i for i in t_pred]
-                # t_pred = [i for i in t_pred]
-                # t_pred = noisereduce.reduce_noise(t_pred, 44100)
-                t_pred = np.abs(np.fft.rfft(t_pred))
-                t_pred = t_pred[t_pred.__len__() - 160:]
-                t_pred = np.append(t_pred, [1 if prev_state == 'in' else -1])
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run_thread = False
+                tr.join()
+                stream.stop_stream()
+                stream.close()
+                p.terminate()
+                pygame.quit()
+                return
+        screen.fill((0, 0, 0))
 
-                indata = npArrayData * window
-                fftData = np.abs(np.fft.rfft(indata))
-                fftData = fftData[fftData.__len__() - 161:]
-                fftTime = np.fft.rfftfreq(sp.CHUNK_SIZE, 1. / RATE)
-                fftTime = fftTime[fftTime.__len__() - 161:]
+        if saved.__len__() >= saved_chunks * CHUNK:
+            clean = sp.signal_clean(saved)
+            commands, pred = TensorFlow.new_predict(model, saved)
+            last_frame = abs(np.fft.rfft(clean[len(clean) - sp.CHUNK_SIZE:]))
+            last_frame = sp.signal_clean(last_frame)
 
-                indata2 = npArrayData_reduced * window
-                fftData2 = np.abs(np.fft.rfft(indata2))
-                fftData2 = fftData2[fftData2.__len__() - 161:]
+            color = (0, 0, 255)
+            if sum(last_frame) < 200:
+                color = (0, 255, 0)
+            elif pred[0] > 0.65 and np.mean(np.abs(saved)) > 50:  # and pred[1]<10:
+                color = (255, 0, 0)
+                radius -= 1
+            elif pred[1] > 0.95 and np.mean(np.abs(saved)) > 50:  # and pred[0]<10:
+                radius += 1
 
-                scaled = scaler.transform(t_pred.reshape(-1, 1).T)
-                state = model.predict(scaled)
-                which = fftData[1:].argmax() + 1
 
-                # Plot time domain
-                ax1.cla()
-                ax1.plot(indata, 'g' if prev_state == 'in' else 'r')
-                ax1.grid()
-                # ax3.cla()
-                ax1.plot(indata2, 'b' if prev_state == 'in' else 'y')
-                # ax3.grid()
-                if np.mean(fftData) > avgnoise:
-                    ax1.set_title(('in' if prev_state == 'in' else 'out') + k.__str__())
-                else:
-                    ax1.set_title('none')
-                ax1.axis([0, sp.CHUNK_SIZE, -1000, 1000])
-                #  ax3.axis([0, sp.CHUNK_SIZE, -5000, 5000])
-                # Plot frequency domain graph
-                # ax2.cla()
-                # ax2.plot(fftTime, fftData, 'g' if prev_state == 'in' else 'r')
-                # ax2.grid()
-                # ax2.axis([0, 5000, 0, 10 ** 6])
-                # ax3.cla()
-                # ax3.plot(fftTime, fftData2, 'b' if prev_state == 'in' else 'y')
-                # ax3.grid()
-                # ax3.axis([0, 5000, 0, 10 ** 6])
-                plt.pause(0.001)
-                # print("took %.02f ms" % ((time.time() - t1) * 1000))
-                # # use quadratic interpolation around the max
-                # if which != len(fftData) - 1:
-                #     y0, y1, y2 = np.log(fftData[which - 1:which + 2:])
-                #     x1 = (y2 - y0) * .5 / (2 * y1 - y2 - y0)
-                #     # find the frequency and output it
-                #     thefreq = (which + x1) * RATE / CHUNK
-                #     print("The freq is %f Hz." % (thefreq))
-                # else:
-                #     thefreq = which * RATE / CHUNK
-                #     print("The freq is %f Hz." % (thefreq))
+            # for x, y in enumerate(last_frame[:-1]):
+            #     pygame.draw.line(screen, color, (x*3, 480 - y), (x*3 + 3, 480 - last_frame[x+1]))
 
-                prev_state = state
-                # i += 1
-                # k+=100
-                # if i == 1000:
-                #     break
+            pygame.draw.circle(screen, color, (width/2, height/2), radius)
 
-    if with_bg:
-        record_time_s = 25
-        record_bg_time_s = 10
-        sample_rate = 44100
-        channels = 1
+        # if print_state == "cisza":
+        #     text = font.render('cisza', True, (255, 255, 255))
+        # else:
+        #     text = font.render('teraz wdychasz' if state == 'in' else 'teraz wydychasz', True, (255, 255, 255))
+        # screen.blit(text, (0, 0))
+        pygame.display.update()
 
-        pygame.init()
-        pygame.font.init()
-        screen = pygame.display.set_mode((740, 480))
-        font = pygame.font.SysFont(None, 50)
-        tr = threading.Thread(target=record_thread, args=(1000,))
-        tr.start()
-        t0 = time.time()
 
-        while time.time() - t0 < record_bg_time_s:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    tr.join()
-                    pygame.quit()
-                    return
+def detection_loudonly(model, scaler, chunk_size=352, input_size=40, uses_previous_state=False, with_bg=False):
+    pygame.init()
+    pygame.font.init()
 
-            screen.fill((0, 0, 0))
-            text = font.render(
-                f'Recording background, try not to breath: {(record_bg_time_s - time.time() + t0).__str__()}', True,
-                (255, 255, 255))
-            screen.blit(text, (0, 0))
-            pygame.display.update()
-        contin = False
-        tr.join()
-        pygame.quit()
-        avgnoise = np.mean(saved)
-        saved = []
-        # sd.stop()
-    contin = True
+    width = 740
+    height = 480
+    screen = pygame.display.set_mode((width, height))
+    font = pygame.font.SysFont(None, 50)
+    p = pyaudio.PyAudio()
+    fs = 44100
+    record_bg_time_s = 10
+    channels = 1
+
+    samples = np.array([])
+
+    stream = p.open(format=pyaudio.paInt16, channels=1, rate=fs, input=True, frames_per_buffer=1024)
+
+    run_thread = True
+    def record_thread():
+        # nonlocal stream
+        nonlocal samples
+        while run_thread:
+                data = np.frombuffer(stream.read(512, exception_on_overflow=False), dtype=np.int16)
+                data = data / 50
+                samples = np.append(samples, data)
 
     tr = threading.Thread(target=record_thread)
-    tr2 = threading.Thread(target=write_thread)
     tr.start()
-    tr2.start()
-    soundPlot()
-    contin = False
-    tr.join()
-    write('test.wav', RATE, np.array(saved))
-    tr2.join()
+
+    state = 'in'
+    prev_state = 'in'
+    print_state = 'cisza'
+
+    radius = 100
+    while True:
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run_thread = False
+                tr.join()
+                stream.stop_stream()
+                stream.close()
+                p.terminate()
+                write('test.wav', fs, samples)
+                pygame.quit()
+                return
+        screen.fill((0, 0, 0))
+
+        if samples.shape[0] > chunk_size * (input_size + 200):
+            clean = noisereduce.reduce_noise(samples[-176400:], 44100)
+
+            last_frame = abs(np.fft.rfft(clean[len(clean) - sp.CHUNK_SIZE:]))
+            last_frame = sp.signal_clean(last_frame)
+
+            if sum(last_frame) < 200:
+                print_state = "cisza"
+            else:
+                print_state = ""
+
+            if uses_previous_state:
+                last_frame = np.append(last_frame, 1 if prev_state == 'in' else -1)
+                prev_state = state
+
+            color = (0, 0, 255)
+            if print_state == "cisza":
+                color = (0, 255, 0)
+            elif state == "out":
+                color = (255, 0, 0)
+                radius -= 1
+            else:
+                radius += 1
+
+            # for x, y in enumerate(last_frame[:-1]):
+            #     pygame.draw.line(screen, color, (x*3, 480 - y), (x*3 + 3, 480 - last_frame[x+1]))
+
+            pygame.draw.circle(screen, color, (width/2, height/2), radius)
+
+            last_frame_std = scaler.transform(last_frame.reshape(-1, 1).T)
+            state = model.predict(last_frame_std)
+
+        # if print_state == "cisza":
+        #     text = font.render('cisza', True, (255, 255, 255))
+        # else:
+        #     text = font.render('teraz wdychasz' if state == 'in' else 'teraz wydychasz', True, (255, 255, 255))
+        # screen.blit(text, (0, 0))
+        pygame.display.update()

@@ -1,3 +1,5 @@
+from keras import models
+
 from macros import freg
 import macros
 import src.data_engineering.data_utils as du
@@ -9,7 +11,7 @@ from TensorFlow import TensorFlow
 from src.new_realtime import new_realtime
 from src.test import test_quantitative, test_qualitative, test_quantitative_loudonly, test_qualitative_loudonly
 from src.new_realtime_tensor import new_realtime_tensor
-
+import re
 
 def show_plot(file_csv, file_wav):
     x, y, sample_rate = du.wav_to_sample_xy(file_wav)
@@ -49,8 +51,7 @@ if __name__ == '__main__':
               "\n8. Real time tensor\n11. Show spectrograms")
         x = input()
         if x == '1':
-            for i in range(10):
-                record()
+            record()
         elif x == '2':
             folder = pl.Path(macros.train_path)
             svm.svm_train_with_previous_state(
@@ -81,7 +82,7 @@ if __name__ == '__main__':
             test_quantitative_loudonly(list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)])),
                                        'svm_custom_softmax_loudonly_prevstate', True)
         elif x == '7':
-            new_realtime('svm_custom_softmax')
+            new_realtime()
         elif x == '8':
             new_realtime_tensor()
         elif x == '9':
@@ -91,3 +92,5 @@ if __name__ == '__main__':
         elif x == '11':
             x = input('Filename: ')
             show_spectrograms(f'{macros.train_path}{x}.wav', x)
+        elif x == '12':
+            TensorFlow.accuracy( models.load_model(f'{macros.model_path}tensorflow'))

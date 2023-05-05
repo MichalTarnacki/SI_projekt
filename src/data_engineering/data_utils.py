@@ -15,7 +15,7 @@ def wav_to_sample_xy(filename):
 
 
 def data_recorder(filename, with_bg=True, seperate=False):
-    record_time_s = 60
+    record_time_s = 20
     record_bg_time_s = 10
     sample_rate = 44100
     channels = 1

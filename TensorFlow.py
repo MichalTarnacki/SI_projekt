@@ -59,11 +59,11 @@ class TensorFlow:
                 if i[0] == 'in':
                     soundfile.write(in_dest + f'e{k}.wav', np.array(new_file), sample_rate,
                                     subtype='PCM_16')
-                    k+=1
+                    k += 1
                 else:
                     soundfile.write(out_dest + f'e{l}.wav', np.array(new_file), sample_rate,
                                     subtype='PCM_16')
-                    l+=1
+                    l += 1
 
     @staticmethod
     def generate_seperate_files(ratio=8 / 10):
@@ -166,15 +166,16 @@ class TensorFlow:
         return spectrogram, label_id
 
     @staticmethod
-    def preprocess_dataset(files):
+    def create_ds(files):
         files_ds = tf.data.Dataset.from_tensor_slices(files)
-        output_ds = files_ds.map(
+        waveform_ds = files_ds.map(
             map_func=TensorFlow.get_waveform_and_label,
             num_parallel_calls=TensorFlow.AUTOTUNE)
-        output_ds = output_ds.map(
+
+        spectrogram_ds = waveform_ds.map(
             map_func=TensorFlow.get_spectrogram_and_label_id,
             num_parallel_calls=TensorFlow.AUTOTUNE)
-        return output_ds
+        return files_ds, waveform_ds, spectrogram_ds
 
     @staticmethod
     def preprocess_dataset2(files):
@@ -198,20 +199,6 @@ class TensorFlow:
         test_filenames = tf.io.gfile.glob(str(TensorFlow.test_data_dir) + '/*/*')
         test_files = test_filenames
         return train_files, val_files, test_files
-
-        # return waveform_ds, spectrogram_ds
-
-    @staticmethod
-    def create_ds(train_files):
-        files_ds = tf.data.Dataset.from_tensor_slices(train_files)
-        waveform_ds = files_ds.map(
-            map_func=TensorFlow.get_waveform_and_label,
-            num_parallel_calls=TensorFlow.AUTOTUNE)
-
-        spectrogram_ds = waveform_ds.map(
-            map_func=TensorFlow.get_spectrogram_and_label_id,
-            num_parallel_calls=TensorFlow.AUTOTUNE)
-        return files_ds, waveform_ds, spectrogram_ds
 
     @staticmethod
     def waveform_plot(waveform_ds, alldata=True, rows=3, cols=3):
@@ -286,7 +273,9 @@ class TensorFlow:
         plt.show()
 
     @staticmethod
-    def accuracy(model, test_ds):
+    def accuracy(model):
+        _, _, test_files = TensorFlow.get_files()
+        _, _, test_ds = TensorFlow.create_ds(test_files)
         test_audio = []
         test_labels = []
         for audio, label in test_ds:
@@ -302,6 +291,20 @@ class TensorFlow:
         test_acc = sum(y_pred == y_true) / len(y_true)
         print(f'Test set accuracy: {test_acc:.0%}')
 
+        k = sum (y_pred == y_true)
+        temp = [True if y_pred[i] == y_true[i] == 1 else False for i in range(y_pred.shape[0])]
+        precision_wdech = temp.count(True) / list(y_pred).count(1)
+        print(f'Test set precision wdech: {precision_wdech:.0%}')
+
+        temp = [True if y_pred[i] == y_true[i] == 1 else False for i in range(y_pred.shape[0])]
+        temp2 = [True if y_pred[i] != y_true[i] == 0 else False for i in range(y_pred.shape[0])]
+
+        recall_wdech = temp.count(True) / (temp.count(True) + temp2.count(True))
+        print(f'Test set recall wdech: {recall_wdech:.0%}')
+
+        f_wdech = 2 * precision_wdech * recall_wdech / (precision_wdech + recall_wdech)
+        print(f'Test set f wdech: {f_wdech:.0%}')
+
         confusion_mtx = tf.math.confusion_matrix(y_true, y_pred)
         plt.figure(figsize=(10, 8))
         sns.heatmap(confusion_mtx,
@@ -312,34 +315,34 @@ class TensorFlow:
         plt.ylabel('Label')
         plt.show()
 
-    @staticmethod
-    def predict_file(model):
-        sample_file = TensorFlow.data_dir / 'in/e10.wav'
-        sample_ds = TensorFlow.preprocess_dataset([str(sample_file)])
-        for spectrogram, label in sample_ds.batch(1):
-            prediction = model(spectrogram)
-            percentage = tf.nn.softmax(prediction[0])
-            plt.bar(TensorFlow.commands, percentage)
-            plt.title(f'Predictions for "{TensorFlow.commands[label[0]]}"')
-            plt.show()
+    # @staticmethod
+    # def predict_file(model):
+    #     sample_file = TensorFlow.data_dir / 'in/e10.wav'
+    #     _, _, sample_ds = TensorFlow.create_ds([str(sample_file)])
+    #     for spectrogram, label in sample_ds.batch(1):
+    #         prediction = model(spectrogram)
+    #         percentage = tf.nn.softmax(prediction[0])
+    #         plt.bar(TensorFlow.commands, percentage)
+    #         plt.title(f'Predictions for "{TensorFlow.commands[label[0]]}"')
+    #         plt.show()
 
-    @staticmethod
-    def predict_percentage(model, audio_array):
-        if os.path.exists(f'media/trash'):
-            folder = pl.Path(f'media/trash')
-            shutil.rmtree(folder)
-        os.mkdir('media/trash')
-        soundfile.write('media/trash/temp.wav', np.array(audio_array), 44100, subtype='PCM_16')
-
-        sample_ds = TensorFlow.preprocess_dataset2([str('media/trash/temp.wav')])
-        for spectrogram in sample_ds.batch(1):
-            prediction = model(spectrogram)
-            percentage = tf.nn.softmax(prediction[0])
-            return TensorFlow.commands, percentage
+    # @staticmethod
+    # def predict_percentage(model, audio_array):
+    #     if os.path.exists(f'media/trash'):
+    #         folder = pl.Path(f'media/trash')
+    #         shutil.rmtree(folder)
+    #     os.mkdir('media/trash')
+    #     soundfile.write('media/trash/temp.wav', np.array(audio_array), 44100, subtype='PCM_16')
+    #
+    #     sample_ds = TensorFlow.preprocess_dataset2([str('media/trash/temp.wav')])
+    #     for spectrogram in sample_ds.batch(1):
+    #         prediction = model(spectrogram)
+    #         percentage = tf.nn.softmax(prediction[0])
+    #         return TensorFlow.commands, percentage
 
     @staticmethod
     def new_predict(model, audio_array):
-        #Oczyszczanie sygnału
+        # Oczyszczanie sygnału
         audio_array = sp.signal_clean(audio_array)
         waveform = [i / 32768 for i in audio_array]
         waveform = tf.convert_to_tensor(waveform, dtype=tf.float32)
@@ -356,28 +359,34 @@ class TensorFlow:
         files_ds, waveform_ds, spectrogram_ds = TensorFlow.create_ds(train_files)
         # TensorFlow.waveform_plot(waveform_ds)
         # TensorFlow.spectro_plot(waveform_ds, alldata=True, take_num=2)
-        TensorFlow.spectro_plots(spectrogram_ds)
+        # TensorFlow.spectro_plots(spectrogram_ds)
 
         train_ds = spectrogram_ds
-        val_ds = TensorFlow.preprocess_dataset(val_files)
-        test_ds = TensorFlow.preprocess_dataset(test_files)
+        _, _, val_ds = TensorFlow.create_ds(val_files)
+        _, _, test_ds = TensorFlow.create_ds(test_files)
 
+        # Ilość pobieranych próbek na raz
         batch_size = 64
         train_ds = train_ds.batch(batch_size)
         val_ds = val_ds.batch(batch_size)
 
+        # Optymalizacje
+        # - Cache transformation can cache a dataset, either in memory or on local storage.
+        # This will save some operations (like file opening and data reading) from being executed during each epoch.
+        # The next epochs will reuse the data cached by the cache transformation.
+        # - Prefetch overlaps the preprocessing and model execution of a training step.
+        # While the model is executing training step s, the input pipeline is reading the data for step s+1.
         train_ds = train_ds.cache().prefetch(TensorFlow.AUTOTUNE)
         val_ds = val_ds.cache().prefetch(TensorFlow.AUTOTUNE)
 
+        input_shape = None
         for spectrogram, _ in spectrogram_ds.take(1):
             input_shape = spectrogram.shape
-        # print('Input shape:', input_shape)
         num_labels = len(TensorFlow.commands)
 
-        # Instantiate the `tf.keras.layers.Normalization` layer.
+        # Warstwa normalizacyjna
         norm_layer = layers.Normalization()
-        # Fit the state of the layer to the spectrograms
-        # with `Normalization.adapt`.
+        # Obliczenie średniej i wariancji
         norm_layer.adapt(data=spectrogram_ds.map(map_func=lambda spec, label: spec))
 
         # Warstwy
@@ -387,11 +396,19 @@ class TensorFlow:
             layers.Resizing(32, 32),
             # Normalize.
             norm_layer,
+            # Splot
+            # https://www.quora.com/Is-flatten-considered-a-separate-layer-when-using-Keras-to-build-a-CNN-model
             layers.Conv2D(32, 3, activation='relu'),
             layers.Conv2D(64, 3, activation='relu'),
+            # https://paperswithcode.com/method/max-pooling
             layers.MaxPooling2D(),
+            # The Dropout layer randomly sets input units to 0 with a frequency of rate at each step during training time,
+            # which helps prevent overfitting. Inputs not set to 0 are scaled up by 1/(1 - rate)
+            # such that the sum over all inputs is unchanged.
             layers.Dropout(0.25),
+            # Spłaszcza wejście do jednego wymiaru
             layers.Flatten(),
+
             layers.Dense(128, activation='relu'),
             layers.Dropout(0.5),
             layers.Dense(num_labels),
@@ -410,13 +427,9 @@ class TensorFlow:
             train_ds,
             validation_data=val_ds,
             epochs=EPOCHS,
-            callbacks=tf.keras.callbacks.EarlyStopping(verbose=1, patience=epochs),
+            callbacks=None  # tf.keras.callbacks.EarlyStopping(verbose=1, patience=epochs),
         )
         if os.path.exists(f'{macros.model_path}tensorflow'):
             folder = pl.Path(f'{macros.model_path}tensorflow')
             shutil.rmtree(folder)
         model.save(f'{macros.model_path}tensorflow')
-
-# TensorFlow.generate_seperate_files()
-# i = TensorFlow()
-# TensorFlow.predict_file(models.load_model(f'{macros.model_path}tensorflow'))
