@@ -15,6 +15,7 @@ from keras import layers
 from keras import models
 from macros import freg
 import macros
+from src.quality_measures import QualityMeasures
 
 
 class TensorFlow:
@@ -286,26 +287,41 @@ class TensorFlow:
         test_labels = np.array(test_labels)
 
         y_pred = np.argmax(model.predict(test_audio), axis=1)
-        y_true = test_labels
-
-        test_acc = sum(y_pred == y_true) / len(y_true)
-        print(f'Test set accuracy: {test_acc:.0%}')
-
-        k = sum (y_pred == y_true)
-        temp = [True if y_pred[i] == y_true[i] == 1 else False for i in range(y_pred.shape[0])]
-        precision_wdech = temp.count(True) / list(y_pred).count(1)
-        print(f'Test set precision wdech: {precision_wdech:.0%}')
-
-        temp = [True if y_pred[i] == y_true[i] == 1 else False for i in range(y_pred.shape[0])]
-        temp2 = [True if y_pred[i] != y_true[i] == 0 else False for i in range(y_pred.shape[0])]
-
-        recall_wdech = temp.count(True) / (temp.count(True) + temp2.count(True))
-        print(f'Test set recall wdech: {recall_wdech:.0%}')
-
-        f_wdech = 2 * precision_wdech * recall_wdech / (precision_wdech + recall_wdech)
-        print(f'Test set f wdech: {f_wdech:.0%}')
+        y_true = np.array(test_labels)
 
         confusion_mtx = tf.math.confusion_matrix(y_true, y_pred)
+
+        y_pred = np.array(['in' if y_pred[i] == 1 else 'out'
+                           for i in range(y_pred.shape[0])])
+        y_true = np.array(['in' if y_true[i] == 1 else 'out'
+                           for i in range(y_true.shape[0])])
+
+        quality_measures = QualityMeasures(y_true, y_pred)
+        print(f"accuracy = {quality_measures.accuracy}\n"
+              f"precision_in = {quality_measures.precision_in}\n"
+              f"precision_out = {quality_measures.precision_out}\n"
+              f"recall_in = {quality_measures.recall_in}\n"
+              f"recall_out = {quality_measures.recall_out}\n"
+              f"F_in = {quality_measures.f_in}\n"
+              f"F_out = {quality_measures.f_out}\n")
+
+        # test_acc = sum(y_pred == y_true) / len(y_true)
+        # print(f'Test set accuracy: {test_acc:.0%}')
+        #
+        # k = sum (y_pred == y_true)
+        # temp = [True if y_pred[i] == y_true[i] == 1 else False for i in range(y_pred.shape[0])]
+        # precision_wdech = temp.count(True) / list(y_pred).count(1)
+        # print(f'Test set precision wdech: {precision_wdech:.0%}')
+        #
+        # temp = [True if y_pred[i] == y_true[i] == 1 else False for i in range(y_pred.shape[0])]
+        # temp2 = [True if y_pred[i] != y_true[i] == 0 else False for i in range(y_pred.shape[0])]
+        #
+        # recall_wdech = temp.count(True) / (temp.count(True) + temp2.count(True))
+        # print(f'Test set recall wdech: {recall_wdech:.0%}')
+        #
+        # f_wdech = 2 * precision_wdech * recall_wdech / (precision_wdech + recall_wdech)
+        # print(f'Test set f wdech: {f_wdech:.0%}')
+
         plt.figure(figsize=(10, 8))
         sns.heatmap(confusion_mtx,
                     xticklabels=TensorFlow.commands,
