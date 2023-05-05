@@ -97,10 +97,10 @@ W celu wyznaczenia sposobu zamiany częstotliwości otrzymanej za pomocą DFT na
 \end{figure}
 \noindent Po zaobserwowaniu w przybliżeniu liniowego charakteru tej relacji zastosowaliśmy metodę najmniejszych kwadratów do wyznaczenia najlepiej dopasowanej prostej. Otrzymaliśmy następujące wyniki:
 \begin{gather*}
-	[\unit{Hz}]\approx43,0789\,[\unit{FU_{DFT}}]-2,8174,\\
-	[\unit{FU_{DFT}}]\approx0,0232\,[\unit{Hz}]+0,068,
+	f_{\unit{Hz}}\approx43,0789\,f_{\unit{DFT}}-2,8174,\\
+	f_{\unit{DFT}}\approx0,0232\,f_{\unit{Hz}}+0,068,
 \end{gather*}
-gdzie [\unit{FU_{DFT}}] to wartość liczbowa częstotliwości w jednostkach, w której otrzymuje się wynik DFT, natomiast [\unit{Hz}] to wartość liczbowa częstotliwości w \unit{Hz}.
+gdzie $f_{\unit{DFT}}$ to wartość liczbowa częstotliwości w jednostkach, w której otrzymuje się wynik DFT, natomiast $f_{\unit{Hz}}$ to wartość liczbowa częstotliwości wyrażonej w \unit{Hz}.
 \subsection{Bramka szumów}
 Głowna metoda odszumiana, z której korzystamy to $Spectral$ $Gating$ (rodzaj bramki szumów).  Pierw wyznaczany jest spektrogram sygnału za pomocą $DFT$ i 
 tworzony jest próg szumu dla każdej jego częstotliwości.
@@ -117,8 +117,8 @@ $Spectral$ $Gating$ & 14
 \end{tabular}
 \end{center}
 
-\subsection{Filtr Savitzky-Golay}
-Filtru Savitzky-Golay używamy do wygładzenia spektrogramu po przeprowadzeniu DFT.  Polega on na dopasowywaniu zbioru sąsiadujących punktów do wielomianu niskiego stopnia za pomocą metody najmniejszych kwadratów.
+\subsection{Filtr Savitzky'ego-Golaya}
+Filtru Savitzky'ego-Golaya używamy do wygładzenia spektrogramu po przeprowadzeniu DFT.  Polega on na dopasowywaniu zbioru sąsiadujących punktów do wielomianu niskiego stopnia za pomocą metody najmniejszych kwadratów.
 Te fragmenty wielomianów są potem łączone w wygładzoną funkcję. Korzystamy z gotowej implementacji
 z biblioteki $scipy$.
 \begin{figure}[H]
@@ -282,7 +282,7 @@ W celu poprawy działania modelu postanowiliśmy dokładniej przeanalizować, kt
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=13cm]{spektrogram_wydech_ustami}
-	\caption{Spektrogramy dwóch nagrań oddechu z wdechem nosem i wydechem ustami uzyskane przy użyciu program Audacity.}
+	\caption{Spektrogramy dwóch nagrań oddechu z wdechem nosem i wydechem ustami uzyskane przy użyciu programu Audacity.}
 \end{figure}
 Dla każdego wyboru przeprowadziliśmy testy. W przypadku ostatniego uzyskaliśmy względny wzrost dokładności predykcji o $\sim8\%$ względem początkowego podejścia. Taki wybór częstotliwości przyjęliśmy zatem dla modelu rozpoznającego wdech nosem i wydech ustami.
 
@@ -305,6 +305,14 @@ Ponownie dokonaliśmy obserwacji spektrogramów, tym razem wyznaczonych dla wdec
 	\caption{Spektrogramy dwóch nagrań oddechu z wdechem i wydechem nosem uzyskane przy użyciu program Audacity.}
 \end{figure}
 Testy pokazały, iż ostatni z powyższych wybór częstotliwości spowodował względny wzrost dokładności o kolejne $\sim7\%$. Taki zatem pozostawiliśmy do dalszej pracy.
+\subsection{Usuwanie ciszy}
+Nietrudno było zaobserwować, iż znaczą część nagrań zajmuje cisza lub dźwięk bliski ciszy.
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=13cm]{natezenie_wydech_nosem}
+	\caption{Wykres natężenia dźwięku w nagraniu wdechu i wydechu nosem uzyskany przy użyciu programu Audacity.}
+\end{figure}
+Te przerwy między wyraźnymi dźwiękami oddechów pozostawały jednak oznaczone jako wdech lub wydech. Z tego powodu model trenowaliśmy w jednym przypadku informacją, iż cisza występuje podczas wdechu, a w innym -- że w trakcie wydechu. Postanowiliśmy usunąć tę niedoskonałość z nadzieją na poprawę wyników działania programu.
 
 \section{Działanie modelu a hałas z otoczenia}
 
