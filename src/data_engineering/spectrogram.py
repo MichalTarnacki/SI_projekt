@@ -152,7 +152,7 @@ def pressure_labeled_plot(labels, time, pressure, chunk_size=CHUNK_SIZE):
         for i in range(chunk_size):
             labels_extended.append(label)
 
-    for i in range(len(time)):
+    for i in range(len(labels_extended)):
         if labels_extended[i] == 'in':
             x_in.append(time[i])
             y_in.append(pressure[i])
