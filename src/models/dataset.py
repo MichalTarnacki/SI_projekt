@@ -3,7 +3,7 @@ import src.data_engineering.data_utils as du
 import src.data_engineering.spectrogram as sp
 
 
-def build_spectro(filenames, dir, previous_state=False, with_bg=False):
+def build(filenames, dir, previous_state=False, with_bg=False):
     x_set = []
     y_set = []
     chunk_size = None
@@ -37,7 +37,7 @@ def build_spectro(filenames, dir, previous_state=False, with_bg=False):
     return x_set, y_set, chunk_size
 
 
-def build_spectro_loudonly(filenames, dir, previous_state=False, with_bg=False):
+def build_loudonly(filenames, dir, previous_state=False, with_bg=False):
     x_set = []
     y_set = []
     chunk_size = None
