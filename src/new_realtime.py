@@ -78,6 +78,7 @@ def new_realtime():
     tr.start()
 
     radius = 100
+    tendency = 0
     while True:
 
         for event in pygame.event.get():
@@ -92,18 +93,24 @@ def new_realtime():
         screen.fill((0, 0, 0))
 
         if saved.__len__() >= saved_chunks * CHUNK:
-            clean = sp.signal_clean(saved)
+            # clean = sp.signal_clean(saved)
             commands, pred = TensorFlow.new_predict(model, saved)
-            last_frame = abs(np.fft.rfft(clean[len(clean) - sp.CHUNK_SIZE:]))
-            last_frame = sp.signal_clean(last_frame)
+            # last_frame = abs(np.fft.rfft(clean[len(clean) - sp.CHUNK_SIZE:]))
+            # last_frame = sp.signal_clean(last_frame)
 
             color = (0, 0, 255)
-            if sum(last_frame) < 200:
-                color = (0, 255, 0)
-            elif pred[0] > 0.65 and np.mean(np.abs(saved)) > 50:  # and pred[1]<10:
+            # if sum(last_frame) < 200:
+            #     color = (0, 255, 0)
+            if pred[1] > 0.80 and np.mean(np.abs(saved)) > 50:  # and pred[1]<10:
+                tendency = tendency+1 if tendency>=0 else 0
+            elif pred[0] > 0.80 and np.mean(np.abs(saved)) > 50:  # and pred[0]<10:
+                tendency = tendency-1 if tendency<=0 else 0
+
+            if tendency >= 25:
                 color = (255, 0, 0)
                 radius -= 1
-            elif pred[1] > 0.95 and np.mean(np.abs(saved)) > 50:  # and pred[0]<10:
+            elif tendency <=-25:
+                color = (0, 255, 0)
                 radius += 1
 
 

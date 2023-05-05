@@ -69,10 +69,10 @@ def new_realtime_tensor():
 
                 color = None
                 title = None
-                if pred[1] > 0.80 and np.mean(np.abs(saved)) > 50: #and pred[1]<10:
+                if pred[1] > 0.90 and np.mean(np.abs(saved)) > 50: #and pred[1]<10:
                     color = 'g' #if commands[0] == 'in' else 'r'
                     title = 'in' #if commands[0] == 'in' else 'out'
-                elif pred[0] > 0.80 and np.mean(np.abs(saved)) > 50:# and pred[0]<10:
+                elif pred[0] > 0.90 and np.mean(np.abs(saved)) > 50:# and pred[0]<10:
                     color = 'r'# if commands[1] == 'out' else 'g'
                     title = 'out'# if commands[1] == 'out' else 'in'
                 else:
@@ -89,7 +89,7 @@ def new_realtime_tensor():
                 # plt.ylim([0,1])
                 # ax1.bar(commands, pred, color='maroon',
                 #         width=0.4)
-                plt.pause(0.01)
+                plt.pause(0.1)
 
     tr = threading.Thread(target=record_thread)
     tr2 = threading.Thread(target=write_thread)
