@@ -10,7 +10,7 @@ def test_quantitative(testfiles, modelfile, with_previous_state):
     clf = load(f'{macros.model_path}{modelfile}.joblib')
     scaler = load(f'{macros.model_path}{modelfile}_scaler.joblib')
 
-    x_test, y_test, chunk_size = dataset.build_spectro(testfiles, macros.test_path, with_previous_state)
+    x_test, y_test, chunk_size = dataset.build(testfiles, macros.test_path, with_previous_state)
     x_test_std = scaler.transform(x_test)
 
     y_test_pred = []
@@ -26,7 +26,7 @@ def test_quantitative_loudonly(testfiles, modelfile, with_previous_state):
     clf = load(f'{macros.model_path}{modelfile}.joblib')
     scaler = load(f'{macros.model_path}{modelfile}_scaler.joblib')
 
-    x_test, y_test, chunk_size = dataset.build_spectro_loudonly(testfiles, macros.test_path, with_previous_state)
+    x_test, y_test, chunk_size = dataset.build_loudonly(testfiles, macros.test_path, with_previous_state)
     x_test_std = scaler.transform(x_test)
 
     y_test_pred = []
