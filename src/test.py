@@ -1,6 +1,8 @@
 import macros
+import numpy as np
 import src.real_time as rt
 import src.models.dataset as dataset
+from src.quality_measures import QualityMeasures
 
 from joblib import load
 from sklearn.metrics import accuracy_score
@@ -19,7 +21,15 @@ def test_quantitative(testfiles, modelfile, with_previous_state):
         xt[len(xt) - 1] = 1 if prev_pred == "in" else -1
         prev_pred = clf.predict(xt.reshape(-1, 1).T)
         y_test_pred.append(prev_pred)
-    print(f"accuracy: {accuracy_score(y_test, y_test_pred)}")
+
+    quality_measures = QualityMeasures(y_test, np.array(y_test_pred))
+    print(f"accuracy = {quality_measures.accuracy}\n"
+          f"precision_in = {quality_measures.precision_in}\n"
+          f"precision_out = {quality_measures.precision_out}\n"
+          f"recall_in = {quality_measures.recall_in}\n"
+          f"recall_out = {quality_measures.recall_out}\n"
+          f"F_in = {quality_measures.f_in}\n"
+          f"F_out = {quality_measures.f_out}\n")
 
 
 def test_quantitative_loudonly(testfiles, modelfile, with_previous_state):
@@ -35,7 +45,15 @@ def test_quantitative_loudonly(testfiles, modelfile, with_previous_state):
         xt[len(xt) - 1] = 1 if prev_pred == "in" else -1
         prev_pred = clf.predict(xt.reshape(-1, 1).T)
         y_test_pred.append(prev_pred)
-    print(f"accuracy: {accuracy_score(y_test, y_test_pred)}")
+
+    quality_measures = QualityMeasures(y_test, np.array(y_test_pred))
+    print(f"accuracy = {quality_measures.accuracy}\n"
+          f"precision_in = {quality_measures.precision_in}\n"
+          f"precision_out = {quality_measures.precision_out}\n"
+          f"recall_in = {quality_measures.recall_in}\n"
+          f"recall_out = {quality_measures.recall_out}\n"
+          f"F_in = {quality_measures.f_in}\n"
+          f"F_out = {quality_measures.f_out}\n")
 
 
 def test_qualitative(modelfile, with_previous_state, with_bg):

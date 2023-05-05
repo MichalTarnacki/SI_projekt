@@ -127,14 +127,14 @@ z biblioteki $scipy$.
 \end{figure}
 
 \subsection{Ocena modeli}
-Metryki oceny ilościowej modelu
-\begin{gather*}
-	accuracy = \frac{\# correct}{\# all} \\
-	precision_{wdech} = \frac{\# correct_{wdech}}{\# correct_{wdech} + \# incorrect_{wdech}} \\
-	recall_{wdech} = \frac{\# correct_{wdech}}{\# correct_{wdech} + \# incorrect_{wydech}} \\
-	F_{wdech} = \frac{2 \cdot precision_{wdech} \cdot recall_{wdech}}{precision_{wdech} + recall_{wdech}}
-\end{gather*}
-analogiczne metryki $precision, recall, F$ definiujemy też dla wydechu
+Zastosowaliśmy następujące miary oceny ilościowej modelu:
+\begin{flalign*}
+	&accuracy = \frac{|TP_{wdech}|+|TN_{wdech}|}{|TP_{wdech}|+|FP_{wdech}|+|TN_{wdech}|+|FN_{wdech}|}&\\
+	&precision_{wdech} = \frac{|TP_{wdech}|}{|TP_{wdech}|+|FP_{wdech}|}&\\
+	&recall_{wdech} = \frac{|TP_{wdech}|}{|TP_{wdech}|+|FN_{wdech}|}&\\
+	&F_{wdech} = \frac{2 \cdot precision_{wdech} \cdot recall_{wdech}}{precision_{wdech} + recall_{wdech}}&
+\end{flalign*}
+oraz analogicznie $precision_{wydech}$, $recall_{wydech}$ i $F_{wydech}$.
 \subsection{Standaryzacja}
 Dane wejściowe do modelu zawsze standaryzujemy, czyli
 \begin{gather*}
@@ -312,7 +312,7 @@ Nietrudno było zaobserwować, iż znaczą część nagrań zajmuje cisza lub d�
 	\includegraphics[width=13cm]{natezenie_wydech_nosem}
 	\caption{Wykres natężenia dźwięku w nagraniu wdechu i wydechu nosem uzyskany przy użyciu programu Audacity.}
 \end{figure}
-Te przerwy między wyraźnymi dźwiękami oddechów pozostawały jednak oznaczone jako wdech lub wydech. Z tego powodu model trenowaliśmy w jednym przypadku informacją, iż cisza występuje podczas wdechu, a w innym -- że w trakcie wydechu. Postanowiliśmy usunąć tę niedoskonałość z nadzieją na poprawę wyników działania programu.
+Te przerwy między wyraźnymi dźwiękami oddechów pozostawały jednak oznaczone jako wdech lub wydech. Z tego powodu model trenowaliśmy w jednym przypadku informacją, iż cisza występuje podczas wdechu, a w innym -- że w trakcie wydechu. Postanowiliśmy usunąć tę niedoskonałość z przypuszczeniem, iż poprawi to wyniki działania programu.
 
 \section{Działanie modelu a hałas z otoczenia}
 
