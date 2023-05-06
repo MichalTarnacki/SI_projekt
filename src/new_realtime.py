@@ -1,4 +1,5 @@
 import copy
+import random
 import sys
 import time
 import threading
@@ -26,18 +27,12 @@ def new_realtime():
     CHANNELS = 1
     RATE = 44100
     CHUNK = 1024
-    RECORD_SECONDS = 3
-    window = np.blackman(CHUNK)
     model = models.load_model(f'{macros.model_path}tensorflow')
-    plt.ion()
-    fig = plt.figure(figsize=(10, 8))
-    ax1 = fig.add_subplot(211)
-
     saved = []
     p = None
     stream = None
     contin = True
-    saved_chunks = 100
+    saved_chunks = 40
 
     pygame.init()
     pygame.font.init()
@@ -46,13 +41,6 @@ def new_realtime():
     height = 480
     screen = pygame.display.set_mode((width, height))
     font = pygame.font.SysFont(None, 50)
-    p = pyaudio.PyAudio()
-    fs = 44100
-
-    samples = np.array([])
-
-    stream = p.open(format=pyaudio.paInt16, channels=1, rate=fs, input=True, frames_per_buffer=1024)
-
     run_thread = True
 
     def record_thread():
@@ -68,7 +56,7 @@ def new_realtime():
 
             saved.extend(waveData)
             if saved.__len__() >= (saved_chunks + 1) * CHUNK:
-                sd.play(saved, 44100)
+                # sd.play(saved, 44100)
                 saved = saved[CHUNK:]
         stream.stop_stream()
         stream.close()
@@ -78,7 +66,18 @@ def new_realtime():
     tr.start()
 
     radius = 100
-    tendency = 0
+    wdech_s = 0.99
+    wydech_s = 0.7
+    minute = pygame.USEREVENT + 1
+    pygame.time.set_timer(minute, 60000)
+    wdechy = 0
+    wydechy = 0
+    inne = 0
+    w_p = 0
+    i_p = 0
+    wy_p = 0
+    R = random.randint(20, 240)
+    points = 0
     while True:
 
         for event in pygame.event.get():
@@ -90,40 +89,67 @@ def new_realtime():
                 p.terminate()
                 pygame.quit()
                 return
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
+                wydech_s += 0.01
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
+                wydech_s -= 0.01
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
+                wdech_s -= 0.01
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
+                wdech_s += 0.01
+            if event.type == minute:
+                w_p = wdechy / (wdechy + wydechy + inne)
+                wy_p = wydechy / (wdechy + wydechy + inne)
+                i_p = inne / (wdechy + wydechy + inne)
+                wdechy = 0
+                wydechy = 0
+                inne = 0
         screen.fill((0, 0, 0))
-
+        text = font.render('nic', True, (255, 255, 255))
         if saved.__len__() >= saved_chunks * CHUNK:
-            # clean = sp.signal_clean(saved)
             commands, pred = TensorFlow.new_predict(model, saved)
-            # last_frame = abs(np.fft.rfft(clean[len(clean) - sp.CHUNK_SIZE:]))
-            # last_frame = sp.signal_clean(last_frame)
 
             color = (0, 0, 255)
-            # if sum(last_frame) < 200:
-            #     color = (0, 255, 0)
-            if pred[1] > 0.80 and np.mean(np.abs(saved)) > 50:  # and pred[1]<10:
-                tendency = tendency+1 if tendency>=0 else 0
-            elif pred[0] > 0.80 and np.mean(np.abs(saved)) > 50:  # and pred[0]<10:
-                tendency = tendency-1 if tendency<=0 else 0
 
-            if tendency >= 25:
+            if pred[1] > wdech_s:  # and pred[1]<10:
                 color = (255, 0, 0)
-                radius -= 1
-            elif tendency <=-25:
+                radius -= 2
+                text = font.render('teraz wdychasz', True, (255, 255, 255))
+                wdechy+=1
+            elif pred[0] > wydech_s:  # and pred[0]<10:
                 color = (0, 255, 0)
                 radius += 1
-
+                text = font.render('teraz wydychasz', True, (0, 255, 255))
+                wydechy+=1
+            else:
+                inne+=1
+            # radius -= 1
 
             # for x, y in enumerate(last_frame[:-1]):
             #     pygame.draw.line(screen, color, (x*3, 480 - y), (x*3 + 3, 480 - last_frame[x+1]))
+            if R == radius:
+                points +=1
+                R = random.randint(20, 240)
 
+            if R > radius:
+                pygame.draw.circle(screen, (124, 143, 31), (width / 2, height / 2), R)
             pygame.draw.circle(screen, color, (width/2, height/2), radius)
+            if R<= radius:
+                pygame.draw.circle(screen, (124, 143, 31), (width / 2, height / 2), R)
 
-        # if print_state == "cisza":
-        #     text = font.render('cisza', True, (255, 255, 255))
-        # else:
-        #     text = font.render('teraz wdychasz' if state == 'in' else 'teraz wydychasz', True, (255, 255, 255))
-        # screen.blit(text, (0, 0))
+
+        text2 = font.render(f'wydech_s {int(100*wydech_s)}%', True, (0, 255, 255))
+        text3 = font.render(f'wdech_s {int(100*wdech_s)}%', True, (0, 255, 255))
+        if wdechy+wydechy+inne > 0:
+            text4 = font.render(f'wdechy {round(100 * w_p)}%'
+                                f'wydechy {round(100 * wy_p)}%'
+                                f'inne {round(100 * i_p)}%', True, (0, 255, 255))
+            screen.blit(text4, (0, 90))
+        text5 = font.render(f'punkty {points}', True, (0, 255, 255))
+        screen.blit(text, (0, 0))
+        screen.blit(text2, (0, 30))
+        screen.blit(text3, (0, 60))
+        screen.blit(text5, (0, 120))
         pygame.display.update()
 
 
@@ -195,7 +221,7 @@ def detection_loudonly(model, scaler, chunk_size=352, input_size=40, uses_previo
                 color = (0, 255, 0)
             elif state == "out":
                 color = (255, 0, 0)
-                radius -= 1
+                radius -= 2
             else:
                 radius += 1
 

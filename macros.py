@@ -1,6 +1,6 @@
 import re
-train_path = "media/train/"
-test_path = "media/test/"
+train_path = "media/temp_train/"
+test_path = "media/temp_test/"
 model_path = "media/models/"
 spectros_path = "media/spectros/"
 train_breaths = "media/sorted/in/"
