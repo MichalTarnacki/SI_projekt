@@ -375,7 +375,7 @@ class TensorFlow:
         train_files, val_files, test_files = TensorFlow.get_files()
         files_ds, waveform_ds, spectrogram_ds = TensorFlow.create_ds(train_files)
         # TensorFlow.waveform_plot(waveform_ds)
-        # TensorFlow.spectro_plot(waveform_ds, alldata=True, take_num=2)
+        TensorFlow.spectro_plot(waveform_ds, alldata=True, take_num=2)
         # TensorFlow.spectro_plots(spectrogram_ds)
 
         train_ds = spectrogram_ds

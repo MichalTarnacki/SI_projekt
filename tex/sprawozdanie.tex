@@ -1,7 +1,5 @@
 \documentclass[polish]{article}
 
-\title{Wykrywanie wdechu i wydechu na podstawie dźwięku z mikrofonu}
-\author{Dominik Lau, Mateusz Kowalczyk, Michał Tarnacki}
 
 \usepackage{blindtext}
 \usepackage{amsmath}
@@ -52,6 +50,9 @@
   }%
 }
 
+\title{Wykrywanie wdechu i wydechu na podstawie dźwięku z mikrofonu}
+\author{Dominik Lau, Mateusz Kowalczyk, Michał Tarnacki}
+
 
 
 \begin{document}
@@ -101,6 +102,14 @@ W celu wyznaczenia sposobu zamiany częstotliwości otrzymanej za pomocą DFT na
 	f_{\unit{DFT}}\approx0,0232\,f_{\unit{Hz}}+0,068,
 \end{gather*}
 gdzie $f_{\unit{DFT}}$ to wartość liczbowa częstotliwości w jednostkach, w której otrzymuje się wynik DFT, natomiast $f_{\unit{Hz}}$ to wartość liczbowa częstotliwości wyrażonej w \unit{Hz}.
+\subsection{STFT}
+Dla sieci neuronowej zamiast posługiwać się zwykłym DFT (na całym przedziale), używamy STFT, czyli krótko-czasowej transformacji Fouriera. Jest to zadaniczo transformacja Fouriera jednak wykonywana w mniejszych oknach czasowych. Dzięki temu otrzymujemy także informację o zmianie widma w czasie, czyli jednocześnie posiadamy informację o właściwościach zarówno w dziedzinie czasu jak i częstotliwości. Najistotniejszym parametrem tej metody jest rozmiar okna. Ponieważ iloczyn jego szerokości w dziedzinie czasu i szerokości w dziedzinie częstotliwości jest stały dla danego okna, poprawiając rozdzielczość czasu, pogarszamy rozdzielczość częstotliwości. Użyliśmy gotowej funkcji z biblioteki tensorflow, nie będziemy więc dokładniej opisywać sposobu implementacji STFT. W naszym przypadku, za szerokość okna ustawiliśmy wartość 255. Rysunek 2 reprezentuje wykres natężenia dźwięku w zależności od czasu, oraz spektrogram stworzony na podstawie niego omawianą metodą.
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=10cm]{STFT.png}
+	\caption{}
+\end{figure}
+
 \subsection{Bramka szumów}
 Głowna metoda odszumiana, z której korzystamy to $Spectral$ $Gating$ (rodzaj bramki szumów).  Pierw wyznaczany jest spektrogram sygnału za pomocą $DFT$ i 
 tworzony jest próg szumu dla każdej jego częstotliwości.
@@ -120,7 +129,7 @@ $Spectral$ $Gating$ & 14
 \subsection{Filtr Savitzky'ego-Golaya}
 Filtru Savitzky'ego-Golaya używamy do wygładzenia spektrogramu po przeprowadzeniu DFT.  Polega on na dopasowywaniu zbioru sąsiadujących punktów do wielomianu niskiego stopnia za pomocą metody najmniejszych kwadratów.
 Te fragmenty wielomianów są potem łączone w wygładzoną funkcję. Korzystamy z gotowej implementacji
-z biblioteki $scipy$.
+z biblioteki $scipy$. W przypadku sieci neuronowej korzystamy natomiast z warstw konwolucyjnych, nakładających odpowiednie filtry na obraz.
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=10cm]{savitzky_golay_filter}
@@ -140,7 +149,7 @@ Dane wejściowe do modelu zawsze standaryzujemy, czyli
 \begin{gather*}
 	\tilde X = \frac{X - EX}{\sigma_X}
 \end{gather*}
-stosujemy gotową implementację z $scikit-learn$.
+stosujemy gotową implementację z $scikit-learn$ lub warstwę normalizacyjną w przypadku sieci neuronowej.
 \subsection{SVM}
 Pierwszym modelem, jakim dokonujemy klasyfikacji, jest SVM. Metoda ta polega na szukaniu optymalnych wag $\boldsymbol{w}, b$.
 Następnie będziemy klasyfikować według funkcji maszyny uczącej 
@@ -155,6 +164,8 @@ funkcji kosztu
 \end{gather*}
 gdzie C jest parametrem uregulowania. Funkcję będziemy minimalizować metodą stochastycznego spadku po gradiencie.
 W projekcie użyliśmy własnej implementacji SVM-a.
+\subsection{Sieć neuronowa}
+Drugim modelem jakim dokonujemy klasyfikacji jest sieć neuronowa. Ze względu na trudność w samodzielnym zaprojektowaniu dobrej sieci neuronowej postanowiliśmy użyć "gotowca" a więc stworzonego przez firmę Google Tensorflow'a wraz z interfejsem Keras.
 \section{Nagrywanie danych oddechowych}
 Żeby zapewnić dobre oznaczenie danych, etykietujemy je jeszcze w trakcie nagrywania dźwięku. 
 Osoba nagrywana naciska przycisk, żeby zasygnalizować, że przestała brać wdech i zaczyna wydychać 
@@ -287,7 +298,7 @@ W celu poprawy działania modelu postanowiliśmy dokładniej przeanalizować, kt
 Dla każdego wyboru przeprowadziliśmy testy. W przypadku ostatniego uzyskaliśmy względny wzrost dokładności predykcji o $\sim8\%$ względem początkowego podejścia. Taki wybór częstotliwości przyjęliśmy zatem dla modelu rozpoznającego wdech nosem i wydech ustami.
 
 \section{Spektrogram i sieć neuronowa}
-
+Aby porównać naszą metodę
 \section{Przejście na inny model oddychania}
 \subsection{Wydech nosem}
 Kolejnym krokiem było przeniesienie wypracowanej metody uczenia na rozpoznawanie wdechu oraz wydechu nosem. W takim przypadku różnice między fazami oddechu są mniej zauważalne, co wymagało kolejnych udoskonaleń.
@@ -326,6 +337,8 @@ Te przerwy między wyraźnymi dźwiękami oddechów pozostawały jednak oznaczon
  Cormen Thomas H., Leiserson Charles E., Rivest Roland L., Stein Clifford (1989) \emph{Wprowadzenie do algorytmów},
 \bibitem{DFT}
 \url{https://pl.wikipedia.org/wiki/Dyskretna_transformata_Fouriera}
+\bibitem{STFT}
+\url{https://esezam.okno.pw.edu.pl/mod/book/view.php?id=9&chapterid=77}
 \bibitem{Bramkaszumow}
 Kumar, E. and Surya, K. and Varma, K. and Akash, A. and Kurapati, Nithish Reddy (2023) \emph{Noise Reduction in Audio File Using Spectral Gatting and FFT by Python Modules}
 \bibitem{SavgolImage}
