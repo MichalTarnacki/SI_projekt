@@ -250,16 +250,15 @@ Nie są nam potrzebne wszystkie częstotliwości zwracane przez algorytm DFT, wi
 do tego stosowanego w telefonii komórkowej -  \textbf{używamy 160 częstotliwości z przedziału do 6,9 kHz}.
 Stosując to podejście dla danych testowych otrzymaliśmy następujące wyniki:
 \begin{flalign*}
-	&accuracy \approx 78\% &\\
-	&precision_{wdech} \approx 90\% &\\
-	&precision_{wydech} \approx 75\% &\\
-	&recall_{wdech} \approx 51\% &\\
-	&recall_{wydech} \approx 96\% &\\
-	&F_{wdech} \approx 76\% &\\
-	&F_{wydech} \approx 84\%. &\\
+	&accuracy \approx 94\% &\\
+	&precision_{wdech} \approx 99\% &\\
+	&precision_{wydech} \approx 79\% &\\
+	&recall_{wdech} \approx 60\% &\\
+	&recall_{wydech} \approx 100\% &\\
+	&F_{wdech} \approx 75\% &\\
+	&F_{wydech} \approx 88\%. &
 \end{flalign*}
-W testach
-jakościowych jednak zaobserwować było można "przeskakiwanie" z jednej
+W testach jakościowych jednak zaobserwować było można "przeskakiwanie" z jednej
 wartości na drugą i z powrotem np. w połowie brania wdechu, wydychania.
 \begin{figure}[H]
 	\centering
@@ -273,12 +272,30 @@ W celu pozbycia się "przeskakiwania" i ogólnej poprawy działania dane z poprz
 	\boldsymbol{x} = [I_{f_1}, I_{f_2}, ..., I_{f_{160}},  s]
 \end{gather*}
  gdzie $s = 1$ jeśli poprzednio stwierdzono wdech, $s=-1$ jeśli poprzednio stwierdzono wydech.
-Dodatkowo przeprowadziliśmy jeszcze \textbf{wygładzenie spektrogramu filtrem Savitzky-Golay}.
-Takim sposobem otrzymaliśmy dokładność $\sim 99\%$ dla danych testowych w sytuacji idealnej - jako wartość $s$ stanu poprzedniego stosowaliśmy tę wziętą z
-danych testowych, czyli zakładaliśmy za każdym razem, że nasz model przewidzi dobrze poprzedni stan.
-Przypadek ten nie jest realny, ponieważ model nie będzie znał poprawnej poprzedniej klasyfikacji tylko 
-zakładał, że to co sam stwierdził jest poprawne.  Biorąc poprzedni stan nie z danych testowych a z poprzedniej
-klasyfikacji modelu otrzymujemy mniejszą dokładność $\sim 80\%$. Wniosek z tego jest taki, że model
+Dodatkowo przeprowadziliśmy jeszcze \textbf{wygładzenie spektrogramu filtrem Savitzky'ego-Golaya}. Następnie przetestowaliśmy program w sposób uproszczony -- jako wartość $s$ stanu poprzedniego stosowaliśmy tę odczytaną z
+danych testowych, czyli zakładaliśmy za każdym razem, że nasz model przewidzi dobrze poprzedni stan. Otrzymaliśmy następujące wyniki:
+\begin{flalign*}
+	&accuracy \approx 99\% &\\
+	&precision_{wdech} \approx 99\% &\\
+	&precision_{wydech} \approx 99\% &\\
+	&recall_{wdech} \approx 99\% &\\
+	&recall_{wydech} \approx 99\% &\\
+	&F_{wdech} \approx 99\% &\\
+	&F_{wydech} \approx 99\%. &
+\end{flalign*}
+Przypadek ten nie jest realny, ponieważ model nie będzie znał poprawnej poprzedniej klasyfikacji, lecz 
+zakładał, że to co sam stwierdził jest poprawne. Odczytując poprzedni stan nie z danych testowych, a z poprzedniej
+klasyfikacji modelu, otrzymujemy gorsze, choć bardziej miarodajne wyniki:
+\begin{flalign*}
+	&accuracy \approx 85\% &\\
+	&precision_{wdech} \approx 88\% &\\
+	&precision_{wydech} \approx 84\% &\\
+	&recall_{wdech} \approx 72\% &\\
+	&recall_{wydech} \approx 93\% &\\
+	&F_{wdech} \approx 79\% &\\
+	&F_{wydech} \approx 88\%. &
+\end{flalign*}
+Wniosek z tego jest taki, że model
 z wysokim prawdopodobieństwem przewidzi dobrze kolejny stan, jeżeli dobrze przewidział poprzedni. 
 Warto dodać, że rzeczywiście metoda z poprzednim stanem pozwoliła nam ograniczyć "przeskakiwanie" 
 w testach jakościowych.
