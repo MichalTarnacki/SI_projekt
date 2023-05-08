@@ -140,7 +140,7 @@ Dane wejściowe do modelu zawsze standaryzujemy, czyli
 \begin{gather*}
 	\tilde X = \frac{X - EX}{\sigma_X}
 \end{gather*}
-stosujemy gotową implementację z $scikit-learn$.
+stosujemy gotową implementację z biblioteki "scikit-learn".
 \subsection{SVM}
 Pierwszym modelem, jakim dokonujemy klasyfikacji, jest SVM. Metoda ta polega na szukaniu optymalnych wag $\boldsymbol{w}, b$.
 Następnie będziemy klasyfikować według funkcji maszyny uczącej 
@@ -235,12 +235,21 @@ rozmiaru 1024 próbek, tworzymy dla każdego bloku spektrogram} ale tym razem ni
 \begin{gather*}
 \boldsymbol{x} = [I_{f_1}, I_{f_2}, ..., I_{f_n}]
 \end{gather*}
-Nie są nam 
-potrzebne wszystkie częstotliwości zwracane przez algorytm DFT, więc stosujemy ograniczenie podobne
+Nie są nam potrzebne wszystkie częstotliwości zwracane przez algorytm DFT, więc stosujemy ograniczenie podobne
 do tego stosowanego w telefonii komórkowej -  \textbf{używamy 160 częstotliwości z przedziału do 6,9 kHz}.
-Stosując to podejście dla danych testowych otrzymaliśmy $\sim 70\%$ dokładności. W testach
+Stosując to podejście dla danych testowych otrzymaliśmy następujące wyniki:
+\begin{flalign*}
+	&accuracy \approx 78\% &\\
+	&precision_{wdech} \approx 90\% &\\
+	&precision_{wydech} \approx 75\% &\\
+	&recall_{wdech} \approx 51\% &\\
+	&recall_{wydech} \approx 96\% &\\
+	&F_{wdech} \approx 76\% &\\
+	&F_{wydech} \approx 84\%. &\\
+\end{flalign*}
+W testach
 jakościowych jednak zaobserwować było można "przeskakiwanie" z jednej
-wartości na drugą i spowrotem np. w połowie brania wdechu, wydychania.
+wartości na drugą i z powrotem np. w połowie brania wdechu, wydychania.
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=10cm]{przeskakiwanie_ozn}

@@ -99,7 +99,7 @@ def library_svm_train(filenames, modelname):
 
 
 def svm_train_basic(filenames, modelname):
-    x_train, y_train = dataset.build(filenames, macros.train_path)
+    x_train, y_train, chunk_size = dataset.build(filenames, macros.train_path)
 
     scaler = StandardScaler()
     x_train_std = scaler.fit_transform(x_train)
