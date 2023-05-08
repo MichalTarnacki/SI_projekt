@@ -322,6 +322,12 @@ W przeciwieństwie do SVM, aktualną predykcję określamy nie na podstawie popr
 \subsection{Problemy}
 Przy rozpoznawaniu próbki zakładamy przynależność do jednej z dwóch klas. W przypadku gdy jako dane wejściowe mamy jedynie wdechy i wydechy nie stanowi to problemu. Gdy jednak chcemy rozpoznać brak oddychania musimy założyć pewien próg pewności co otrzymanej klasyfikacji. Eksperymentalnie przyjęliśmy iż wdech jest wdechem gdy pewność sieci neuronowej wynosi 99\% natomiast co do wydechów przyjęliśmy pewność na poziomie 70\%. 
 \section{Przejście na inny model oddychania - SVM}
+\subsection{Metoda}
+\subsection{Wykorzystywane próbki}
+W przeciwieństwie do SVM, aktualną predykcję określamy nie na podstawie poprzedniego stanu, lecz dla stanu sprzed pewnej chwili czasowej. W naszym przypadku aktualnie wyświetlany stan pochodzi sprzed około 0,5 s. Oczywiście powoduje to pewne opóźnienie, jednak praktycznie niezauważalne przez użytownika. Podejście to nie ulega jednak propagacji błędów, którą widzimy w przypadku SVM.
+\subsection{Problemy}
+Przy rozpoznawaniu próbki zakładamy przynależność do jednej z dwóch klas. W przypadku gdy jako dane wejściowe mamy jedynie wdechy i wydechy nie stanowi to problemu. Gdy jednak chcemy rozpoznać brak oddychania musimy założyć pewien próg pewności co otrzymanej klasyfikacji. Eksperymentalnie przyjęliśmy iż wdech jest wdechem gdy pewność sieci neuronowej wynosi 99\% natomiast co do wydechów 70\%. 
+\section{Przejście na inny model oddychania}
 \subsection{Wydech nosem}
 Kolejnym krokiem było przeniesienie wypracowanej metody uczenia na rozpoznawanie wdechu oraz wydechu nosem. W takim przypadku różnice między fazami oddechu są mniej zauważalne, co wymagało kolejnych udoskonaleń.
 \subsection{Szerszy spektrogram}
