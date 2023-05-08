@@ -306,23 +306,6 @@ class TensorFlow:
               f"F_in = {quality_measures.f_in}\n"
               f"F_out = {quality_measures.f_out}\n")
 
-        # test_acc = sum(y_pred == y_true) / len(y_true)
-        # print(f'Test set accuracy: {test_acc:.0%}')
-        #
-        # k = sum (y_pred == y_true)
-        # temp = [True if y_pred[i] == y_true[i] == 1 else False for i in range(y_pred.shape[0])]
-        # precision_wdech = temp.count(True) / list(y_pred).count(1)
-        # print(f'Test set precision wdech: {precision_wdech:.0%}')
-        #
-        # temp = [True if y_pred[i] == y_true[i] == 1 else False for i in range(y_pred.shape[0])]
-        # temp2 = [True if y_pred[i] != y_true[i] == 0 else False for i in range(y_pred.shape[0])]
-        #
-        # recall_wdech = temp.count(True) / (temp.count(True) + temp2.count(True))
-        # print(f'Test set recall wdech: {recall_wdech:.0%}')
-        #
-        # f_wdech = 2 * precision_wdech * recall_wdech / (precision_wdech + recall_wdech)
-        # print(f'Test set f wdech: {f_wdech:.0%}')
-
         plt.figure(figsize=(10, 8))
         sns.heatmap(confusion_mtx,
                     xticklabels=TensorFlow.commands,
