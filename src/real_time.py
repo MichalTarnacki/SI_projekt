@@ -8,6 +8,8 @@ import noisereduce
 import numpy as np
 import pygame
 import pyaudio
+import scipy.signal
+from scipy.signal import find_peaks, find_peaks_cwt
 import sounddevice as sd
 import soundcard as sc
 from scipy.signal import savgol_filter
@@ -52,6 +54,7 @@ def detection(model, scaler, chunk_size=352, input_size=40, uses_previous_state=
     print_state = 'cisza'
 
     radius = 100
+
     while True:
 
         for event in pygame.event.get():
@@ -93,10 +96,13 @@ def detection(model, scaler, chunk_size=352, input_size=40, uses_previous_state=
             # for x, y in enumerate(last_frame[:-1]):
             #     pygame.draw.line(screen, color, (x*3, 480 - y), (x*3 + 3, 480 - last_frame[x+1]))
 
+
+
             pygame.draw.circle(screen, color, (width/2, height/2), radius)
 
             last_frame_std = scaler.transform(last_frame.reshape(-1, 1).T)
             state = model.predict(last_frame_std)
+
 
         # if print_state == "cisza":
         #     text = font.render('cisza', True, (255, 255, 255))
@@ -140,6 +146,10 @@ def detection_loudonly(model, scaler, chunk_size=352, input_size=40, uses_previo
     print_state = 'cisza'
 
     radius = 100
+    fx = 0
+    pred_history = []
+    pred_time = []
+    resprate = ""
     while True:
 
         for event in pygame.event.get():
@@ -160,7 +170,7 @@ def detection_loudonly(model, scaler, chunk_size=352, input_size=40, uses_previo
             last_frame = abs(np.fft.rfft(clean[len(clean) - sp.CHUNK_SIZE:]))
             last_frame = sp.signal_clean(last_frame)
 
-            if sum(last_frame) < 200:
+            if sum(last_frame) < 400:
                 print_state = "cisza"
             else:
                 print_state = ""
@@ -174,10 +184,33 @@ def detection_loudonly(model, scaler, chunk_size=352, input_size=40, uses_previo
                 color = (0, 255, 0)
             elif state == "out":
                 color = (255, 0, 0)
-                radius -= 1
+                fx -= 0.05
+                pred_history.append(fx)
+                pred_time.append(time.time())
+                radius -= 0.5
             else:
+                fx += 0.1
+                pred_history.append(fx)
+                pred_time.append(time.time())
                 radius += 1
 
+            if len(pred_history) > 0:
+                peaks = find_peaks_cwt(pred_history, widths=np.arange(5, 15))
+                if len(peaks) > 1:
+                    sumdist = 0
+                    for j in range(len(peaks)-1):
+                        sumdist += pred_time[peaks[j+1]] - pred_time[peaks[j]]
+                    avgT = sumdist / (len(peaks) - 1)
+                    resprate = 60/avgT
+
+            if len(pred_history) > width:
+                pred_history = pred_history[-width:]
+                pred_time = pred_time[-width:]
+
+            for x, y in enumerate(pred_history[:-1]):
+                pygame.draw.line(screen, color, (x, 400 - y * 5), (x+ 1, 400 - pred_history[x + 1] * 5))
+                # if x in peaks:
+                #     pygame.draw.circle(screen, (0, 255, 0), (x, 400-y*5), 5)
             # for x, y in enumerate(last_frame[:-1]):
             #     pygame.draw.line(screen, color, (x*3, 480 - y), (x*3 + 3, 480 - last_frame[x+1]))
 
@@ -186,9 +219,6 @@ def detection_loudonly(model, scaler, chunk_size=352, input_size=40, uses_previo
             last_frame_std = scaler.transform(last_frame.reshape(-1, 1).T)
             state = model.predict(last_frame_std)
 
-        # if print_state == "cisza":
-        #     text = font.render('cisza', True, (255, 255, 255))
-        # else:
-        #     text = font.render('teraz wdychasz' if state == 'in' else 'teraz wydychasz', True, (255, 255, 255))
-        # screen.blit(text, (0, 0))
+        text = font.render(f"RR: {resprate}", True, (255, 255, 255))
+        screen.blit(text, (0, 0))
         pygame.display.update()

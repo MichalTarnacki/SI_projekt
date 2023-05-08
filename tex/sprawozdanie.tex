@@ -165,7 +165,7 @@ funkcji kosztu
 gdzie C jest parametrem uregulowania. Funkcję będziemy minimalizować metodą stochastycznego spadku po gradiencie.
 W projekcie użyliśmy własnej implementacji SVM-a.
 \subsection{Sieć neuronowa}
-Drugim modelem jakim dokonujemy klasyfikacji jest sieć neuronowa. Ze względu na trudność w samodzielnym zaprojektowaniu dobrej sieci neuronowej postanowiliśmy użyć "gotowca" a więc stworzonego przez firmę Google Tensorflow'a wraz z interfejsem Keras.
+Drugim modelem jakim dokonujemy klasyfikacji jest sieć neuronowa. Ze względu na trudność w samodzielnym zaprojektowaniu dobrej sieci neuronowej postanowiliśmy użyć "gotowca" a więc stworzonego przez firmę Google Tensorflow'a wraz z interfejsem Keras. # TODO opisać jak działa ta sieć
 \section{Nagrywanie danych oddechowych}
 Żeby zapewnić dobre oznaczenie danych, etykietujemy je jeszcze w trakcie nagrywania dźwięku. 
 Osoba nagrywana naciska przycisk, żeby zasygnalizować, że przestała brać wdech i zaczyna wydychać 
@@ -297,9 +297,31 @@ W celu poprawy działania modelu postanowiliśmy dokładniej przeanalizować, kt
 \end{figure}
 Dla każdego wyboru przeprowadziliśmy testy. W przypadku ostatniego uzyskaliśmy względny wzrost dokładności predykcji o $\sim8\%$ względem początkowego podejścia. Taki wybór częstotliwości przyjęliśmy zatem dla modelu rozpoznającego wdech nosem i wydech ustami.
 
-\section{Spektrogram i sieć neuronowa}
-Aby porównać naszą metodę
-\section{Przejście na inny model oddychania}
+\section{Dane wejściowe z mikrofonu + Sieć neuronowa}
+\subsection{Założenie}
+Do przetestowania działania sieci neuronowej przyjęliśmy nieco odmienne podejście. Jako dane wejściowe przyjmujemy (podobnie jak w przypadku SVM) spektrogram jednak w tym przypadku stworzony przy użyciu STFT. Dzięki temu model bierze pod uwagę także zmianę widma w czasie.
+\subsection{Metoda}
+Stosując poszczególne warstwy nasz spektrogram jest odpowiednio przetwarzany tak aby uwidocznić istotne cechy. Wykorzystywane przez nas warstwy (wraz z parametrami) to:
+\begin{enumerate}
+  \item\texttt{Input} - Punkt wejścia do sieci neuronowej
+  \item\texttt{Resizing} - Zmiana rozmiaru obrazu (32x32)
+  \item\texttt{Normalization} - Normalizacja cech
+  \item\texttt{Conv2D} - Nałożenie odpowiedniego filtru o rozmiarze n x m (lub n x n) na obraz tak aby uwydatnić jego cechy (32, 3, 'relu'). Wykorzystuje funkcję aktywacji.
+  \item\texttt{Conv2D} - Tak jak wyżej (64, 3, 'relu')
+  \item\texttt{MaxPooling2D} - Downsampling czyli wybranie maksymalnej wartości spośród okna o zadanych wymiarach (2x2)
+  \item\texttt{Dropout} - Ustawienie losowych wejść na 0 z częstotliwością n, przeskalowanie pozostałych cech przez 
+  $\frac{1}{1-n}$, pozwala na zredukowanie overfittingu (0.25)
+  \item\texttt{Flatten} - Spłaszczenie wejścia do 1 wymiaru
+  \item\texttt{Dense} - Łączy wszystkie neurony z warstwy poprzedniej ze wszystkimi z warstwy kolejnej, identyfikuje do jakiej klasy przynależy obiekt wejściowy. Wykorzystuje funkcję aktywacji. (128, 'relu')
+  \item\texttt{Dropout} - Tak jak wyżej (0.5)
+  \item\texttt{Dense} - Tak jak wyżej (2)
+\end{enumerate}
+
+\subsection{Wykorzystywane próbki}
+W przeciwieństwie do SVM, aktualną predykcję określamy nie na podstawie poprzedniego stanu, lecz dla stanu sprzed pewnej chwili czasowej. W naszym przypadku aktualnie wyświetlany stan pochodzi sprzed około 0,5 s. Oczywiście powoduje to pewne opóźnienie, jednak praktycznie niezauważalne przez użytkownika. Podejście to nie ulega jednak propagacji błędów, którą widzimy w przypadku SVM.
+\subsection{Problemy}
+Przy rozpoznawaniu próbki zakładamy przynależność do jednej z dwóch klas. W przypadku gdy jako dane wejściowe mamy jedynie wdechy i wydechy nie stanowi to problemu. Gdy jednak chcemy rozpoznać brak oddychania musimy założyć pewien próg pewności co otrzymanej klasyfikacji. Eksperymentalnie przyjęliśmy iż wdech jest wdechem gdy pewność sieci neuronowej wynosi 99\% natomiast co do wydechów przyjęliśmy pewność na poziomie 70\%. 
+\section{Przejście na inny model oddychania - SVM}
 \subsection{Wydech nosem}
 Kolejnym krokiem było przeniesienie wypracowanej metody uczenia na rozpoznawanie wdechu oraz wydechu nosem. W takim przypadku różnice między fazami oddechu są mniej zauważalne, co wymagało kolejnych udoskonaleń.
 \subsection{Szerszy spektrogram}
@@ -324,13 +346,17 @@ Nietrudno było zaobserwować, iż znaczą część nagrań zajmuje cisza lub d�
 	\caption{Wykres natężenia dźwięku w nagraniu wdechu i wydechu nosem uzyskany przy użyciu programu Audacity.}
 \end{figure}
 Te przerwy między wyraźnymi dźwiękami oddechów pozostawały jednak oznaczone jako wdech lub wydech. Z tego powodu model trenowaliśmy w jednym przypadku informacją, iż cisza występuje podczas wdechu, a w innym -- że w trakcie wydechu. Postanowiliśmy usunąć tę niedoskonałość z przypuszczeniem, iż poprawi to wyniki działania programu.
-
+\section{Przejście na inny model oddychania - sieć neuronowa}
+Ze względu na dobre działanie modelu, postanowiliśmy nie implementować dodatkowych usprawnień a jedynie nagrać dodatkowe dane uczące.
 \section{Działanie modelu a hałas z otoczenia}
-
+\subsection{SVM}
+\subsection{Sieć neuronowa}
+Testy doświadczalne wykazały dobre rozpoznawanie zarówno wdechów i wydechów podczas przebywania w umiarkowanie głośnym pomieszczeniu. Największym problemem okazało się wykrywanie braku oddychania z którym nasza implementacja rozpoznawania na żywo z siecią neuronową sobie nie radzi.
+	Proponowane rozwiązanie - zatrzymanie rozpoznawania w przypadku wykrycia braku aktywności użytkownika (na wzór chociażby Asystenta Google lub Siri).
 \section{Douczanie}
 
 \section{Wnioski}
-
+Sieć neuronowa lepiej radzi sobie z omawianym w sprawozdaniu zadaniem. Wynika to przede wszystkim z faktu skorzystania z gotowego, sprawdzonego już rozwiązania.
 \section{Źródła}
 \begin{thebibliography}{2}
 \bibitem{Cormen} 
@@ -343,8 +369,13 @@ Te przerwy między wyraźnymi dźwiękami oddechów pozostawały jednak oznaczon
 Kumar, E. and Surya, K. and Varma, K. and Akash, A. and Kurapati, Nithish Reddy (2023) \emph{Noise Reduction in Audio File Using Spectral Gatting and FFT by Python Modules}
 \bibitem{SavgolImage}
 \url{https://www.maplesoft.com/Applications/Detail.aspx?id=154593}
+\bibitem{Głębokie uczenie maszyn}
+\url{https://www.deltami.edu.pl/temat/informatyka/sztuczna_inteligencja/2017/12/28/Glebokie_uczenie_maszyn/}
+\bibitem{Warstwa w pełni połączona}
+\url{http://sciagaprogramisty.blogspot.com/2018/03/fully-connected-layer-fc-warstwa-w-peni.html}
+\bibitem{Keras Tutorial}
+\url{https://www.tutorialspoint.com/keras}
 \end{thebibliography}
-
 
 
 \end{document}
