@@ -184,10 +184,10 @@ def detection_loudonly(model, scaler, chunk_size=352, input_size=40, uses_previo
                 color = (0, 255, 0)
             elif state == "out":
                 color = (255, 0, 0)
-                fx -= 0.08
+                fx -= 0.05
                 pred_history.append(fx)
                 pred_time.append(time.time())
-                radius -= 0.8
+                radius -= 0.5
             else:
                 fx += 0.1
                 pred_history.append(fx)
