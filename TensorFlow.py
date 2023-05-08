@@ -16,7 +16,7 @@ from keras import models
 from macros import freg
 import macros
 from src.quality_measures import QualityMeasures
-
+import tensorflow_io as tfio
 
 class TensorFlow:
     # Stworzenie etykiet na podstawie folderów
@@ -139,6 +139,7 @@ class TensorFlow:
             equal_length, frame_length=255, frame_step=128)
         # Obtain the magnitude of the STFT.
         spectrogram = tf.abs(spectrogram)
+        spectrogram
         # Add a `channels` dimension, so that the spectrogram can be used
         # as image-like input data with convolution layers (which expect
         # shape (`batch_size`, `height`, `width`, `channels`).

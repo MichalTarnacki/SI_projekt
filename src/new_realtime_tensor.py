@@ -23,7 +23,6 @@ def new_realtime_tensor():
     CHANNELS = 1
     RATE = 44100
     CHUNK = 1024
-    RECORD_SECONDS = 3
     window = np.blackman(CHUNK)
     model = models.load_model(f'{macros.model_path}tensorflow')
     plt.ion()
@@ -34,9 +33,7 @@ def new_realtime_tensor():
     p = None
     stream = None
     contin = True
-    saved_chunks = 100
-
-
+    saved_chunks = 20
 
     def record_thread():
         nonlocal stream
@@ -50,8 +47,8 @@ def new_realtime_tensor():
             waveData = np.frombuffer(stream.read(CHUNK, exception_on_overflow=False), dtype=np.int16)
 
             saved.extend(waveData)
-            if saved.__len__() >= (saved_chunks+1)*CHUNK:
-                #sd.play(saved, 44100)
+            if saved.__len__() >= (saved_chunks + 1) * CHUNK:
+                # sd.play(saved, 44100)
                 saved = saved[CHUNK:]
         stream.stop_stream()
         stream.close()
@@ -63,18 +60,19 @@ def new_realtime_tensor():
     def soundPlot():
         nonlocal saved, window, ax1, model, saved_chunks
         while True:
-            if saved.__len__() >= saved_chunks*CHUNK:
-                #x = sp.signal_clean(saved)
-                commands, pred  = TensorFlow.new_predict(model,saved)
+            if saved.__len__() >= saved_chunks * CHUNK:
+                # sd.play(saved, 44100)
+                # x = sp.signal_clean(saved)
+                commands, pred = TensorFlow.new_predict(model, saved)
 
                 color = None
                 title = None
-                if pred[1] > 0.90 and np.mean(np.abs(saved)) > 50: #and pred[1]<10:
-                    color = 'g' #if commands[0] == 'in' else 'r'
-                    title = 'in' #if commands[0] == 'in' else 'out'
-                elif pred[0] > 0.90 and np.mean(np.abs(saved)) > 50:# and pred[0]<10:
-                    color = 'r'# if commands[1] == 'out' else 'g'
-                    title = 'out'# if commands[1] == 'out' else 'in'
+                if pred[1] > 0.90:  # and pred[1]<10:
+                    color = 'g'  # if commands[0] == 'in' else 'r'
+                    title = 'in'  # if commands[0] == 'in' else 'out'
+                elif pred[0] > 0.99:  # and pred[0]<10:
+                    color = 'r'  # if commands[1] == 'out' else 'g'
+                    title = 'out'  # if commands[1] == 'out' else 'in'
                 else:
                     title = 'none'
                     color = 'b'
@@ -86,10 +84,10 @@ def new_realtime_tensor():
                 ax1.plot(indata, color)
                 ax1.grid()
                 ax1.set_title(title)
-                # plt.ylim([0,1])
-                # ax1.bar(commands, pred, color='maroon',
-                #         width=0.4)
-                plt.pause(0.1)
+                plt.ylim([0,1])
+                ax1.bar(commands, pred, color='maroon',
+                        width=0.4)
+                plt.pause(0.001)
 
     tr = threading.Thread(target=record_thread)
     tr2 = threading.Thread(target=write_thread)
