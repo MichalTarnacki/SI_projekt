@@ -65,11 +65,9 @@ if __name__ == '__main__':
                 'svm_custom_softmax_loudonly',
                 True, False)
         elif x == '3':
-            test_qualitative('svm_custom_softmax_prevstate', with_previous_state=True,
-                             with_bg=False)
+            test_qualitative('svm_custom_softmax_prevstate', with_previous_state=True)
         elif x == '3.1':
-            test_qualitative_loudonly('svm_custom_softmax_loudonly_prevstate', with_previous_state=True,
-                                      with_bg=False)
+            test_qualitative_loudonly('svm_custom_softmax_loudonly_prevstate', with_previous_state=True)
         elif x == '4':
             x = input('Filename: ')
             show_plot(f'{macros.train_path}{x}.csv', f'{macros.train_path}{x}.wav')
