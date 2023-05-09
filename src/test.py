@@ -56,19 +56,18 @@ def test_quantitative_loudonly(testfiles, modelfile, with_previous_state):
           f"F_out = {quality_measures.f_out}\n")
 
 
-def test_qualitative(modelfile, with_previous_state, with_bg):
+def test_qualitative(modelfile, with_previous_state):
     rt.detection(
         load(f'{macros.model_path}{modelfile}.joblib'),
         load(f'{macros.model_path}{modelfile}_scaler.joblib'),
         uses_previous_state=with_previous_state,
-        with_bg=with_bg
     )
 
 
-def test_qualitative_loudonly(modelfile, with_previous_state, with_bg):
-    rt.detection_loudonly(
+def test_qualitative_loudonly(modelfile, with_previous_state):
+    rt.detection(
         load(f'{macros.model_path}{modelfile}.joblib'),
         load(f'{macros.model_path}{modelfile}_scaler.joblib'),
         uses_previous_state=with_previous_state,
-        with_bg=with_bg
+        loudonly=True
     )

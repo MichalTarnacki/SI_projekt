@@ -91,8 +91,8 @@ def show_spectrograms(pressure, sample_rate, filename):
         chunk_index += 1
 
 
-def signal_clean(signal, window=5):
-    return savgol_filter(signal, window, 2)
+def signal_clean(signal, window=10):
+    return savgol_filter(signal, window, 3)
 
 
 # add labels to constructed spectrogram frames
