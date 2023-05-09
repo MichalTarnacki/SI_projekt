@@ -65,7 +65,7 @@ Dokonano oceny jakościowej za pomocą detekcji oddechu na żywo jak i ilościow
 dalej wymienionej metryk).
 
 \section{Teoria}
-\subsection{DFT}
+\subsection{Dyskretna transformata Fouriera (DFT)}
 W celu przejścia z dziedziny natężenia od czasu do dziedziny częstotliwości stosujemy dyskretną transformatę
 Fouriera.  DFT przekształca ciąg skończonych próbek sygnału $a_0, a_1, a_2, ..., a_{N-1}$ w ciąg 
 $A_1, ..., A_{N-1} \in \mathbb{C}$
@@ -76,7 +76,9 @@ W naszych zastosowaniach będziemy brali pod uwagę tylko część rzeczywistą 
 \begin{gather*}
 	R_k = Re(A_k), 0 \le k \le N-1
 \end{gather*}
-Naszą funkcję natężenia w czasie dla pewnego okresu $t \in [t_0, t_0 + B]$, gdzie $B$ - rozmiar bloku (przyjmujemy $B=1024\approx \frac{1}{44} s$) przedstawiamy zatem jako 
+Skorzystamy z odmiany dyskretnej transformaty Fouriera - STFT (krótkoczasowa transformata Fouriera). 
+Jest to zadaniczo transformacja Fouriera jednak wykonywana w mniejszych oknach czasowych. Dzięki temu otrzymujemy informację o zmianie widma w czasie, czyli jednocześnie posiadamy informację o właściwościach zarówno w dziedzinie czasu jak i częstotliwości. Najistotniejszym parametrem tej metody jest rozmiar okna. Ponieważ iloczyn jego szerokości w dziedzinie czasu i szerokości w dziedzinie częstotliwości jest stały dla danego okna, poprawiając rozdzielczość czasu, pogarszamy rozdzielczość częstotliwości.
+Naszą funkcję natężenia w czasie dla pewnego okresu $t \in [t_0, t_0 + B]$, gdzie $B$ - rozmiar okna (przyjmujemy $B=1024\approx \frac{1}{44} s$) przedstawiamy zatem jako 
 \begin{gather*}
 	I(t) = \Sigma_{f} I_{f}(t)sin(2 \pi f t)
 \end{gather*}
@@ -88,34 +90,24 @@ W dalszych rozważaniach wykorzystujemy także średnią częstotliwość, któr
 \begin{gather*}
 	\bar{f} = \frac{\Sigma_ffI_f}{I}
 \end{gather*}
-Wykorzystujemy implementację transformaty z biblioteki $numpy$.
-\subsection{Przeliczanie częstotliwości z DFT}
-W celu wyznaczenia sposobu zamiany częstotliwości otrzymanej za pomocą DFT na znaną jednostkę (Hz) wykonaliśmy kilkanaście nagrań z ustaloną (w Hz) dominującą częstotliwością i odczytaliśmy, której wartości częstotliwości otrzymanej za pomocą DFT odpowiada maksymalne natężenie. Wyniki przedstawia rysunek 1.
+Wykorzystujemy implementację transformaty z biblioteki $numpy$ oraz $tensorflow$.
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=10cm]{przeliczanie_dft_hz}
-	\caption{}
-\end{figure}
-\noindent Po zaobserwowaniu w przybliżeniu liniowego charakteru tej relacji zastosowaliśmy metodę najmniejszych kwadratów do wyznaczenia najlepiej dopasowanej prostej. Otrzymaliśmy następujące wyniki:
-\begin{gather*}
-	f_{\unit{Hz}}\approx43,0789\,f_{\unit{DFT}}-2,8174,\\
-	f_{\unit{DFT}}\approx0,0232\,f_{\unit{Hz}}+0,068,
-\end{gather*}
-gdzie $f_{\unit{DFT}}$ to wartość liczbowa częstotliwości w jednostkach, w której otrzymuje się wynik DFT, natomiast $f_{\unit{Hz}}$ to wartość liczbowa częstotliwości wyrażonej w \unit{Hz}.
-\subsection{STFT}
-Dla sieci neuronowej zamiast posługiwać się zwykłym DFT (na całym przedziale), używamy STFT, czyli krótko-czasowej transformacji Fouriera. Jest to zadaniczo transformacja Fouriera jednak wykonywana w mniejszych oknach czasowych. Dzięki temu otrzymujemy także informację o zmianie widma w czasie, czyli jednocześnie posiadamy informację o właściwościach zarówno w dziedzinie czasu jak i częstotliwości. Najistotniejszym parametrem tej metody jest rozmiar okna. Ponieważ iloczyn jego szerokości w dziedzinie czasu i szerokości w dziedzinie częstotliwości jest stały dla danego okna, poprawiając rozdzielczość czasu, pogarszamy rozdzielczość częstotliwości. Użyliśmy gotowej funkcji z biblioteki tensorflow, nie będziemy więc dokładniej opisywać sposobu implementacji STFT. W naszym przypadku, za szerokość okna ustawiliśmy wartość 255. Rysunek 2 reprezentuje wykres natężenia dźwięku w zależności od czasu, oraz spektrogram stworzony na podstawie niego omawianą metodą.
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=10cm]{STFT.png}
-	\caption{}
+	\includegraphics[width=10cm]{stft2}
+	\caption{Przykład sygnału wdechu i wydechu nosem poddanego transformacie Fouriera dla okien czasowych - otrzymujemy nowy wymiar informacji, czyli nie tylko natężenie
+dźwięku ale też natężenie poszczegółnych częstotliwości w dźwięku}
 \end{figure}
 
 \subsection{Bramka szumów}
 Głowna metoda odszumiana, z której korzystamy to $Spectral$ $Gating$ (rodzaj bramki szumów).  Pierw wyznaczany jest spektrogram sygnału za pomocą $DFT$ i 
 tworzony jest próg szumu dla każdej jego częstotliwości.
 Częstotliwości progowe służą to stworzenia maski, której potem używamy do usunięcia niechcianych dźwięków.
-Następnie ze spektrogramu tworzymy z powrotem natężenie $I(t)$. W projekcie wykorzystujemy gotową implementację bramki szumów z biblioteki $noisereduce$\footnote{\url{https://pypi.org/project/noisereduce/}}. Przykładowe wartości osiąganych SNR w porównaniu z innymi 
-algorytmami usuwania szumu\footnote{źródła [3]}:
+Następnie ze spektrogramu tworzymy z powrotem natężenie $I(t)$. W projekcie wykorzystujemy gotową implementację bramki szumów z biblioteki $noisereduce$\footnote{\url{https://pypi.org/project/noisereduce/}}. Zdefiniujmy
+\begin{gather*}
+	SNR = \frac{P_s}{P_n}
+\end{gather*}
+gdzie $P_n$ - moc szumu, $P_s = P - P_n$ - moc sygnału użytecznego (moc sygnału pomniejszona o moc szumu).
+Porównanie przykładowych SNR dla algorytmów usuwania szumu\footnote{źródła [3]}:
 \begin{center}
 \begin{tabular}{c  | c }
 algorytm & SNR \\
@@ -184,6 +176,19 @@ stwierdzany stan.
 	\centering
 	\includegraphics[width=10cm]{wdechwydechcisza}
 \end{figure}
+\section{Przeliczanie częstotliwości z DFT}
+W celu wyznaczenia sposobu zamiany częstotliwości otrzymanej za pomocą DFT na znaną jednostkę (Hz) wykonaliśmy kilkanaście nagrań z ustaloną (w Hz) dominującą częstotliwością i odczytaliśmy, której wartości częstotliwości otrzymanej za pomocą DFT odpowiada maksymalne natężenie. Wyniki przedstawia rysunek 1.
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=10cm]{przeliczanie_dft_hz}
+	\caption{}
+\end{figure}
+\noindent Po zaobserwowaniu w przybliżeniu liniowego charakteru tej relacji zastosowaliśmy metodę najmniejszych kwadratów do wyznaczenia najlepiej dopasowanej prostej. Otrzymaliśmy następujące wyniki:
+\begin{gather*}
+	f_{\unit{Hz}}\approx43,0789\,f_{\unit{DFT}}-2,8174,\\
+	f_{\unit{DFT}}\approx0,0232\,f_{\unit{Hz}}+0,068,
+\end{gather*}
+gdzie $f_{\unit{DFT}}$ to wartość liczbowa częstotliwości w jednostkach, w której otrzymuje się wynik DFT, natomiast $f_{\unit{Hz}}$ to wartość liczbowa częstotliwości wyrażonej w \unit{Hz}.
 Jeżeli koło zwiększa się i jest niebieskie to model wykrywa wdech, jeśli zmniejsza się i jest
 czerwone to jest to wydech, natomiast kolor zielony oznacza, że natężenie dźwięku nie przekracza pewnego 
 progu dobieranego eksperymentalnie w zależności od mikrofonu.
