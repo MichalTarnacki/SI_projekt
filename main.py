@@ -1,4 +1,5 @@
 from keras import models
+from joblib import load
 
 from macros import freg
 import macros
@@ -12,6 +13,7 @@ from src.new_realtime import new_realtime
 from src.test import test_quantitative, test_qualitative, test_quantitative_loudonly, test_qualitative_loudonly
 from src.new_realtime_tensor import new_realtime_tensor
 import re
+import src.real_time as realtime
 
 def show_plot(file_csv, file_wav):
     x, y, sample_rate = du.wav_to_sample_xy(file_wav)
@@ -41,6 +43,23 @@ def record():
     if pl.Path.exists(pl.Path(filename + '.wav')):
         #   show_plot(filename + '.csv', filename + '.wav')
         print(filename)
+
+
+NOSE_IN_MOUTH_OUT_MODEL = "media/models/outmodel/nose_in_mouth_out/svm_prevstate"
+
+def menu():
+    while True:
+        print("1. Nose in, mouth out\n"
+              "2. Nose in, nose out\n")
+        x = input()
+        if x == "1":
+            realtime.detection(
+                load(NOSE_IN_MOUTH_OUT_MODEL+".joblib"),
+                load(NOSE_IN_MOUTH_OUT_MODEL+"_scaler.joblib"),
+                uses_previous_state=True,
+                loudonly=False)
+        elif x == "2":
+            pass
 
 
 if __name__ == '__main__':

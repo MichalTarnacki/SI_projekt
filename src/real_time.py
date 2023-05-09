@@ -18,7 +18,7 @@ BALL_START_RADIUS = 100
 PLOT_HEIGHT = WIN_HEIGHT * 3 / 4
 PLOT_MARGIN = 10
 
-MIN_MAX_BALL = {"min": 10, "max": 300}
+MIN_MAX_BALL = {"min": 10, "max": 150}
 MIN_MAX_FVAL = {"min": -200, "max": 200}
 
 THRESHOLD = 300
@@ -66,7 +66,7 @@ def detection(model, scaler, uses_previous_state=False, loudonly=False):
                 return
         screen.fill((0, 0, 0))
 
-        if samples.shape[0] > sp.CHUNK_SIZE:
+        if samples.shape[0] > NOISE_REDUCTION_PERIOD:
             clean = noisereduce.reduce_noise(samples[-NOISE_REDUCTION_PERIOD:], SAMPLERATE)
 
             last_frame = abs(np.fft.rfft(clean[len(clean) - sp.CHUNK_SIZE:]))
