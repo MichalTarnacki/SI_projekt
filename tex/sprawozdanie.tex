@@ -95,7 +95,7 @@ Wykorzystujemy implementację transformaty z biblioteki $numpy$ oraz $tensorflow
 	\centering
 	\includegraphics[width=10cm]{stft2}
 	\caption{Przykład sygnału wdechu i wydechu nosem poddanego transformacie Fouriera dla okien czasowych - otrzymujemy nowy wymiar informacji, czyli nie tylko natężenie
-dźwięku ale też natężenie poszczegółnych częstotliwości w dźwięku}
+dźwięku ale też natężenie poszczegółnych częstotliwości w dźwięku. Obraz z programu Sonic Visualizer, który realizuje STFT}
 \end{figure}
 
 \subsection{Bramka szumów}
@@ -107,7 +107,7 @@ Następnie ze spektrogramu tworzymy z powrotem natężenie $I(t)$. W projekcie w
 	SNR = \frac{P_s}{P_n}
 \end{gather*}
 gdzie $P_n$ - moc szumu, $P_s = P - P_n$ - moc sygnału użytecznego (moc sygnału pomniejszona o moc szumu).
-Porównanie przykładowych SNR dla algorytmów usuwania szumu\footnote{źródła [3]}:
+Porównanie przykładowych SNR dla algorytmów usuwania szumu\footnote{Kumar, E. and Surya, K. and Varma, K. and Akash, A. and Kurapati, Nithish Reddy (2023) \emph{Noise Reduction in Audio File Using Spectral Gatting and FFT by Python Modules}}:
 \begin{center}
 \begin{tabular}{c  | c }
 algorytm & SNR \\
@@ -125,6 +125,7 @@ z biblioteki $scipy$. W przypadku sieci neuronowej korzystamy natomiast z warstw
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=10cm]{savitzky_golay_filter}
+	\caption{Wizualizacja działania filtru Savitzky'ego-Golaya dla przykładowego zbioru próbek, \url{https://www.maplesoft.com/Applications/Detail.aspx?id=154593}}
 \end{figure}
 
 \subsection{Ocena modeli}
@@ -135,7 +136,11 @@ Zastosowaliśmy następujące miary oceny ilościowej modelu:
 	&recall_{wdech} = \frac{|TP_{wdech}|}{|TP_{wdech}|+|FN_{wdech}|}&\\
 	&F_{wdech} = \frac{2 \cdot precision_{wdech} \cdot recall_{wdech}}{precision_{wdech} + recall_{wdech}}&
 \end{flalign*}
-oraz analogicznie $precision_{wydech}$, $recall_{wydech}$ i $F_{wydech}$.
+gdzie $TP_{wdech}$ - ilość próbek oznaczonych jako wdech, które sklasyfikowane zostały jako wdech,
+$TN_{wdech}$ - ilość próbek nieoznaczonych jako wdech, które nie zostały sklasyfikowane jako wdech,
+$FP_{wdech}$ - ilość próbek nieoznaczonych jako wdech, które zostały sklasyfikowane jako wdech,
+$FN_{wdech}$ - ilość próbek oznaczonych jako wdech, które nie zostały sklasyfikowane jako wdech.
+Analogicznie definiujemy $precision_{wydech}, recall_{wydech}, F_{wydech}$.
 \subsection{Standaryzacja}
 Dane wejściowe do modelu zawsze standaryzujemy, czyli
 \begin{gather*}
@@ -175,7 +180,12 @@ stwierdzany stan.
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=10cm]{wdechwydechcisza}
+	\caption{Jeżeli koło zwiększa się i jest niebieskie to model wykrywa wdech, jeśli zmniejsza się i jest
+czerwone to jest to wydech, natomiast kolor zielony oznacza, że natężenie dźwięku nie przekracza pewnego 
+progu dobieranego eksperymentalnie w zależności od mikrofonu.
+Dalej klasyfikacja na żywo nazywana jest też testem jakościowym.}
 \end{figure}
+
 \section{Przeliczanie częstotliwości z DFT}
 W celu wyznaczenia sposobu zamiany częstotliwości otrzymanej za pomocą DFT na znaną jednostkę (Hz) wykonaliśmy kilkanaście nagrań z ustaloną (w Hz) dominującą częstotliwością i odczytaliśmy, której wartości częstotliwości otrzymanej za pomocą DFT odpowiada maksymalne natężenie. Wyniki przedstawia rysunek 1.
 \begin{figure}[H]
@@ -352,12 +362,7 @@ Stosując poszczególne warstwy nasz spektrogram jest odpowiednio przetwarzany t
 W przeciwieństwie do SVM, aktualną predykcję określamy nie na podstawie poprzedniego stanu, lecz dla stanu sprzed pewnej chwili czasowej. W naszym przypadku aktualnie wyświetlany stan pochodzi sprzed około 0,5 s. Oczywiście powoduje to pewne opóźnienie, jednak praktycznie niezauważalne przez użytkownika. Podejście to nie ulega jednak propagacji błędów, którą widzimy w przypadku SVM.
 \subsection{Problemy}
 Przy rozpoznawaniu próbki zakładamy przynależność do jednej z dwóch klas. W przypadku gdy jako dane wejściowe mamy jedynie wdechy i wydechy nie stanowi to problemu. Gdy jednak chcemy rozpoznać brak oddychania musimy założyć pewien próg pewności co otrzymanej klasyfikacji. Eksperymentalnie przyjęliśmy iż wdech jest wdechem gdy pewność sieci neuronowej wynosi 99\% natomiast co do wydechów przyjęliśmy pewność na poziomie 70\%. 
-\section{Przejście na inny model oddychania - SVM}
-\subsection{Metoda}
-\subsection{Wykorzystywane próbki}
-W przeciwieństwie do SVM, aktualną predykcję określamy nie na podstawie poprzedniego stanu, lecz dla stanu sprzed pewnej chwili czasowej. W naszym przypadku aktualnie wyświetlany stan pochodzi sprzed około 0,5 s. Oczywiście powoduje to pewne opóźnienie, jednak praktycznie niezauważalne przez użytownika. Podejście to nie ulega jednak propagacji błędów, którą widzimy w przypadku SVM.
-\subsection{Problemy}
-Przy rozpoznawaniu próbki zakładamy przynależność do jednej z dwóch klas. W przypadku gdy jako dane wejściowe mamy jedynie wdechy i wydechy nie stanowi to problemu. Gdy jednak chcemy rozpoznać brak oddychania musimy założyć pewien próg pewności co otrzymanej klasyfikacji. Eksperymentalnie przyjęliśmy iż wdech jest wdechem gdy pewność sieci neuronowej wynosi 99\% natomiast co do wydechów 70\%. 
+
 \section{Przejście na inny model oddychania}
 \subsection{Wydech nosem}
 Kolejnym krokiem było przeniesienie wypracowanej metody uczenia na rozpoznawanie wdechu oraz wydechu nosem. W takim przypadku różnice między fazami oddechu są mniej zauważalne, co wymagało kolejnych udoskonaleń.
@@ -383,17 +388,9 @@ Nietrudno było zaobserwować, iż znaczą część nagrań zajmuje cisza lub d�
 	\caption{Wykres natężenia dźwięku w nagraniu wdechu i wydechu nosem uzyskany przy użyciu programu Audacity.}
 \end{figure}
 Te przerwy między wyraźnymi dźwiękami oddechów pozostawały jednak oznaczone jako wdech lub wydech. Z tego powodu model trenowaliśmy w jednym przypadku informacją, iż cisza występuje podczas wdechu, a w innym -- że w trakcie wydechu. Postanowiliśmy usunąć tę niedoskonałość z przypuszczeniem, iż poprawi to wyniki działania programu.
-\section{Przejście na inny model oddychania - sieć neuronowa}
-Ze względu na dobre działanie modelu, postanowiliśmy nie implementować dodatkowych usprawnień a jedynie nagrać dodatkowe dane uczące.
-\section{Działanie modelu a hałas z otoczenia}
-\subsection{SVM}
-\subsection{Sieć neuronowa}
-Testy doświadczalne wykazały dobre rozpoznawanie zarówno wdechów i wydechów podczas przebywania w umiarkowanie głośnym pomieszczeniu. Największym problemem okazało się wykrywanie braku oddychania z którym nasza implementacja rozpoznawania na żywo z siecią neuronową sobie nie radzi.
-	Proponowane rozwiązanie - zatrzymanie rozpoznawania w przypadku wykrycia braku aktywności użytkownika (na wzór chociażby Asystenta Google lub Siri).
-\section{Douczanie}
 
 \section{Wnioski}
-Sieć neuronowa lepiej radzi sobie z omawianym w sprawozdaniu zadaniem. Wynika to przede wszystkim z faktu skorzystania z gotowego, sprawdzonego już rozwiązania.
+Todo
 \section{Źródła}
 \begin{thebibliography}{2}
 \bibitem{Cormen} 
