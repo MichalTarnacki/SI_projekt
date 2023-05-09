@@ -1,4 +1,5 @@
 import math
+from abc import ABC, abstractmethod
 
 import numpy as np
 
@@ -15,10 +16,13 @@ import numpy as np
 
 class SVM:
 
-    def __init__(self, C=1.0):
+    def __init__(self, C=100, batch_size=200, learning_rate=0.0001, epochs=200):
         self.C = C
         self.w = []
         self.b = 0
+        self.batch_size = batch_size
+        self.learning_rate = learning_rate
+        self.epochs = epochs
 
     def hingeloss(self, w, b, x, y):
         reg = 0.5 * (w * w)
@@ -28,7 +32,11 @@ class SVM:
 
         return loss[0][0]
 
-    def fit(self, X, Y, batch_size=1, learning_rate=0.0001, epochs=200):
+    def fit(self, X, Y):
+        epochs = self.epochs
+        batch_size = self.batch_size
+        learning_rate = self.learning_rate
+
         number_of_features = X.shape[1]
         number_of_samples = X.shape[0]
         c = self.C
@@ -71,18 +79,60 @@ class SVM:
         return 'in' if np.sign(prediction) == 1 else 'out'
 
 
+class SVMWrapper(ABC):
+
+    def __init__(self):
+        self.svm = SVM()
+
+    @abstractmethod
+    def select_key_frequencies(self, X):
+        pass
+
+    @staticmethod
+    def to_string(prediction):
+        if prediction == 1 or prediction == -1 or prediction == 0:
+            return "in" if prediction == 1 else "out"
+        return prediction
+
+    def fit(self, X, Y):
+        modified_X = self.select_key_frequencies(X)
+        self.svm.fit(modified_X, Y)
+
+    def predict(self, X):
+        modified_X = self.select_key_frequencies(X)
+        return SVMWrapper.to_string(self.svm.predict(modified_X))
+
+
+class StandardScalerIgnorePreviousState(TransformerMixin):
+    def __init__(self):
+        self.scaler = StandardScaler()
+
+    def fit(self, X):
+        self.scaler.fit(X[:, :-1])
+        return self
+
+    def transform(self, X):
+        X_head = self.scaler.transform(X[:, :-1])
+        return np.concatenate((X_head, X[:, -1:]), axis=1)
+
+class MouthOutSVMWrapper(SVMWrapper):
+    def select_key_frequencies(self, X):
+        return np.array([np.concatenate([x[:169], [x[len(x) - 1]]]) for x in X])
+
+
+class NoseOutSVMWrapper(SVMWrapper):
+    def select_key_frequencies(self, X):
+        return np.array([np.concatenate([x[:371], [x[len(x) - 1]]]) for x in X])
+
+class MouthOutLoudonlySVMWrapper(MouthOutSVMWrapper):
+    def __init__(self):
+        super().__init__()
+        self.svm = SVM(C=1, learning_rate=0.001, batch_size=1)
+
 def transform_to_binary(y):
     decisions = {'in': 1, 'out': -1}
 
     return [decisions[t] for t in y]
-
-
-def transform_to_extended(x):
-    return np.array([extended(xi) for xi in x])
-
-
-def extended(x):
-    return np.append(x, 1)
 
 
 def library_svm_train(filenames, modelname):
@@ -112,140 +162,26 @@ def svm_train_basic(filenames, modelname):
     return clf, scaler
 
 
-def svm_train_with_previous_state(filenames, modelname, softmax=False, with_bg=False):
-    x_train, y_train, chunk_size = dataset.build(filenames, macros.train_path, True, with_bg)
+def svm_train_with_previous_state(filenames, modelname, mouth_out=True, loudonly=False):
+    if loudonly:
+        x_train, y_train, chunk_size = dataset.build_loudonly(filenames, macros.train_path, previous_state=True)
+    else:
+        x_train, y_train, chunk_size = dataset.build(filenames, macros.train_path, previous_state=True)
 
     scaler = StandardScalerIgnorePreviousState()
     x_train_std = scaler.fit(x_train).transform(x_train)
     y_train = transform_to_binary(y_train)
 
-    if softmax:
-        clf = SoftmaxSvm()
+    if loudonly:
+        clf = MouthOutLoudonlySVMWrapper()
     else:
-        clf = SVM()
+        if mouth_out:
+            clf = MouthOutSVMWrapper()
+        else:
+            clf = NoseOutSVMWrapper()
 
     clf.fit(x_train_std, y_train)
-    dump(clf, f'{macros.model_path}{modelname}_prevstate.joblib')
-    dump(scaler, f'{macros.model_path}{modelname}_prevstate_scaler.joblib')
+    dump(clf, f'{macros.model_path}{modelname}.joblib')
+    dump(scaler, f'{macros.model_path}{modelname}_scaler.joblib')
 
     return clf, scaler
-
-
-def svm_train_with_previous_state_loudonly(filenames, modelname, softmax=False, with_bg=False):
-    x_train, y_train, chunk_size = dataset.build_loudonly(filenames, macros.train_path, True, with_bg)
-
-    scaler = StandardScalerIgnorePreviousState()
-    x_train_std = scaler.fit(x_train).transform(x_train)
-    y_train = transform_to_binary(y_train)
-
-    if softmax:
-        clf = SoftmaxLoudOnlySvm()
-    else:
-        clf = SVM()
-
-    clf.fit(x_train_std, y_train)
-    dump(clf, f'{macros.model_path}{modelname}_prevstate.joblib')
-    dump(scaler, f'{macros.model_path}{modelname}_prevstate_scaler.joblib')
-
-    return clf, scaler
-
-
-class StandardScalerIgnorePreviousState(TransformerMixin):
-    def __init__(self):
-        self.scaler = StandardScaler()
-
-    def fit(self, X):
-        self.scaler.fit(X[:, :-1])
-        return self
-
-    def transform(self, X):
-        X_head = self.scaler.transform(X[:, :-1])
-        return np.concatenate((X_head, X[:, -1:]), axis=1)
-
-
-class SoftmaxSvm:
-    def __init__(self):
-        self.in_SVM = SVM()
-        self.out_SVM = SVM()
-        self.classifier_SVM = SVM()
-
-    def fit(self, X, Y):
-        modified = np.array([np.concatenate([x[:371], [x[len(x) - 1]]]) for x in X])
-        self.in_SVM.fit(modified, Y)
-        return self.in_SVM.w, self.in_SVM.b
-        # print("breathe in SVM")
-        # Xin = X[:, 70:]
-        # self.in_SVM.fit(Xin, Y)
-        # print("breathe out SVM")
-        # Xout = np.concatenate([X[:, :30], [X[:, 160]]])
-        # self.out_SVM.fit(Xout, Y)
-        # # self.out_SVM.fit(np.concatenate([X[,:80], [X[160]]]), Y)
-        # print("classifier SVM")
-        # X_new = np.array([self.to_softmax(x) for x in X])
-        # self.classifier_SVM.fit(X_new, Y, batch_size=100)
-
-        # return (self.in_SVM.w, self.in_SVM.b), (self.out_SVM.w, self.out_SVM.b)
-
-    def to_softmax(self, X):
-        prediction_in = np.dot(X, self.in_SVM.w[0]) + self.in_SVM.b  # 1 - in, -1 - not in
-        prediction_out = -1 * (np.dot(X, self.out_SVM.w[0]) + self.out_SVM.b)  # 1 - out, -1 - not out
-
-        e_in = math.exp(prediction_in - max(prediction_in, prediction_out))
-        e_out = math.exp(prediction_out - max(prediction_in, prediction_out))
-        su = e_in + e_out
-        return e_in/su, e_out/su
-
-    def predict(self, X):
-        modified = np.array([np.concatenate([x[:371], [x[len(x) - 1]]]) for x in X])
-        return self.in_SVM.predict(modified)
-        # softmax_in, softmax_out = self.to_softmax(X)
-        # prediction = np.dot(np.array([softmax_in, softmax_out]), self.classifier_SVM.w[0]) + self.classifier_SVM.b
-
-        # return 'in' if np.sign(prediction) == 1 else 'out'
-
-
-def select_key_frequencies(X):
-    return np.array([np.concatenate([x[:371], [x[len(x) - 1]]]) for x in X])
-
-
-class SoftmaxLoudOnlySvm:
-    def __init__(self):
-        self.in_SVM = SVM()
-        self.out_SVM = SVM()
-        self.classifier_SVM = SVM()
-
-    def fit(self, X, Y):
-        modified_X = select_key_frequencies(X)
-
-        self.in_SVM.fit(modified_X, Y)
-        return self.in_SVM.w, self.in_SVM.b
-        # print("breathe in SVM")
-        # Xin = X[:, 70:]
-        # self.in_SVM.fit(Xin, Y)
-        # print("breathe out SVM")
-        # Xout = np.concatenate([X[:, :30], [X[:, 160]]])
-        # self.out_SVM.fit(Xout, Y)
-        # # self.out_SVM.fit(np.concatenate([X[,:80], [X[160]]]), Y)
-        # print("classifier SVM")
-        # X_new = np.array([self.to_softmax(x) for x in X])
-        # self.classifier_SVM.fit(X_new, Y, batch_size=100)
-
-        # return (self.in_SVM.w, self.in_SVM.b), (self.out_SVM.w, self.out_SVM.b)
-
-    def to_softmax(self, X):
-        prediction_in = np.dot(X, self.in_SVM.w[0]) + self.in_SVM.b  # 1 - in, -1 - not in
-        prediction_out = -1 * (np.dot(X, self.out_SVM.w[0]) + self.out_SVM.b)  # 1 - out, -1 - not out
-
-        e_in = math.exp(prediction_in - max(prediction_in, prediction_out))
-        e_out = math.exp(prediction_out - max(prediction_in, prediction_out))
-        su = e_in + e_out
-        return e_in/su, e_out/su
-
-    def predict(self, X):
-        modified_X = select_key_frequencies(X)
-        return self.in_SVM.predict(modified_X)
-        # softmax_in, softmax_out = self.to_softmax(X)
-        # prediction = np.dot(np.array([softmax_in, softmax_out]), self.classifier_SVM.w[0]) + self.classifier_SVM.b
-
-        # return 'in' if np.sign(prediction) == 1 else 'out'
-

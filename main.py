@@ -1,4 +1,4 @@
-from keras import models
+# from keras import models
 from joblib import load
 
 from macros import freg
@@ -75,29 +75,29 @@ if __name__ == '__main__':
             folder = pl.Path(macros.train_path)
             svm.svm_train_with_previous_state(
                 list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)])),
-                'svm_custom_softmax',
-                True, False)
+                'svm_trained',
+                mouth_out=True, loudonly=False)
         elif x == '2.1':
             folder = pl.Path(macros.train_path)
-            svm.svm_train_with_previous_state_loudonly(
+            svm.svm_train_with_previous_state(
                 list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)])),
-                'svm_custom_softmax_loudonly',
-                True, False)
+                'svm_trained_loud',
+                mouth_out=True, loudonly=True)
         elif x == '3':
-            test_qualitative('svm_custom_softmax_prevstate', with_previous_state=True)
+            test_qualitative('svm_trained', with_previous_state=True)
         elif x == '3.1':
-            test_qualitative_loudonly('svm_custom_softmax_loudonly_prevstate', with_previous_state=True)
+            test_qualitative_loudonly('svm_trained_loud', with_previous_state=True)
         elif x == '4':
             x = input('Filename: ')
             show_plot(f'{macros.train_path}{x}.csv', f'{macros.train_path}{x}.wav')
         elif x == '5':
             folder = pl.Path(macros.test_path)
             test_quantitative(list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)])),
-                              'svm_custom_softmax_prevstate', True)
+                              'svm_trained', True)
         elif x == '5.1':
             folder = pl.Path(macros.test_path)
             test_quantitative_loudonly(list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)])),
-                                       'svm_custom_softmax_loudonly_prevstate', True)
+                                       'svm_trained_loud', True)
         elif x == '7':
             new_realtime()
         elif x == '8':
