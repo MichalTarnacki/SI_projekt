@@ -16,7 +16,6 @@ from keras import models
 from macros import freg
 import macros
 from src.quality_measures import QualityMeasures
-import tensorflow_io as tfio
 
 class TensorFlow:
     # Stworzenie etykiet na podstawie folderów
@@ -396,6 +395,8 @@ class TensorFlow:
             layers.Resizing(32, 32),
             # Normalize.
             norm_layer,
+
+
             # Splot
             # https://www.quora.com/Is-flatten-considered-a-separate-layer-when-using-Keras-to-build-a-CNN-model
             layers.Conv2D(32, 3, activation='relu'),
@@ -410,6 +411,10 @@ class TensorFlow:
             layers.Flatten(),
 
             layers.Dense(128, activation='relu'),
+            layers.Dropout(0.5),
+            layers.Dense(64, activation='relu'),
+            layers.Dropout(0.5),
+            layers.Dense(32, activation='softmax'),
             layers.Dropout(0.5),
             layers.Dense(num_labels),
         ])
@@ -433,3 +438,69 @@ class TensorFlow:
             folder = pl.Path(f'{macros.model_path}tensorflow')
             shutil.rmtree(folder)
         model.save(f'{macros.model_path}tensorflow')
+
+
+    @staticmethod
+    def train_rnn(epochs):
+
+            train_files, val_files, test_files = TensorFlow.get_files()
+            files_ds, waveform_ds, _ = TensorFlow.create_ds(train_files)
+
+            train_ds = waveform_ds
+            _, _, val_ds = TensorFlow.create_ds(val_files)
+            _, _, test_ds = TensorFlow.create_ds(test_files)
+
+            batch_size = 64
+            train_ds = train_ds.batch(batch_size)
+            val_ds = val_ds.batch(batch_size)
+
+            train_ds = train_ds.cache().prefetch(TensorFlow.AUTOTUNE)
+            val_ds = val_ds.cache().prefetch(TensorFlow.AUTOTUNE)
+
+            input_shape = None
+            for spectrogram, _ in waveform_ds.take(1):
+                input_shape = spectrogram.shape
+            num_labels = len(TensorFlow.commands)
+
+            # Warstwa normalizacyjna
+            norm_layer = layers.Normalization()
+            # Obliczenie średniej i wariancji
+            # norm_layer.adapt(data=waveform_ds.map(map_func=lambda spec, label: spec))
+
+            # Warstwy
+            model = models.Sequential([
+                layers.Input(shape=input_shape),
+                # layers.Resizing(32, 32),
+                # norm_layer,
+                layers.Lambda(lambda x: x[ :, :, 0], input_shape=(*input_shape, 3)),
+                layers.SimpleRNN(128, return_sequences=True),
+                layers.LSTM(64),
+
+                layers.Dense(128, activation='relu'),
+                layers.Dropout(0.5),
+                layers.Dense(64, activation='relu'),
+                layers.Dropout(0.5),
+                layers.Dense(32, activation='softmax'),
+                layers.Dropout(0.5),
+                layers.Dense(num_labels),
+            ])
+
+            model.summary()
+
+            model.compile(
+                optimizer=tf.keras.optimizers.Adam(),
+                loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+                metrics=['accuracy'],
+            )
+
+            EPOCHS = epochs
+            history = model.fit(
+                train_ds,
+                validation_data=val_ds,
+                epochs=EPOCHS,
+                callbacks=None  # tf.keras.callbacks.EarlyStopping(verbose=1, patience=epochs),
+            )
+            if os.path.exists(f'{macros.model_path}tensorflow'):
+                folder = pl.Path(f'{macros.model_path}tensorflow')
+                shutil.rmtree(folder)
+            model.save(f'{macros.model_path}tensorflow')
