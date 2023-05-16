@@ -1,3 +1,4 @@
+import random
 import time
 import threading
 import noisereduce
@@ -21,10 +22,60 @@ PLOT_MARGIN = 10
 MIN_MAX_BALL = {"min": 10, "max": 150}
 MIN_MAX_FVAL = {"min": -200, "max": 200}
 
-THRESHOLD = 300
+THRESHOLD = 200
 
 
-def detection(model, scaler, uses_previous_state=False, loudonly=False):
+class StateMachine:
+    WEIGHT = 0.6
+    P_MUTATION = 0.7
+
+    def __init__(self, buffer_size=5):
+        self.buffer = []
+        self.current_state = "silence_after_in"
+        self.buffer_size = buffer_size
+
+    def feed(self, state):
+        self.buffer.append(state)
+        if len(self.buffer) > self.buffer_size:
+            self.buffer = self.buffer[-self.buffer_size:]
+        self._change_state()
+
+    def _change_state(self):
+        num_ins = sum(1 for b in self.buffer if b == "in")
+        num_outs = sum(1 for b in self.buffer if b == "out")
+        num_silence = sum(1 for b in self.buffer if b == "silence")
+
+        if self.current_state == "in":
+            if num_silence / self.buffer_size >= StateMachine.WEIGHT:
+                self.current_state = "silence_after_in"
+        elif self.current_state == "out":
+            if num_silence / self.buffer_size >= StateMachine.WEIGHT:
+                self.current_state = "silence_after_out"
+        elif self.current_state == "silence_after_in":
+            if num_outs / self.buffer_size >= StateMachine.WEIGHT:
+                self.current_state = "out"
+        elif self.current_state == "silence_after_out":
+            if num_ins / self.buffer_size >= StateMachine.WEIGHT:
+                self.current_state = "in"
+        else:
+            assert 0
+        self._mutate_state(num_ins, num_outs)
+
+    def _mutate_state(self, num_ins, num_outs):
+        if self.current_state == "silence_after_out" \
+                and num_outs/self.buffer_size > StateMachine.WEIGHT \
+                and random.random() > StateMachine.P_MUTATION:
+            self.current_state = "silence_after_in"
+        elif self.current_state == "silence_after_in" \
+                and num_ins/self.buffer_size > StateMachine.WEIGHT \
+                and random.random() > StateMachine.P_MUTATION:
+            self.current_state = "silence_after_out"
+
+    def get_state(self):
+        return self.current_state
+
+
+def detection(model, scaler, uses_previous_state=False, loudonly=False, inertia=True):
     pygame.init()
     pygame.font.init()
 
@@ -53,6 +104,8 @@ def detection(model, scaler, uses_previous_state=False, loudonly=False):
     fx = 0
     pred_history = []
     pred_label = []
+    state_machine = StateMachine()
+
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -80,16 +133,29 @@ def detection(model, scaler, uses_previous_state=False, loudonly=False):
                 state = model.predict(last_frame_std)
                 prev_state = state
 
-            color = (0, 0, 255)
-            if sum(last_frame) <= THRESHOLD:
-                color = (0, 255, 0)
-            elif state == "out":
-                color = (255, 0, 0)
-                fx -= 0.05
-                radius -= 0.5
+            if inertia:
+                state_machine.feed("silence" if sum(last_frame) <= THRESHOLD else state)
+                color = (0, 0, 255)
+                if state_machine.get_state() == "silence_after_in" or state_machine.get_state() == "silence_after_out":
+                    color = (0, 255, 0)
+                elif state_machine.get_state() == "out":
+                    color = (255, 0, 0)
+                    fx -= 0.05
+                    radius -= 0.5
+                else:
+                    fx += 0.1
+                    radius += 0.5
             else:
-                fx += 0.1
-                radius += 1
+                color = (0, 0, 255)
+                if sum(last_frame) <= THRESHOLD:
+                    color = (0, 255, 0)
+                elif state == "out":
+                    color = (255, 0, 0)
+                    fx -= 0.05
+                    radius -= 0.5
+                else:
+                    fx += 0.1
+                    radius += 1
 
             radius = min(max(radius, MIN_MAX_BALL["min"]), MIN_MAX_BALL["max"])
             fx = min(max(fx, MIN_MAX_FVAL["min"]), MIN_MAX_FVAL["max"])
