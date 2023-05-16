@@ -115,6 +115,7 @@ class StandardScalerIgnorePreviousState(TransformerMixin):
         X_head = self.scaler.transform(X[:, :-1])
         return np.concatenate((X_head, X[:, -1:]), axis=1)
 
+
 class MouthOutSVMWrapper(SVMWrapper):
     def select_key_frequencies(self, X):
         return np.array([np.concatenate([x[:169], [x[len(x) - 1]]]) for x in X])
@@ -124,10 +125,12 @@ class NoseOutSVMWrapper(SVMWrapper):
     def select_key_frequencies(self, X):
         return np.array([np.concatenate([x[:371], [x[len(x) - 1]]]) for x in X])
 
+
 class MouthOutLoudonlySVMWrapper(MouthOutSVMWrapper):
     def __init__(self):
         super().__init__()
         self.svm = SVM(C=1, learning_rate=0.001, batch_size=1)
+
 
 def transform_to_binary(y):
     decisions = {'in': 1, 'out': -1}
