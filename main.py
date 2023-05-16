@@ -1,5 +1,6 @@
 # from keras import models
 from joblib import load
+from keras import models
 
 from macros import freg
 import macros
@@ -106,6 +107,8 @@ if __name__ == '__main__':
             TensorFlow.generate_seperate_files()
         elif x == '10':
             TensorFlow.train(int(input('epochs')))
+        elif x == '10.1':
+            TensorFlow.train_rnn(int(input('epochs')))
         elif x == '11':
             x = input('Filename: ')
             show_spectrograms(f'{macros.train_path}{x}.wav', x)
