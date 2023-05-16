@@ -396,6 +396,37 @@ Te przerwy między wyraźnymi dźwiękami oddechów pozostawały jednak oznaczon
 
 (napisać, że podejście też ma zastosowanie w przypadku wdechu nosem i wydechu ustami i dać poprawione metryki tego)
 
+\section{Maszyna stanów do zwiększania inercji}
+\subsection{Cel}
+Powyższe rozważania miały na celu głównie poprawę jakości klasyfikacji pojedynczej próbki, natomiast w praktyce, jaką jest klasyfikacja na żywo, nawet dokładne modele mogą powodować niechciane przeskakiwanie.
+Przypadek, w którym ktoś bierze wdech na ułamek sekundy w połowie wykonywania wydechu jest nierealny, zatem możemy nadać wynikom naszego modelu pewnej bezwładności, co czynimy za pomocą przedstawionej
+w tej sekcji maszyny stanów dobudowanej na modelu i korzystającym z jego klasyfikacji do przechodzenia między kolejnymi stanami.
+\subsection{Schemat}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=13cm]{dstanow}
+	\caption{Diagram stanów $S$, $s \in S$ oznacza stan diagramu a $A, B, C, D, M, N$ są predykatami określającymi przejścia między poszczególnymi stanami}
+\end{figure}
+Diagram działa jak na schemacie powyżej, ponadto ma bufor stanowiący historię klasyfikacji modelu, np. $bufor = [in, out, out, out, cisza]$. Niech $n$ - rozmiar bufora,
+$i$ - ilość wdechów w buforze, $o$ - ilość wydechów w buforze, $t$ - ilość cisz w buforze. Ponadto zdefiniujemy zdarzenie $X$, takie, że $P(X) = P$ dla pewnego ustalonego $P$
+oraz wagę $W$ będące parametrami maszyny stanów wpływającymi na inercję (dobraliśmy $W = 60\%, P=70\%, n = 10$). Dla tych parametrów definiujemy predykaty
+\begin{gather*}
+	A(s) = (\frac{t}{n} > W) \lor (\frac{o}{n} > W \land X) \\
+	B(s) = \frac{o}{n} > W \\
+	C(s) =  (\frac{t}{n} > W) \lor (\frac{i}{n} > W \land X) \\
+	D(s) = \frac{i}{n} > W \\
+	M(s) = \frac{o}{n} > W \land X \\
+	N(s) = \frac{i}{n} > W \land X
+\end{gather*}
+przykładowo dla stanu bufora $[in,cisza, cisza, cisza, cisza]$ oraz aktualnego stanu $s =$ wdech i reszty parametrów przyjętych tak jak powyżej nastąpi przejście
+ze stanu wdech do stanu cisza po wdechu. Zdarzenie $X$ tak samo jak predykaty $M, N$ uwzględniono, by maszyna nie była cyklem, czyli uwzględniała też możliwość np. sekwencji stanów
+wdech, cisza po wdechu, wdech, gdyby zaszedł jakiś błąd.
+
+\subsection{Rezultat}
+Wyżej zdefiniowana maszyna stanów spełnia swój rezultat - przy jej zastosowaniu przeskakiwanie stanów w klasyfikacji na żywo zostaje zmniejszone. 
+Warto jednak wspomnieć, że czynimy to kosztem wprowadzenia opóźnienia proporcjonalnego
+do wielkości bufora, teoretycznie jeśli ktoś będzie bardzo szybko oddychał to może nie zaobserwować zmian stanu. Brak zmiany stanów może też wystąpić przy nieregularnym oddechu np. kilka razy z rzędu
+wdech bez wydechu, jednak zapobiegają temu predykaty $M,N$. 
 \section{Wnioski}
 Wniosek jeden: dużo zależy od obróbki danych, różnica między sieciami w tym wypadku nie była tak zauważalna \\
 Wniosek dwa: trudno uzyskać inercję stanów oddechu i pozbyć się efektu przeskakiwania \\
