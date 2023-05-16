@@ -17,66 +17,64 @@
 \providecommand\HyField@AuxAddToFields[1]{}
 \providecommand\HyField@AuxAddToCoFields[2]{}
 \babel@aux{polish}{}
-\@writefile{toc}{\contentsline {section}{\numberline {1}Wstęp}{1}{section.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {2}Teoria}{1}{section.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}DFT}{1}{subsection.2.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Przeliczanie częstotliwości z DFT}{2}{subsection.2.2}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces \relax }}{2}{figure.caption.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}STFT}{2}{subsection.2.3}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces \relax }}{3}{figure.caption.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Bramka szumów}{3}{subsection.2.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.5}Filtr Savitzky'ego-Golaya}{4}{subsection.2.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.6}Ocena modeli}{4}{subsection.2.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.7}Standaryzacja}{4}{subsection.2.7}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.8}SVM}{5}{subsection.2.8}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.9}Sieć neuronowa}{5}{subsection.2.9}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {3}Nagrywanie danych oddechowych}{5}{section.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {1}Wstęp}{2}{section.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}Teoria}{2}{section.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Dyskretna transformata Fouriera (DFT)}{2}{subsection.2.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Przykład sygnału wdechu i wydechu nosem poddanego transformacie Fouriera dla okien czasowych - otrzymujemy nowy wymiar informacji, czyli nie tylko natężenie dźwięku ale też natężenie poszczegółnych częstotliwości w dźwięku. Obraz z programu Sonic Visualizer, który realizuje STFT\relax }}{3}{figure.caption.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Bramka szumów}{3}{subsection.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Filtr Savitzky'ego-Golaya}{4}{subsection.2.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Wizualizacja działania filtru Savitzky'ego-Golaya dla przykładowego zbioru próbek, \url  {https://www.maplesoft.com/Applications/Detail.aspx?id=154593}\relax }}{4}{figure.caption.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Ocena modeli}{5}{subsection.2.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.5}Standaryzacja}{5}{subsection.2.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.6}SVM}{5}{subsection.2.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.7}Sieć neuronowa}{6}{subsection.2.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}Narzędzia i inne}{6}{section.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Nagrywanie danych oddechowych}{6}{subsection.3.1}\protected@file@percent }
 \@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Przykładowe nagrane dane, in-wdech, out-wydech. Jak widać dane oznaczone na żywo są bardzo dokładne, być może nie bylibyśmy w stanie osiągnąć takiej dokładności oznaczając ręcznie (lub byłoby to bardzo żmudne).\relax }}{6}{figure.caption.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {4}Oddychanie na żywo}{6}{section.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {5}Przyjęty model oddechu}{7}{section.5}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Ilustracja przyjętego modelu, \href  {https://www.quora.com/Should-I-exhale-from-the-mouth-or-nose-while-deep-breathing}{źródło}\relax }}{7}{figure.caption.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {6}Średnia częstotliwość w czasie}{7}{section.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Metoda}{7}{subsection.6.1}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Przykładowe działanie modelu dla danych spełniających założenie: wyższy wdech, niższy wydech. W pewnych momentach podobnie wyglądające fragmenty krzywej powinny być wdechem, w innych wydechem, mamy więc możliwy underfitting.\relax }}{8}{figure.caption.7}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Problemy}{8}{subsection.6.2}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Nieoczywista zależność między wdechem a wydechem.\relax }}{8}{figure.caption.8}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {7}Dane wejściowe ze spektrogramu + SVM}{9}{section.7}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {7.1}Założenie}{9}{subsection.7.1}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Nie są istotne dokładne kształty powyższych spektrogramów, tylko fakt, że wydech jest pojedynczym pikiem $\in (0, 1)$ kHz a wdech częstotliwościami z natężeniem o mniejszym odchyleniu $\in (2, 7)$ kHz. Zbliżoną zależność zaobserwowano dla paru osób.\relax }}{9}{figure.caption.9}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {7.2}Metoda}{9}{subsection.7.2}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Dane z rysunku 1. oznaczone, jak widać, występują przeskoki z jednej wartości na drugą.\relax }}{10}{figure.caption.10}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {7.3}Poprzedni stan}{10}{subsection.7.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {7.4}Problemy}{11}{subsection.7.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {7.5}Szerszy spektrogram}{11}{subsection.7.5}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Spektrogramy dwóch nagrań oddechu z wdechem nosem i wydechem ustami uzyskane przy użyciu programu Audacity.\relax }}{12}{figure.caption.11}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {8}Dane wejściowe z mikrofonu + Sieć neuronowa}{13}{section.8}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {8.1}Założenie}{13}{subsection.8.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {8.2}Metoda}{13}{subsection.8.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {8.3}Wykorzystywane próbki}{14}{subsection.8.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {8.4}Problemy}{14}{subsection.8.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {9}Przejście na inny model oddychania - SVM}{14}{section.9}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {9.1}Metoda}{14}{subsection.9.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {9.2}Wykorzystywane próbki}{14}{subsection.9.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {9.3}Problemy}{14}{subsection.9.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {10}Przejście na inny model oddychania}{14}{section.10}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {10.1}Wydech nosem}{14}{subsection.10.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {10.2}Szerszy spektrogram}{15}{subsection.10.2}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces Spektrogramy dwóch nagrań oddechu z wdechem i wydechem nosem uzyskane przy użyciu program Audacity.\relax }}{16}{figure.caption.12}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {10.3}Usuwanie ciszy}{16}{subsection.10.3}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces Wykres natężenia dźwięku w nagraniu wdechu i wydechu nosem uzyskany przy użyciu programu Audacity.\relax }}{17}{figure.caption.13}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {11}Przejście na inny model oddychania - sieć neuronowa}{17}{section.11}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {12}Działanie modelu a hałas z otoczenia}{17}{section.12}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {12.1}SVM}{17}{subsection.12.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {12.2}Sieć neuronowa}{17}{subsection.12.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Oddychanie na żywo}{6}{subsection.3.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Jeżeli koło zwiększa się i jest niebieskie to model wykrywa wdech, jeśli zmniejsza się i jest czerwone to jest to wydech, natomiast kolor zielony oznacza, że natężenie dźwięku nie przekracza pewnego progu dobieranego eksperymentalnie w zależności od mikrofonu. Dalej klasyfikacja na żywo nazywana jest też testem jakościowym.\relax }}{7}{figure.caption.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Przeliczanie częstotliwości z DFT}{7}{subsection.3.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces na osi poziomej ustalona w \unit {Hz} dominująca częstotliwość z nagrania, na osi pionowej -- wartość częstotliwości otrzymanej w wyniku DFT, której odpowiada maksymalne natężenie.\relax }}{7}{figure.caption.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4}Początkowo przyjęty model oddechu}{8}{section.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Ilustracja przyjętego modelu, \href  {https://www.quora.com/Should-I-exhale-from-the-mouth-or-nose-while-deep-breathing}{źródło}\relax }}{8}{figure.caption.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}Pierwotne podejście - średnia częstotliwość w czasie}{8}{section.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Metoda}{8}{subsection.5.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Przykładowe działanie modelu dla danych spełniających założenie: wyższy wdech, niższy wydech. W pewnych momentach podobnie wyglądające fragmenty krzywej powinny być wdechem, w innych wydechem, mamy więc możliwy underfitting.\relax }}{9}{figure.caption.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Problemy}{9}{subsection.5.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Nieoczywista zależność między wdechem a wydechem.\relax }}{10}{figure.caption.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {6}Wykorzystanie spektrogramu}{10}{section.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Założenie}{10}{subsection.6.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Istotnym jest fakt, że w przyjętym modelu oddychania wydech jest pojedynczym pikiem $\in (0, 1)$ kHz a wdech częstotliwościami z natężeniem o mniejszym odchyleniu $\in (2, 7)$ kHz. Zbliżoną zależność zaobserwowano dla kilku badanych osób.\relax }}{10}{figure.caption.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Metoda}{11}{subsection.6.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}Kluczowe częstotliwości}{11}{subsection.6.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces Spektrogramy dwóch nagrań oddechu z wdechem nosem i wydechem ustami uzyskane przy użyciu programu Audacity.\relax }}{12}{figure.caption.11}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces Dane z rysunku 1. oznaczone, jak widać, występują przeskoki z jednej wartości na drugą.\relax }}{13}{figure.caption.12}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.4}Poprzedni stan}{13}{subsection.6.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.5}Problemy}{14}{subsection.6.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {7}Sieć neuronowa}{14}{section.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.1}Założenie}{14}{subsection.7.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.2}Metoda}{15}{subsection.7.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.3}Wykorzystywane próbki}{15}{subsection.7.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.4}Problemy}{15}{subsection.7.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {8}Przejście na inny model oddychania}{16}{section.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.1}Wydech nosem}{16}{subsection.8.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.2}Kluczowe częstotliwości}{16}{subsection.8.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces Spektrogramy dwóch nagrań oddechu z wdechem i wydechem nosem uzyskane przy użyciu program Audacity.\relax }}{17}{figure.caption.13}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.3}Usuwanie ciszy}{17}{subsection.8.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces Wykres natężenia dźwięku w nagraniu wdechu i wydechu nosem uzyskany przy użyciu programu Audacity.\relax }}{18}{figure.caption.14}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {9}Maszyna stanów do zwiększania inercji}{18}{section.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.1}Cel}{18}{subsection.9.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.2}Schemat}{19}{subsection.9.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {14}{\ignorespaces Diagram stanów $S$, $s \in S$ oznacza stan diagramu a $A, B, C, D, M, N$ są predykatami określającymi przejścia między poszczególnymi stanami\relax }}{19}{figure.caption.15}\protected@file@percent }
 \bibcite{Cormen}{1}
 \bibcite{DFT}{2}
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.3}Rezultat}{20}{subsection.9.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {10}Wnioski}{20}{section.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {11}Źródła}{20}{section.11}\protected@file@percent }
 \bibcite{STFT}{3}
 \bibcite{Bramkaszumow}{4}
 \bibcite{SavgolImage}{5}
 \bibcite{Głębokie uczenie maszyn}{6}
 \bibcite{Warstwa w pełni połączona}{7}
 \bibcite{Keras Tutorial}{8}
-\@writefile{toc}{\contentsline {section}{\numberline {13}Douczanie}{18}{section.13}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {14}Wnioski}{18}{section.14}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {15}Źródła}{18}{section.15}\protected@file@percent }
-\gdef \@abspage@last{18}
+\gdef \@abspage@last{21}
