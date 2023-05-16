@@ -29,7 +29,7 @@ class StateMachine:
     WEIGHT = 0.6
     P_MUTATION = 0.7
 
-    def __init__(self, buffer_size=5):
+    def __init__(self, buffer_size=8):
         self.buffer = []
         self.current_state = "silence_after_in"
         self.buffer_size = buffer_size
@@ -69,6 +69,14 @@ class StateMachine:
         elif self.current_state == "silence_after_in" \
                 and num_ins/self.buffer_size > StateMachine.WEIGHT \
                 and random.random() > StateMachine.P_MUTATION:
+            self.current_state = "silence_after_out"
+        elif self.current_state == "in" \
+            and num_outs/self.buffer_size > StateMachine.WEIGHT \
+            and random.random() > StateMachine.P_MUTATION:
+            self.current_state = "silence_after_in"
+        elif self.current_state == "out" \
+            and num_ins/self.buffer_size > StateMachine.WEIGHT \
+            and random.random() > StateMachine.P_MUTATION:
             self.current_state = "silence_after_out"
 
     def get_state(self):
