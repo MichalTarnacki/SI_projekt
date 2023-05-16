@@ -16,7 +16,6 @@ from keras import models
 from macros import freg
 import macros
 from src.quality_measures import QualityMeasures
-import tensorflow_io as tfio
 
 class TensorFlow:
     # Stworzenie etykiet na podstawie folderów
