@@ -63,7 +63,7 @@
 \section{Wstęp}
 Celem projektu było określanie chwil na nagraniu, w których osoba bierze wdech i wydech. 
 Dokonano oceny jakościowej za pomocą detekcji oddechu na żywo jak i ilościowej (przy wykorzystaniu
-dalej wymienionej metryk).
+dalej wymienionej miar).
 
 \section{Teoria}
 \subsection{Dyskretna transformata Fouriera (DFT)}
@@ -202,7 +202,7 @@ W celu wyznaczenia sposobu zamiany częstotliwości otrzymanej za pomocą DFT na
 \end{gather*}
 gdzie $f_{\unit{DFT}}$ to wartość liczbowa częstotliwości w jednostkach, w której otrzymuje się wynik DFT, natomiast $f_{\unit{Hz}}$ to wartość liczbowa częstotliwości wyrażonej w \unit{Hz}.
 \section{Początkowo przyjęty model oddechu}
-Na początku przyjmujemy model "sportowego" oddychania, czyli wdech nosem i wydech ustami.
+Na początku przyjmujemy model ,,sportowego'' oddychania, czyli wdech nosem i wydech ustami.
 Uproszczenie to polega na tym, że wydawane dźwięki są dosyć różne, dopiero potem sprawdzamy jak nasze podejście będzie się sprawować
 przy innych metodach oddychania.
 \begin{figure}[H]
@@ -210,7 +210,7 @@ przy innych metodach oddychania.
 	\includegraphics[width=3cm]{model_oddechu}
   	\caption{Ilustracja przyjętego modelu,  \href{https://www.quora.com/Should-I-exhale-from-the-mouth-or-nose-while-deep-breathing}{źródło}}
 \end{figure}
-\section{Pierwotne podejście - średnia częstotliwość w czasie}
+\section{Pierwotne podejście -- średnia częstotliwość w czasie}
 \subsection{Metoda}
 Pierwotnie przyjętym założeniem było, że podczas wdechu średnia częstotliwość dźwięku jest wyższa niż
 gdy osoba wydycha. Z pliku w formacie .wav pobieramy natężenie, które następnie \textbf{odszumiamy} za pomocą $noisereduce$ (przy testach jakościowych stosujemy bramkę szumów dla 3 ostatnich sekund) . 
@@ -222,7 +222,7 @@ Cechami, na podstawie których dokonywana jest predykcja są
 \end{gather*}
 czyli średnie częstotliwości z kilku przeszłych chwil.
 Dla danych testowych spełniających powyższe założenie (predykcja na podstawie ostatnich 100 i modelu wytrenowanego SVM-em dawało nam to dokładność $\sim 60\%$.
-(Inne metryki nie zostały zmierzone ze względu na problemy, o których mowa w kolejnym podpunkcie).
+(Inne miary nie zostały zmierzone ze względu na problemy, o których mowa w kolejnym podpunkcie).
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=10cm]{porownanie_srednie}
@@ -230,9 +230,9 @@ Dla danych testowych spełniających powyższe założenie (predykcja na podstaw
 	W pewnych momentach podobnie wyglądające fragmenty krzywej powinny być wdechem, w innych wydechem, mamy więc możliwy underfitting.}
 \end{figure}
 \subsection{Problemy}
-Podejście to jednak mocno ograniczna nasze dalsze pole do rozwoju.  Zmniejszenie całego 
+Podejście to jednak mocno ogranicza nasze dalsze pole do rozwoju.  Zmniejszenie całego 
 spektrogramu do pojedynczej wartości częstotliwości daje nam mniej informacji, przez co 
-być może ograniczylibyśmy się tylko do przyjętego przez nas modelu (tj.  wdech - nos, wydech - usta) - w innych
+być może ograniczylibyśmy się tylko do przyjętego przez nas modelu (tj.  wdech -- nos, wydech -- usta) -- w innych
 modelach różnica średnich częstotliwości między wdechem a wydechem może nie być taka wyraźna.  Ponadto, dla niektórych osób zaobserwowaliśmy, 
 że zależność między wdechem a wydechem jest niekoniecznie tak prosta jak założyliśmy. Obserwowana metoda
 była również bardzo niestabilna jeżeli chodzi o testy jakościowe (klasyfikację na żywo).
@@ -244,7 +244,7 @@ była również bardzo niestabilna jeżeli chodzi o testy jakościowe (klasyfika
 
 \section{Wykorzystanie spektrogramu}
 \subsection{Założenie}
-Kolejnym przyjętym przez nas podejściem było wzięcie całego spektrogramu (a przynajmniej jego części) jako dane wejściowe do SVM-a.  
+Kolejnym przyjętym przez nas podejściem było podanie całego spektrogramu (a przynajmniej jego części) jako dane wejściowe do SVM-a.  
 Metoda pochodzi od przypuszczenia, że człowiek rozpoznaje i rozróżnia wdech/wydech
 na podstawie barwy dźwięku.  
 \begin{figure}[H]
@@ -264,22 +264,22 @@ rozmiaru 1024 próbek, tworzymy dla każdego bloku spektrogram} ale tym razem ni
 Postanowiliśmy dokładniej przeanalizować, które częstotliwości są kluczowe dla poprawnej oceny fazy oddechu. W oparciu o obserwację spektrogramów wybraliśmy kilka możliwych zakresów, w których różnice między wdechem i wydechem są dobrze widoczne:
 \begin{itemize}
 	\setlength\itemsep{-0.25em}
-	\item[--] 0--6\,900 \unit{Hz},
-	\item[--] 0--1\,300 \unit{Hz} i 3\,400--22\,000 \unit{Hz},
-	\item[--] 0--14\,000 \unit{Hz},
-	\item[--] 0--1\,300 \unit{Hz} i 3\,400--14\,000 \unit{Hz},
-	\item[--] 0--8\,500 \unit{Hz} i 10\,000--14\,000 \unit{Hz},
-	\item[--] 0--16\,000 \unit{Hz},
-	\item[--] 0--1\,300 \unit{Hz} i 3\,400--16\,000 \unit{Hz},
-	\item[--] 0--1\,300 \unit{Hz}, 3\,400--8\,500 \unit{Hz} i 10\,000 \unit{Hz}--16\,000 \unit{Hz},
-	\item[--] 0--8\,500 \unit{Hz} i 10\,000--16\,000 \unit{Hz}.
+	\item[--] 0\,--\,6\,900 \unit{Hz},
+	\item[--] 0\,--\,1\,300 \unit{Hz} i 3\,400\,--\,22\,000 \unit{Hz},
+	\item[--] 0\,--\,14\,000 \unit{Hz},
+	\item[--] 0\,--\,1\,300 \unit{Hz} i 3\,400\,--\,14\,000 \unit{Hz},
+	\item[--] 0\,--\,8\,500 \unit{Hz} i 10\,000\,--\,14\,000 \unit{Hz},
+	\item[--] 0\,--\,16\,000 \unit{Hz},
+	\item[--] 0\,--\,1\,300 \unit{Hz} i 3\,400\,--\,16\,000 \unit{Hz},
+	\item[--] 0\,--\,1\,300 \unit{Hz}, 3\,400\,--\,8\,500 \unit{Hz} i 10\,000 \unit{Hz}\,--\,16\,000 \unit{Hz},
+	\item[--] 0\,--\,8\,500 \unit{Hz} i 10\,000\,--\,16\,000 \unit{Hz}.
 \end{itemize}
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=13cm]{spektrogram_wydech_ustami}
 	\caption{Spektrogramy dwóch nagrań oddechu z wdechem nosem i wydechem ustami uzyskane przy użyciu programu Audacity.}
 \end{figure}
-Dla każdego wyboru przeprowadziliśmy testy. W przypadku pierwszego uzyskaliśmy najlepsze wartości metryk i dobre działanie w przypadku przewidywania na żywo. 
+Dla każdego wyboru przeprowadziliśmy testy. W przypadku pierwszego uzyskaliśmy najlepsze wartości miar i dobre działanie w przypadku przewidywania na żywo. 
 Taki wybór częstotliwości przyjęliśmy zatem dla modelu rozpoznającego wdech nosem i wydech ustami.
  \textbf{Używamy zatem 169 częstotliwości z przedziału do 6,9 kHz} (jest to ograniczenie podobne do stosowanego w telekomunikacji dla rozmów telefonicznych).
 Stosując to podejście dla danych testowych otrzymaliśmy następujące wyniki:
@@ -292,7 +292,7 @@ Stosując to podejście dla danych testowych otrzymaliśmy następujące wyniki:
 	&F_{wdech} \approx 75\% &\\
 	&F_{wydech} \approx 88\%. &
 \end{flalign*}
-W testach jakościowych jednak zaobserwować było można "przeskakiwanie" z jednej
+W testach jakościowych jednak zaobserwować było można ,,przeskakiwanie'' z jednej
 wartości na drugą i z powrotem np. w połowie brania wdechu, wydychania.
 \begin{figure}[H]
 	\centering
@@ -301,7 +301,7 @@ wartości na drugą i z powrotem np. w połowie brania wdechu, wydychania.
 \end{figure}
 
 \subsection{Poprzedni stan}
-W celu pozbycia się "przeskakiwania" (zwiększenia inercji) i ogólnej poprawy działania dane z poprzedniego podpunktu rozszerzyliśmy o informację o \textbf{wcześniej przewidzianym stanie}, czyli wektor cech ma teraz postać
+W celu pozbycia się ,,przeskakiwania'' (zwiększenia inercji) i ogólnej poprawy działania dane z poprzedniego podpunktu rozszerzyliśmy o informację o \textbf{wcześniej przewidzianym stanie}, czyli wektor cech ma teraz postać
 \begin{gather*}
 	\boldsymbol{x} = [I_{f_1}, I_{f_2}, ..., I_{f_{160}},  s]
 \end{gather*}
@@ -331,18 +331,18 @@ klasyfikacji modelu, otrzymujemy gorsze, choć bardziej miarodajne wyniki:
 \end{flalign*}
 Wniosek z tego jest taki, że model
 z wysokim prawdopodobieństwem przewidzi dobrze kolejny stan, jeżeli dobrze przewidział poprzedni. 
-Warto dodać, że rzeczywiście metoda z poprzednim stanem pozwoliła nam ograniczyć "przeskakiwanie" 
+Warto dodać, że rzeczywiście metoda z poprzednim stanem pozwoliła nam ograniczyć ,,przeskakiwanie'' 
 w testach jakościowych, jednak całkowicie go nie wyeliminowała.
 \subsection{Problemy}
 W poprzednim podpunkcie wyszedł główny mankament tej metody - konieczność założenia, że poprzednio
 przewidziany stan jest dobry co nie zawsze jest prawdą. W testach jakościowych zaobserwować można było
-"wariowanie" modelu, czyli sekwencję źle przewidzianych stanów.
+,,wariowanie'' modelu, czyli sekwencję źle przewidzianych stanów.
 
 \section{Sieć neuronowa}
 \subsection{Założenie}
 Do przetestowania działania sieci neuronowej przyjęliśmy nieco odmienne podejście. Jako dane wejściowe przyjmujemy (podobnie jak w przypadku SVM) spektrogram jednak w tym przypadku stworzony przy użyciu STFT. Dzięki temu model bierze pod uwagę także zmianę widma w czasie.
 \subsection{Metoda}
-Stosując poszczególne warstwy nasz spektrogram jest odpowiednio przetwarzany tak aby uwidocznić istotne cechy. Wykorzystywane przez nas warstwy (wraz z parametrami) to:
+Stosując poszczególne warstwy, nasz spektrogram jest odpowiednio przetwarzany, tak aby uwidocznić istotne cechy. Wykorzystywane przez nas warstwy (wraz z parametrami) to:
 \begin{enumerate}
   \item\texttt{Input} - Punkt wejścia do sieci neuronowej
   \item\texttt{Resizing} - Zmiana rozmiaru obrazu (32x32)
@@ -359,7 +359,7 @@ Stosując poszczególne warstwy nasz spektrogram jest odpowiednio przetwarzany t
 \end{enumerate}
 
 \subsection{Wykorzystywane próbki}
-W przeciwieństwie do SVM, aktualną predykcję określamy nie na podstawie poprzedniego stanu, lecz dla stanu sprzed pewnej chwili czasowej. W naszym przypadku aktualnie wyświetlany stan pochodzi sprzed około 0,5 s. Oczywiście powoduje to pewne opóźnienie, jednak praktycznie niezauważalne przez użytkownika. Podejście to nie ulega jednak propagacji błędów, którą widzimy w przypadku SVM.
+W przeciwieństwie do SVM aktualną predykcję określamy nie na podstawie poprzedniego stanu, lecz dla stanu sprzed pewnej chwili czasowej. W naszym przypadku aktualnie wyświetlany stan pochodzi sprzed około 0,5 \unit{s}. Oczywiście powoduje to pewne opóźnienie, jednak praktycznie niezauważalne przez użytkownika. Podejście to nie ulega jednak propagacji błędów, którą widzimy w przypadku SVM.
 \subsection{Problemy}
 Przy rozpoznawaniu próbki zakładamy przynależność do jednej z dwóch klas. W przypadku gdy jako dane wejściowe mamy jedynie wdechy i wydechy nie stanowi to problemu. Gdy jednak chcemy rozpoznać brak oddychania musimy założyć pewien próg pewności co otrzymanej klasyfikacji. Eksperymentalnie przyjęliśmy iż wdech jest wdechem gdy pewność sieci neuronowej wynosi 99\% natomiast co do wydechów przyjęliśmy pewność na poziomie 70\%. 
 
@@ -370,9 +370,9 @@ Kolejnym krokiem było przeniesienie wypracowanej metody uczenia na rozpoznawani
 Ponownie dokonaliśmy obserwacji spektrogramów, tym razem wyznaczonych dla wdechów i wydechów nosem. Zauważyliśmy kilka zakresów, w których różnice między fazami oddechu są zauważalne:
 \begin{itemize}
 	\setlength\itemsep{-0.25em}
-	\item[--] 0--8\,500 \unit{Hz} i 10\,000--16\,000 \unit{Hz},
-	\item[--] 0--3\,000 \unit{Hz} i 6\,000--16\,000 \unit{Hz},
-	\item[--] 0--16\,000 \unit{Hz}.
+	\item[--] 0\,--\,8\,500 \unit{Hz} i 10\,000\,--\,16\,000 \unit{Hz},
+	\item[--] 0\,--\,3\,000 \unit{Hz} i 6\,000\,--\,16\,000 \unit{Hz},
+	\item[--] 0\,--\,16\,000 \unit{Hz}.
 \end{itemize}
 \begin{figure}[H]
 	\centering
@@ -390,7 +390,7 @@ Nietrudno było zaobserwować, iż znaczą część nagrań zajmuje cisza lub d�
 Te przerwy między wyraźnymi dźwiękami oddechów pozostawały jednak oznaczone jako wdech lub wydech. Z tego powodu model trenowaliśmy w jednym przypadku informacją, iż cisza występuje podczas wdechu, a w innym -- że w trakcie wydechu. Postanowiliśmy usunąć tę niedoskonałość z przypuszczeniem, iż poprawi to wyniki działania programu.
 
 
-(napisać, że podejście też ma zastosowanie w przypadku wdechu nosem i wydechu ustami i dać poprawione metryki tego)
+(napisać, że podejście też ma zastosowanie w przypadku wdechu nosem i wydechu ustami i dać poprawione miary tego)
 
 \section{Maszyna stanów do zwiększania inercji}
 \subsection{Cel}
@@ -427,7 +427,7 @@ wdech bez wydechu, jednak zapobiegają temu predykaty $M,N$.
 Wniosek jeden: dużo zależy od obróbki danych, różnica między sieciami w tym wypadku nie była tak zauważalna \\
 Wniosek dwa: trudno uzyskać inercję stanów oddechu i pozbyć się efektu przeskakiwania \\
 Wniosek trzy: na wdech i wydech nosem wpływa bardziej zaszumione otoczenie
-Wniosek cztery: dodać tabelkę z końcowymi wartościami metryk dla obu modeli oddychania (SVM dla nosa i ust, Tensorflow dla ust)
+Wniosek cztery: dodać tabelkę z końcowymi wartościami miar dla obu modeli oddychania (SVM dla nosa i ust, Tensorflow dla ust)
 \section{Źródła}
 \begin{thebibliography}{2}
 \bibitem{Cormen} 
