@@ -16,6 +16,7 @@ from src.new_realtime_tensor import new_realtime_tensor
 import re
 import src.real_time as realtime
 
+
 def show_plot(file_csv, file_wav):
     x, y, sample_rate = du.wav_to_sample_xy(file_wav)
     timestamps, frames, chunk_size = sp.to_spectro(y, sample_rate)
@@ -48,6 +49,7 @@ def record():
 
 NOSE_IN_MOUTH_OUT_MODEL = "media/models/outmodel/nose_in_mouth_out/svm_prevstate"
 
+
 def menu():
     while True:
         print("1. Nose in, mouth out\n"
@@ -55,8 +57,8 @@ def menu():
         x = input()
         if x == "1":
             realtime.detection(
-                load(NOSE_IN_MOUTH_OUT_MODEL+".joblib"),
-                load(NOSE_IN_MOUTH_OUT_MODEL+"_scaler.joblib"),
+                load(NOSE_IN_MOUTH_OUT_MODEL + ".joblib"),
+                load(NOSE_IN_MOUTH_OUT_MODEL + "_scaler.joblib"),
                 uses_previous_state=True,
                 loudonly=False)
         elif x == "2":
@@ -113,4 +115,4 @@ if __name__ == '__main__':
             x = input('Filename: ')
             show_spectrograms(f'{macros.train_path}{x}.wav', x)
         elif x == '12':
-            TensorFlow.accuracy( models.load_model(f'{macros.model_path}tensorflow'))
+            TensorFlow.accuracy(models.load_model(f'{macros.model_path}tensorflow'))
