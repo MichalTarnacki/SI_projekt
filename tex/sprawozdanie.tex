@@ -62,13 +62,11 @@
 
 \section{Wstęp}
 Celem projektu było określanie chwil na nagraniu, w których osoba bierze wdech i wydech. 
-Dokonano oceny jakościowej za pomocą detekcji oddechu na żywo jak i ilościowej (przy wykorzystaniu
-dalej wymienionej miar).
+Dokonano oceny jakościowej za pomocą detekcji oddechu na żywo jak i ilościowej (przy wykorzystaniu dalej wymienionej miar).
 
 \section{Teoria}
 \subsection{Dyskretna transformata Fouriera (DFT)}
-W celu przejścia z dziedziny natężenia od czasu do dziedziny częstotliwości stosujemy dyskretną transformatę
-Fouriera.  DFT przekształca ciąg skończonych próbek sygnału $a_0, a_1, a_2, ..., a_{N-1}$ w ciąg 
+W celu przejścia z dziedziny natężenia od czasu do dziedziny częstotliwości stosujemy dyskretną transformatę Fouriera.  DFT przekształca ciąg skończonych próbek sygnału $a_0, a_1, a_2, ..., a_{N-1}$ w ciąg 
 $A_1, ..., A_{N-1} \in \mathbb{C}$
 \begin{gather*}
 	A_k = \Sigma_{n=0}^{N-1} a_ne^{\frac{-kni\pi}{N}}, 0 \le k \le N-1
@@ -78,8 +76,8 @@ W naszych zastosowaniach będziemy brali pod uwagę tylko część rzeczywistą 
 	R_k = Re(A_k), 0 \le k \le N-1
 \end{gather*}
 Skorzystamy z odmiany dyskretnej transformaty Fouriera - STFT (krótkoczasowa transformata Fouriera). 
-Jest to zadaniczo transformacja Fouriera jednak wykonywana w mniejszych oknach czasowych. Dzięki temu otrzymujemy informację o zmianie widma w czasie, czyli jednocześnie posiadamy informację o właściwościach zarówno w dziedzinie czasu jak i częstotliwości. Najistotniejszym parametrem tej metody jest rozmiar okna. Ponieważ iloczyn jego szerokości w dziedzinie czasu i szerokości w dziedzinie częstotliwości jest stały dla danego okna, poprawiając rozdzielczość czasu, pogarszamy rozdzielczość częstotliwości.
-Naszą funkcję natężenia w czasie dla pewnego okresu $t \in [t_0, t_0 + B]$, gdzie $B$ - rozmiar okna (przyjmujemy $B=1024\approx \frac{1}{44} s$) przedstawiamy zatem jako 
+Jest to zasadniczo transformacja Fouriera jednak wykonywana w mniejszych oknach czasowych. Dzięki temu otrzymujemy informację o zmianie widma w czasie, czyli jednocześnie posiadamy informację o właściwościach zarówno w dziedzinie czasu, jak i częstotliwości. Najistotniejszym parametrem tej metody jest rozmiar okna. Ponieważ iloczyn jego szerokości w dziedzinie czasu i szerokości w dziedzinie częstotliwości jest stały dla danego okna, poprawiając rozdzielczość czasu, pogarszamy rozdzielczość częstotliwości.
+Naszą funkcję natężenia w czasie dla pewnego okresu $t \in [t_0, t_0 + B]$, gdzie $B$ - rozmiar okna (przyjmujemy $B=1024\approx \frac{1}{44} s$), przedstawiamy zatem jako 
 \begin{gather*}
 	I(t) = \Sigma_{f} I_{f}(t)sin(2 \pi f t)
 \end{gather*}
@@ -91,23 +89,23 @@ W dalszych rozważaniach wykorzystujemy także średnią częstotliwość, któr
 \begin{gather*}
 	\bar{f} = \frac{\Sigma_ffI_f}{I}
 \end{gather*}
-Wykorzystujemy implementację transformaty z biblioteki $numpy$ oraz $tensorflow$.
+Wykorzystujemy implementację transformaty z bibliotek $numpy$ oraz $tensorflow$.
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=10cm]{stft2}
-	\caption{Przykład sygnału wdechu i wydechu nosem poddanego transformacie Fouriera dla okien czasowych - otrzymujemy nowy wymiar informacji, czyli nie tylko natężenie
-dźwięku ale też natężenie poszczegółnych częstotliwości w dźwięku. Obraz z programu Sonic Visualizer, który realizuje STFT}
+	\caption{Przykład sygnału wdechu i wydechu nosem poddanego transformacie Fouriera dla okien czasowych -- otrzymujemy nowy wymiar informacji, czyli nie tylko natężenie
+dźwięku, ale też natężenie poszczególnych częstotliwości w dźwięku. Obraz z programu Sonic Visualizer, który realizuje STFT.}
 \end{figure}
 
 \subsection{Bramka szumów}
-Głowna metoda odszumiana, z której korzystamy to $Spectral$ $Gating$ (rodzaj bramki szumów).  Pierw wyznaczany jest spektrogram sygnału za pomocą $DFT$ i 
+Główna metoda odszumiana, z której korzystamy, to $Spectral$ $Gating$ (rodzaj bramki szumów). Pierw wyznaczany jest spektrogram sygnału za pomocą $DFT$ i 
 tworzony jest próg szumu dla każdej jego częstotliwości.
-Częstotliwości progowe służą to stworzenia maski, której potem używamy do usunięcia niechcianych dźwięków.
+Częstotliwości progowe służą do stworzenia maski, której potem używamy do usunięcia niechcianych dźwięków.
 Następnie ze spektrogramu tworzymy z powrotem natężenie $I(t)$. W projekcie wykorzystujemy gotową implementację bramki szumów z biblioteki $noisereduce$\footnote{\url{https://pypi.org/project/noisereduce/}}. Zdefiniujmy
 \begin{gather*}
 	SNR = \frac{P_s}{P_n}
 \end{gather*}
-gdzie $P_n$ - moc szumu, $P_s = P - P_n$ - moc sygnału użytecznego (moc sygnału pomniejszona o moc szumu).
+gdzie $P_n$ -- moc szumu, $P_s = P - P_n$ -- moc sygnału użytecznego (moc sygnału pomniejszona o moc szumu).
 Porównanie przykładowych SNR dla algorytmów usuwania szumu\footnote{Kumar, E. and Surya, K. and Varma, K. and Akash, A. and Kurapati, Nithish Reddy (2023) \emph{Noise Reduction in Audio File Using Spectral Gatting and FFT by Python Modules}}:
 \begin{center}
 \begin{tabular}{c  | c }
@@ -143,27 +141,27 @@ $FP_{wdech}$ -- liczba próbek nieoznaczonych jako wdech, które zostały sklasy
 $FN_{wdech}$ -- liczba próbek oznaczonych jako wdech, które nie zostały sklasyfikowane jako wdech.
 Analogicznie definiujemy $precision_{wydech}, recall_{wydech}, F_{wydech}$.
 \subsection{Standaryzacja}
-Dane wejściowe do modelu zawsze standaryzujemy, czyli
+Dane wejściowe do modelu zawsze standaryzujemy, wykonując operację daną wzorem:
 \begin{gather*}
-	\tilde X = \frac{X - EX}{\sigma_X}
+	\tilde X = \frac{X - EX}{\sigma_X}.
 \end{gather*}
-stosujemy gotową implementację z biblioteki \textit{scikit-learn} lub warstwę normalizacyjną w przypadku sieci neuronowej.
+Stosujemy gotową implementację z biblioteki \textit{scikit-learn} lub warstwę normalizacyjną w przypadku sieci neuronowej.
 \subsection{SVM}
 Pierwszym modelem, jakim dokonujemy klasyfikacji, jest SVM. Metoda ta polega na szukaniu optymalnych wag $\boldsymbol{w}, b$.
 Następnie będziemy klasyfikować według funkcji maszyny uczącej 
 \begin{gather*}
-	f(x) = sgn(\boldsymbol{w}^T \boldsymbol{x} + b)
+	f(x) = sgn(\boldsymbol{w}^T \boldsymbol{x} + b).
 \end{gather*}
-jeśli $f$ zwraca 1 to traktujemy to jako jedną z binarnych decyzji (w naszym przypadku np. wdech) a jeśli zwraca -1 to drugą (czyli np. wydech).
+Jeśli $f$ zwraca $1$, traktujemy to jako jedną z binarnych decyzji (w naszym przypadku np. wdech) a jeśli zwraca $-1$, to drugą (czyli np. wydech).
 $\textbf{x}$ jest wektorem cech.  Znalezienie optymalnych wag będzie polegało na minimalizacji
 funkcji kosztu
 \begin{gather*}
-	J(\boldsymbol{w}) = \frac{1}{2}||\boldsymbol{w}||^2 + \frac{C}{N}\Sigma_x max\{0, 1 - y(\boldsymbol{w}^Tx + b)\}
+	J(\boldsymbol{w}) = \frac{1}{2}||\boldsymbol{w}||^2 + \frac{C}{N}\Sigma_x max\{0, 1 - y(\boldsymbol{w}^Tx + b)\},
 \end{gather*}
 gdzie C jest parametrem uregulowania. Funkcję będziemy minimalizować metodą stochastycznego spadku po gradiencie.
 W projekcie użyliśmy własnej implementacji SVM-a.
 \subsection{Sieć neuronowa}
-Drugim modelem jakim dokonujemy klasyfikacji jest sieć neuronowa. Ze względu na trudność w samodzielnym zaprojektowaniu dobrej sieci neuronowej postanowiliśmy użyć stworzonego przez firmę Google Tensorflowa wraz z interfejsem Keras. 
+Drugim modelem, jakim dokonujemy klasyfikacji, jest sieć neuronowa. Ze względu na trudność w samodzielnym zaprojektowaniu dobrej sieci neuronowej postanowiliśmy użyć stworzonego przez firmę Google Tensorflowa wraz z interfejsem Keras. 
 \section{Narzędzia i inne}
 \subsection{Nagrywanie danych oddechowych}
 Żeby zapewnić dobre oznaczenie danych, etykietujemy je jeszcze w trakcie nagrywania dźwięku. 
@@ -173,7 +171,7 @@ powietrze lub na odwrót. Momenty przejścia z wdechu na wydech i w drugą stron
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=10cm]{nagrywanie_ozn}
-	\caption{Przykładowe nagrane dane, in-wdech, out-wydech. Jak widać dane oznaczone na żywo są bardzo dokładne, być może nie bylibyśmy w stanie osiągnąć takiej
+	\caption{Przykładowe nagrane dane, in-wdech, out-wydech. Jak widać, dane oznaczone na żywo są bardzo dokładne, być może nie bylibyśmy w stanie osiągnąć takiej
 dokładności oznaczając ręcznie (lub byłoby to bardzo żmudne).}
 \end{figure}
 \subsection{Oddychanie na żywo}
@@ -182,11 +180,9 @@ stwierdzany stan.
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=10cm]{wdechwydechcisza}
-	\caption{Jeżeli koło zwiększa się i jest niebieskie to model wykrywa wdech, jeśli zmniejsza się i jest
-czerwone to jest to wydech, natomiast kolor zielony oznacza, że natężenie dźwięku nie przekracza pewnego 
-progu dobieranego eksperymentalnie w zależności od mikrofonu.
-Dalej klasyfikacja na żywo nazywana jest też testem jakościowym.}
+	\caption{Jeżeli koło zwiększa się i jest niebieskie, model wykrywa wdech, jeśli zmniejsza się i jest czerwone, jest to wydech, natomiast kolor zielony oznacza, że natężenie dźwięku nie przekracza pewnego  progu dobieranego eksperymentalnie w zależności od mikrofonu.}
 \end{figure}
+Dalej klasyfikację na żywo nazywamy też testem jakościowym.
 
 \subsection{Przeliczanie częstotliwości z DFT}
 W celu wyznaczenia sposobu zamiany częstotliwości otrzymanej za pomocą DFT na znaną jednostkę (Hz) wykonaliśmy kilkanaście nagrań z ustaloną (w Hz) dominującą częstotliwością i odczytaliśmy, której wartości częstotliwości otrzymanej za pomocą DFT odpowiada maksymalne natężenie. Wyniki przedstawia rysunek 5.
@@ -202,8 +198,7 @@ W celu wyznaczenia sposobu zamiany częstotliwości otrzymanej za pomocą DFT na
 \end{gather*}
 gdzie $f_{\unit{DFT}}$ to wartość liczbowa częstotliwości w jednostkach, w której otrzymuje się wynik DFT, natomiast $f_{\unit{Hz}}$ to wartość liczbowa częstotliwości wyrażonej w \unit{Hz}.
 \section{Początkowo przyjęty model oddechu}
-Na początku przyjmujemy model ,,sportowego'' oddychania, czyli wdech nosem i wydech ustami.
-Uproszczenie to polega na tym, że wydawane dźwięki są dosyć różne, dopiero potem sprawdzamy jak nasze podejście będzie się sprawować
+Na początku przyjmujemy model ,,sportowego'' oddychania, czyli wdech nosem i wydech ustami. Uproszczenie to polega na tym, że wydawane dźwięki są dosyć różne, dopiero potem sprawdzamy jak nasze podejście będzie się sprawować
 przy innych metodach oddychania.
 \begin{figure}[H]
 	\centering
@@ -212,16 +207,14 @@ przy innych metodach oddychania.
 \end{figure}
 \section{Pierwotne podejście -- średnia częstotliwość w czasie}
 \subsection{Metoda}
-Pierwotnie przyjętym założeniem było, że podczas wdechu średnia częstotliwość dźwięku jest wyższa niż
-gdy osoba wydycha. Z pliku w formacie .wav pobieramy natężenie, które następnie \textbf{odszumiamy} za pomocą $noisereduce$ (przy testach jakościowych stosujemy bramkę szumów dla 3 ostatnich sekund) . 
+Pierwotnie przyjętym założeniem było, że podczas wdechu średnia częstotliwość dźwięku jest wyższa niż gdy osoba wydycha. Z pliku w formacie .wav pobieramy natężenie, które następnie \textbf{odszumiamy} za pomocą $noisereduce$ (przy testach jakościowych stosujemy bramkę szumów dla 3 ostatnich sekund) . 
 \textbf{Dzielimy próbki na bloki, dla których tworzymy spektrogramy} i obliczamy
-średnią ważoną częstotliwość.
-Cechami, na podstawie których dokonywana jest predykcja są  
+średnią ważoną częstotliwość. Cechami, na podstawie których dokonywana jest predykcja, są  
 \begin{gather*}
-\boldsymbol x (t_n) = [\bar{f}(t_1), ..., \bar{f}(t_n)]
+\boldsymbol x (t_n) = [\bar{f}(t_1), ..., \bar{f}(t_n)],
 \end{gather*}
 czyli średnie częstotliwości z kilku przeszłych chwil.
-Dla danych testowych spełniających powyższe założenie (predykcja na podstawie ostatnich 100 i modelu wytrenowanego SVM-em dawało nam to dokładność $\sim 60\%$.
+Dla danych testowych spełniających powyższe założenie (predykcja na podstawie ostatnich 100 i modelu wytrenowanego SVM-em) dawało nam to dokładność $\sim 60\%$.
 (Inne miary nie zostały zmierzone ze względu na problemy, o których mowa w kolejnym podpunkcie).
 \begin{figure}[H]
 	\centering
@@ -279,19 +272,23 @@ Postanowiliśmy dokładniej przeanalizować, które częstotliwości są kluczow
 	\includegraphics[width=13cm]{spektrogram_wydech_ustami}
 	\caption{Spektrogramy dwóch nagrań oddechu z wdechem nosem i wydechem ustami uzyskane przy użyciu programu Audacity.}
 \end{figure}
-Dla każdego wyboru przeprowadziliśmy testy. W przypadku pierwszego uzyskaliśmy najlepsze wartości miar i dobre działanie w przypadku przewidywania na żywo. 
+Dla każdego wyboru przeprowadziliśmy testy. W przypadku ostatniego uzyskaliśmy najlepsze wartości miar i dobre działanie przy przewidywaniu na żywo. 
 Taki wybór częstotliwości przyjęliśmy zatem dla modelu rozpoznającego wdech nosem i wydech ustami.
- \textbf{Używamy zatem 169 częstotliwości z przedziału do 6,9 kHz} (jest to ograniczenie podobne do stosowanego w telekomunikacji dla rozmów telefonicznych).
-Stosując to podejście dla danych testowych otrzymaliśmy następujące wyniki:
-\begin{flalign*}
-	&accuracy \approx 73\% &\\
-	&precision_{wdech} \approx 68\% &\\
-	&precision_{wydech} \approx 92\% &\\
-	&recall_{wdech} \approx 86\% &\\
-	&recall_{wydech} \approx 64\% &\\
-	&F_{wdech} \approx 72\% &\\
-	&F_{wydech} \approx 72\%. &
-\end{flalign*}
+ \textbf{Używamy zatem częstotliwości z przedziału od 0 do 8\,500 \unit{Hz} i od 10\,000 do 16\,000 \unit{Hz}}.
+Stosując to podejście dla danych testowych, otrzymaliśmy następujące wyniki:
+\begin{center}
+\begin{tabular}{c  | c }
+	miara & wartość (\%) \\
+	\hline
+	$accuracy$ & 75 \\
+	$precision_{wdech}$ & 68 \\
+	$precision_{wydech}$ & 92 \\
+	$recall_{wdech}$ & 88 \\
+	$recall_{wydech}$ & 66 \\
+	$F_{wdech}$ & 74 \\
+	$F_{wydech}$ & 74
+\end{tabular}
+\end{center}
 W testach jakościowych jednak zaobserwować było można ,,przeskakiwanie'' z jednej
 wartości na drugą i z powrotem np. w połowie brania wdechu, wydychania.
 \begin{figure}[H]
@@ -308,27 +305,41 @@ W celu pozbycia się ,,przeskakiwania'' (zwiększenia inercji) i ogólnej popraw
  gdzie $s = 1$ jeśli poprzednio stwierdzono wdech, $s=-1$ jeśli poprzednio stwierdzono wydech.
 Dodatkowo przeprowadziliśmy jeszcze \textbf{wygładzenie spektrogramu filtrem Savitzky'ego-Golaya}. Następnie przetestowaliśmy program w sposób uproszczony -- jako wartość $s$ stanu poprzedniego stosowaliśmy tę odczytaną z
 danych testowych, czyli zakładaliśmy za każdym razem, że nasz model przewidzi dobrze poprzedni stan. Otrzymaliśmy następujące wyniki:
-\begin{flalign*}
-	&accuracy \approx 99\% &\\
-	&precision_{wdech} \approx 99\% &\\
-	&precision_{wydech} \approx 99\% &\\
-	&recall_{wdech} \approx 99\% &\\
-	&recall_{wydech} \approx 99\% &\\
-	&F_{wdech} \approx 99\% &\\
-	&F_{wydech} \approx 99\%. &
-\end{flalign*}
+\begin{table}[H]
+\caption{Wartości miar uzyskane podczas uproszczonych testów modelu z \textbf{wydechem ustami} przy wyborze częstotliwości 0\,--\,8\,500 \unit{Hz} i 10\,000\,--\,16\,000.}
+\begin{center}
+\begin{tabular}{c  | c }
+	miara & wartość (\%) \\
+	\hline
+	$accuracy$ & 99 \\
+	$precision_{wdech}$ & 99 \\
+	$precision_{wydech}$ & 99 \\
+	$recall_{wdech}$ & 99 \\
+	$recall_{wydech}$ & 99 \\
+	$F_{wdech}$ & 99 \\
+	$F_{wydech}$ & 99
+\end{tabular}
+\end{center}
+\end{table}
 Przypadek ten nie jest realny, ponieważ model nie będzie znał poprawnej poprzedniej klasyfikacji, lecz 
 zakładał, że to co sam stwierdził jest poprawne. Odczytując poprzedni stan nie z danych testowych, a z poprzedniej
 klasyfikacji modelu, otrzymujemy gorsze, choć bardziej miarodajne wyniki:
-\begin{flalign*}
-	&accuracy \approx 83\% &\\
-	&precision_{wdech} \approx 83\% &\\
-	&precision_{wydech} \approx 83\% &\\
-	&recall_{wdech} \approx 70\% &\\
-	&recall_{wydech} \approx 91\% &\\
-	&F_{wdech} \approx 76\% &\\
-	&F_{wydech} \approx 86\%. &
-\end{flalign*}
+\begin{table}[H]
+\caption{Wartości miar uzyskane podczas testów modelu z \textbf{wydechem ustami} przy wyborze częstotliwości 0\,--\,8\,500 \unit{Hz} i 10\,000\,--\,16\,000.}
+\begin{center}
+\begin{tabular}{c  | c }
+	miara & wartość (\%) \\
+	\hline
+	$accuracy$ & 87 \\
+	$precision_{wdech}$ & 88 \\
+	$precision_{wydech}$ & 87 \\
+	$recall_{wdech}$ & 78 \\
+	$recall_{wydech}$ & 65 \\
+	$F_{wdech}$ & 83 \\
+	$F_{wydech}$ & 90
+\end{tabular}
+\end{center}
+\end{table}
 Wniosek z tego jest taki, że model
 z wysokim prawdopodobieństwem przewidzi dobrze kolejny stan, jeżeli dobrze przewidział poprzedni. 
 Warto dodać, że rzeczywiście metoda z poprzednim stanem pozwoliła nam ograniczyć ,,przeskakiwanie'' 
@@ -379,7 +390,23 @@ Ponownie dokonaliśmy obserwacji spektrogramów, tym razem wyznaczonych dla wdec
 	\includegraphics[width=13cm]{spektrogram_wydech_nosem}
 	\caption{Spektrogramy dwóch nagrań oddechu z wdechem i wydechem nosem uzyskane przy użyciu program Audacity.}
 \end{figure}
-Testy pokazały, iż ostatni z powyższych wybór częstotliwości spowodował względny wzrost dokładności o kolejne $\sim7\%$. Taki zatem pozostawiliśmy do dalszej pracy.
+Testy pokazały, iż ostatni z powyższych wybór częstotliwości spowodował największą poprawę większości wyników. Przedstawia je poniższa tabela:
+\begin{table}[H]
+\caption{Wartości miar uzyskane podczas testów modelu z \textbf{wydechem nosem} przy poprzednim (0\,--\,8\,500 \unit{Hz} i 10\,000\,--\,16\,000 \unit{Hz}) oraz nowym (0\,--\,16\,000 \unit{Hz}) wyborze częstotliwości.}
+\begin{center}
+\begin{tabular}{c | c | c}
+	miara & wartość (\%) poprzednia & wartość (\%) nowa \\
+	\hline
+	$accuracy$ & 88 & 89 \\
+	$precision_{wdech}$ & 89 & 92 \\
+	$precision_{wydech}$ & 88 & 85 \\
+	$recall_{wdech}$ & 92 & 89 \\
+	$recall_{wydech}$ & 84 & 90 \\
+	$F_{wdech}$ & 90 & 90 \\
+	$F_{wydech}$ & 86 & 87
+\end{tabular}
+\end{center}
+\end{table}
 \subsection{Usuwanie ciszy}
 Nietrudno było zaobserwować, iż znaczą część nagrań zajmuje cisza lub dźwięk bliski ciszy.
 \begin{figure}[H]
@@ -387,9 +414,23 @@ Nietrudno było zaobserwować, iż znaczą część nagrań zajmuje cisza lub d�
 	\includegraphics[width=13cm]{natezenie_wydech_nosem}
 	\caption{Wykres natężenia dźwięku w nagraniu wdechu i wydechu nosem uzyskany przy użyciu programu Audacity.}
 \end{figure}
-Te przerwy między wyraźnymi dźwiękami oddechów pozostawały jednak oznaczone jako wdech lub wydech. Z tego powodu model trenowaliśmy w jednym przypadku informacją, iż cisza występuje podczas wdechu, a w innym -- że w trakcie wydechu. Postanowiliśmy usunąć tę niedoskonałość z przypuszczeniem, iż poprawi to wyniki działania programu.
-
-
+Te przerwy między wyraźnymi dźwiękami oddechów pozostawały jednak oznaczone jako wdech lub wydech. Z tego powodu model trenowaliśmy w jednym przypadku informacją, iż cisza występuje podczas wdechu, a w innym -- że w trakcie wydechu. Postanowiliśmy usunąć tę niedoskonałość z przypuszczeniem, iż poprawi to wyniki działania programu. Obliczyliśmy w tym celu sumę natężeń dźwięku w poszczególnych klatkach nagrania. Za próg ciszy przyjęliśmy wartość nieco większą niż maksymalne natężenie w klatkach pochodzących z tych fragmentów nagrania, które na podstawie własnych doświadczeń słuchowych oceniliśmy jako zbyt ciche. Następnie podczas trenowania oraz testowania usuwaliśmy z danych klatki o sumie natężeń nieprzekraczającej tego progu. Otrzymaliśmy poprawę wyników do następujących wartości:
+\begin{table}[H]
+\caption{Wartości miar uzyskane podczas testów modelu z \textbf{wydechem nosem} przy wyborze częstotliwości 0\,--\,16\,000 \unit{Hz} i po usunięciu ciszy.}
+\begin{center}
+\begin{tabular}{c | c}
+	miara & wartość (\%) poprzednia\\
+	\hline
+	$accuracy$ & 94 \\
+	$precision_{wdech}$ & 96 \\
+	$precision_{wydech}$ & 92 \\
+	$recall_{wdech}$ & 95 \\
+	$recall_{wydech}$ & 92 \\
+	$F_{wdech}$ & 96 \\
+	$F_{wydech}$ & 92
+\end{tabular}
+\end{center}
+\end{table}
 (napisać, że podejście też ma zastosowanie w przypadku wdechu nosem i wydechu ustami i dać poprawione miary tego)
 
 \section{Maszyna stanów do zwiększania inercji}
