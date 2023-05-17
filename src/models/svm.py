@@ -123,7 +123,7 @@ class MouthOutNoPrevStateSVMWrapper(SVMWrapper):
 
 class MouthOutSVMWrapper(SVMWrapper):
     def select_key_frequencies(self, X):
-        return np.array([np.concatenate([x[:160], [x[len(x) - 1]]]) for x in X])
+        return np.array([np.concatenate([x[:160], x[232:371], [x[len(x) - 1]]]) for x in X])
 
 
 class NoseOutSVMWrapper(SVMWrapper):

@@ -414,7 +414,8 @@ Nietrudno było zaobserwować, iż znaczą część nagrań zajmuje cisza lub d�
 	\includegraphics[width=13cm]{natezenie_wydech_nosem}
 	\caption{Wykres natężenia dźwięku w nagraniu wdechu i wydechu nosem uzyskany przy użyciu programu Audacity.}
 \end{figure}
-Te przerwy między wyraźnymi dźwiękami oddechów pozostawały jednak oznaczone jako wdech lub wydech. Z tego powodu model trenowaliśmy w jednym przypadku informacją, iż cisza występuje podczas wdechu, a w innym -- że w trakcie wydechu. Postanowiliśmy usunąć tę niedoskonałość z przypuszczeniem, iż poprawi to wyniki działania programu. Obliczyliśmy w tym celu sumę natężeń dźwięku w poszczególnych klatkach nagrania. Za próg ciszy przyjęliśmy wartość nieco większą niż maksymalne natężenie w klatkach pochodzących z tych fragmentów nagrania, które na podstawie własnych doświadczeń słuchowych oceniliśmy jako zbyt ciche. Następnie podczas trenowania oraz testowania usuwaliśmy z danych klatki o sumie natężeń nieprzekraczającej tego progu. Otrzymaliśmy poprawę wyników do następujących wartości:
+Te przerwy między wyraźnymi dźwiękami oddechów pozostawały jednak oznaczone jako wdech lub wydech. Z tego powodu model trenowaliśmy w jednym przypadku informacją, iż cisza występuje podczas wdechu, a w innym -- że w trakcie wydechu. Podczas testów natomiast w jednym przypadku za poprawną klasyfikację ciszy przyjmowaliśmy wdech, a w innym -- wydech. \\
+\indent Postanowiliśmy usunąć tę niedoskonałości z przypuszczeniem, iż poprawi to wyniki działania programu. Obliczyliśmy w tym celu sumę natężeń dźwięku w poszczególnych klatkach nagrania. Za próg ciszy przyjęliśmy wartość nieco większą niż maksymalne natężenie w klatkach pochodzących z tych fragmentów nagrania, które na podstawie własnych doświadczeń słuchowych oceniliśmy jako zbyt ciche. Następnie podczas trenowania oraz testowania usuwaliśmy z danych klatki o sumie natężeń nieprzekraczającej tego progu. Otrzymaliśmy poprawę wyników do następujących wartości:
 \begin{table}[H]
 \caption{Wartości miar uzyskane podczas testów modelu z \textbf{wydechem nosem} przy wyborze częstotliwości 0\,--\,16\,000 \unit{Hz} i po usunięciu ciszy.}
 \begin{center}
@@ -431,7 +432,7 @@ Te przerwy między wyraźnymi dźwiękami oddechów pozostawały jednak oznaczon
 \end{tabular}
 \end{center}
 \end{table}
-(napisać, że podejście też ma zastosowanie w przypadku wdechu nosem i wydechu ustami i dać poprawione miary tego)
+Postanowiliśmy także sprawdzić, jak podejście z usuwaniem ciszy sprawdzi się w poprzednim modelu -- wdechu nosem i wydechu ustami. Okazało się, iż również nastąpiła poprawa.
 
 \section{Maszyna stanów do zwiększania inercji}
 \subsection{Cel}

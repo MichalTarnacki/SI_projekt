@@ -68,16 +68,21 @@ def menu():
 if __name__ == '__main__':
     while True:
         print("1. Record\n"
-              "2.1. Train mouth-out with no-loudonly, no-prevstate SVM (mouth-out data required)\n"
-              "2.2. Train mouth-out with no-loudonly, prevstate SVM (mouth-out data required)\n"
-              "2.3. Train nose-out with no-loudonly, prevstate SVM (nose-out data required)\n"
-              "2.4. Train nose-out with loudonly, prevstate SVM (nose-out data required)\n"
-              "3. Realtime with SVM\n3.1 Realtime with loud-only SVM\n"
+              "2.1. Train mouth-out with no-loudonly no-prevstate SVM\n"
+              "2.2. Train mouth-out with no-loudonly prevstate SVM\n"
+              "2.3. Train nose-out with no-loudonly prevstate SVM\n"
+              "2.4. Train nose-out with loudonly prevstate SVM\n"
+              "2.5. Train nose-out with loudonly prevstate SVM for no-loudonly prevstate SVM testing\n"
+              "2.6. Train mouth-out with loudonly prevstate SVM\n"
+              "3. Realtime with SVM\n"
+              "3.1 Realtime with loud-only SVM\n"
               "4. Show pressure plot\n"
-              "5.1. Test quantitative mouth-out with no-loudonly, no-prevstate SVM (mouth-out data required)\n"
-              "5.2. Test quantitative mouth-out with no-loudonly, prevstate SVM (mouth-out data required)\n"
-              "5.3. Test quantitative nose-out with no-loudonly, prevstate SVM (nose-out data required)\n"
-              "5.4. Test quantitative nose-out with loudonly, prevstate SVM (nose-out data required)\n"
+              "5.1. Test quantitative mouth-out with no-loudonly no-prevstate SVM\n"
+              "5.2. Test quantitative mouth-out with no-loudonly prevstate SVM\n"
+              "5.3. Test quantitative nose-out with no-loudonly prevstate SVM\n"
+              "5.4. Test quantitative nose-out with loudonly prevstate SVM\n"
+              "5.5. Test quantitative nose-out with no-loudonly prevstate SVM after loudonly prevstate SVM training\n"
+              "5.6. Test quantitative mouth-out with loudonly prevstate SVM\n"
               "7. New real time with SVM\n"
               "8. Real time tensor\n"
               "10. Train with Tensorflow\n"
@@ -102,12 +107,18 @@ if __name__ == '__main__':
                 list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)])),
                 'svm_trained_nose',
                 mouth_out=False, loudonly=False)
-        elif x == '2.4':
+        elif x == '2.4' or x == '2.5':
             folder = pl.Path(macros.train_path)
             svm.svm_train_with_previous_state(
                 list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)])),
                 'svm_trained_nose_loud',
                 mouth_out=False, loudonly=True)
+        elif x == '2.6':
+            folder = pl.Path(macros.train_path)
+            svm.svm_train_with_previous_state(
+                list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)])),
+                'svm_trained_mouth_loud',
+                mouth_out=True, loudonly=True)
         elif x == '3':
             test_qualitative('svm_trained', with_previous_state=True)
         elif x == '3.1':
@@ -131,6 +142,14 @@ if __name__ == '__main__':
             folder = pl.Path(macros.test_path)
             test_quantitative_loudonly(list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)])),
                                        'svm_trained_nose_loud', with_previous_state=True)
+        elif x == '5.5':
+            folder = pl.Path(macros.test_path)
+            test_quantitative(list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)])),
+                              'svm_trained_nose_loud', with_previous_state=True)
+        elif x == '5.6':
+            folder = pl.Path(macros.test_path)
+            test_quantitative_loudonly(list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)])),
+                                       'svm_trained_mouth_loud', with_previous_state=True)
         elif x == '7':
             new_realtime()
         elif x == '8':
