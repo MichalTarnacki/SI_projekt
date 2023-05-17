@@ -116,14 +116,24 @@ class StandardScalerIgnorePreviousState(TransformerMixin):
         return np.concatenate((X_head, X[:, -1:]), axis=1)
 
 
+class MouthOutNoPrevStateSVMWrapper(SVMWrapper):
+    def select_key_frequencies(self, X):
+        return np.array([np.concatenate([x[:160], x[232:371]]) for x in X])
+
+
 class MouthOutSVMWrapper(SVMWrapper):
     def select_key_frequencies(self, X):
-        return np.array([np.concatenate([x[:169], [x[len(x) - 1]]]) for x in X])
+        return np.array([np.concatenate([x[:160], [x[len(x) - 1]]]) for x in X])
 
 
 class NoseOutSVMWrapper(SVMWrapper):
     def select_key_frequencies(self, X):
         return np.array([np.concatenate([x[:371], [x[len(x) - 1]]]) for x in X])
+
+
+class NoseOutLoadonlySVMWrapper(NoseOutSVMWrapper):
+    def __init__(self):
+        super().__init__()
 
 
 class MouthOutLoudonlySVMWrapper(MouthOutSVMWrapper):
@@ -157,7 +167,7 @@ def svm_train_basic(filenames, modelname):
     scaler = StandardScaler()
     x_train_std = scaler.fit_transform(x_train)
     y_train = transform_to_binary(y_train)
-    clf = SVM()
+    clf = MouthOutNoPrevStateSVMWrapper()
     clf.fit(x_train_std, y_train)
     dump(clf, f'{macros.model_path}{modelname}.joblib')
     dump(scaler, f'{macros.model_path}{modelname}_scaler.joblib')
@@ -176,7 +186,10 @@ def svm_train_with_previous_state(filenames, modelname, mouth_out=True, loudonly
     y_train = transform_to_binary(y_train)
 
     if loudonly:
-        clf = MouthOutLoudonlySVMWrapper()
+        if mouth_out:
+            clf = MouthOutLoudonlySVMWrapper()
+        else:
+            clf = NoseOutLoadonlySVMWrapper()
     else:
         if mouth_out:
             clf = MouthOutSVMWrapper()

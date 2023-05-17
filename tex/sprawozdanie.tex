@@ -284,13 +284,13 @@ Taki wybór częstotliwości przyjęliśmy zatem dla modelu rozpoznającego wdec
  \textbf{Używamy zatem 169 częstotliwości z przedziału do 6,9 kHz} (jest to ograniczenie podobne do stosowanego w telekomunikacji dla rozmów telefonicznych).
 Stosując to podejście dla danych testowych otrzymaliśmy następujące wyniki:
 \begin{flalign*}
-	&accuracy \approx 94\% &\\
-	&precision_{wdech} \approx 99\% &\\
-	&precision_{wydech} \approx 79\% &\\
-	&recall_{wdech} \approx 60\% &\\
-	&recall_{wydech} \approx 100\% &\\
-	&F_{wdech} \approx 75\% &\\
-	&F_{wydech} \approx 88\%. &
+	&accuracy \approx 73\% &\\
+	&precision_{wdech} \approx 68\% &\\
+	&precision_{wydech} \approx 92\% &\\
+	&recall_{wdech} \approx 86\% &\\
+	&recall_{wydech} \approx 64\% &\\
+	&F_{wdech} \approx 72\% &\\
+	&F_{wydech} \approx 72\%. &
 \end{flalign*}
 W testach jakościowych jednak zaobserwować było można ,,przeskakiwanie'' z jednej
 wartości na drugą i z powrotem np. w połowie brania wdechu, wydychania.
@@ -321,26 +321,26 @@ Przypadek ten nie jest realny, ponieważ model nie będzie znał poprawnej poprz
 zakładał, że to co sam stwierdził jest poprawne. Odczytując poprzedni stan nie z danych testowych, a z poprzedniej
 klasyfikacji modelu, otrzymujemy gorsze, choć bardziej miarodajne wyniki:
 \begin{flalign*}
-	&accuracy \approx 85\% &\\
-	&precision_{wdech} \approx 88\% &\\
-	&precision_{wydech} \approx 84\% &\\
-	&recall_{wdech} \approx 72\% &\\
-	&recall_{wydech} \approx 93\% &\\
-	&F_{wdech} \approx 79\% &\\
-	&F_{wydech} \approx 88\%. &
+	&accuracy \approx 83\% &\\
+	&precision_{wdech} \approx 83\% &\\
+	&precision_{wydech} \approx 83\% &\\
+	&recall_{wdech} \approx 70\% &\\
+	&recall_{wydech} \approx 91\% &\\
+	&F_{wdech} \approx 76\% &\\
+	&F_{wydech} \approx 86\%. &
 \end{flalign*}
 Wniosek z tego jest taki, że model
 z wysokim prawdopodobieństwem przewidzi dobrze kolejny stan, jeżeli dobrze przewidział poprzedni. 
 Warto dodać, że rzeczywiście metoda z poprzednim stanem pozwoliła nam ograniczyć ,,przeskakiwanie'' 
 w testach jakościowych, jednak całkowicie go nie wyeliminowała.
 \subsection{Problemy}
-W poprzednim podpunkcie wyszedł główny mankament tej metody - konieczność założenia, że poprzednio
-przewidziany stan jest dobry co nie zawsze jest prawdą. W testach jakościowych zaobserwować można było
+W poprzednim podpunkcie wyszedł główny mankament tej metody -- konieczność założenia, że poprzednio
+przewidziany stan jest dobry, co nie zawsze jest prawdą. W testach jakościowych zaobserwować można było
 ,,wariowanie'' modelu, czyli sekwencję źle przewidzianych stanów.
 
 \section{Sieć neuronowa}
 \subsection{Założenie}
-Do przetestowania działania sieci neuronowej przyjęliśmy nieco odmienne podejście. Jako dane wejściowe przyjmujemy (podobnie jak w przypadku SVM) spektrogram jednak w tym przypadku stworzony przy użyciu STFT. Dzięki temu model bierze pod uwagę także zmianę widma w czasie.
+Do przetestowania działania sieci neuronowej przyjęliśmy nieco odmienne podejście. Jako dane wejściowe przyjmujemy (podobnie jak w przypadku SVM) spektrogram, jednak w tym przypadku stworzony przy użyciu STFT. Dzięki temu model bierze pod uwagę także zmianę widma w czasie.
 \subsection{Metoda}
 Stosując poszczególne warstwy, nasz spektrogram jest odpowiednio przetwarzany, tak aby uwidocznić istotne cechy. Wykorzystywane przez nas warstwy (wraz z parametrami) to:
 \begin{enumerate}
