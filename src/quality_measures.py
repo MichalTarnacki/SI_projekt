@@ -1,13 +1,11 @@
 class QualityMeasures:
     def __init__(self, labels_correct, labels_pred):
         """
-        Counts accuracy, precisions, recalls and F-measures of the prediction.
+        :param ndarray labels_correct: correct labels ('in' for inhale and 'out' for exhale)
+        :param ndarray labels_pred: predicted labels ('in' for inhale and 'out' for exhale)
 
-        Arguments:
-        labels_correct: ndarray of correct labels ('in' for inhale and 'out' for exhale)
-        labels_pred: ndarray of predicted labels ('in' for inhale and 'out' for exhale)
-
-        Counted measures are available as fields of the created object.
+        Counts accuracy, precisions, recalls and F-measures of the prediction. Counted measures are available
+        as fields of the created object.
         """
         self.accuracy = None
         self.precision_in = None
@@ -26,7 +24,7 @@ class QualityMeasures:
         false_neg_in = false_pos_out
         false_neg_out = false_pos_in
 
-        self.accuracy =(true_pos_in + true_neg_in) / (true_pos_in + false_pos_in + true_neg_in + false_neg_in)
+        self.accuracy = (true_pos_in + true_neg_in) / (true_pos_in + false_pos_in + true_neg_in + false_neg_in)
         self.precision_in = true_pos_in / (true_pos_in + false_pos_in)
         self.precision_out = true_pos_out / (true_pos_out + false_pos_out)
         self.recall_in = true_pos_in / (true_pos_in + false_neg_in)
