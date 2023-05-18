@@ -1,0 +1,5369 @@
+#LyX file created by tex2lyx 2.3
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin /media/user/62f8c8e5-3384-4593-981e-34d256c48a91/_projects/SI_projekt/tex/
+\textclass article
+\begin_preamble
+
+
+
+\usepackage{blindtext}
+\usepackage[polish]{babel}
+\usepackage{listings}
+\usepackage{esvect}
+\usepackage{caption}
+\usepackage{siunitx}
+
+
+\usepackage{etoolbox}
+\patchcmd{\thebibliography}{\section*{\refname}}{}{}{}
+
+\graphicspath{ {./obrazy/} }
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{frame=tb,
+  language=Python,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny,
+  keywordstyle=,
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
+
+\newcommand*{\captionsource}[2]{%
+  \caption[{#1}]{%
+    #1%
+    \\\hspace{\linewidth}%
+    \textbf{Źródło:} #2%
+  }%
+}
+
+\title{Wykrywanie wdechu i wydechu na podstawie dźwięku z mikrofonu}
+\author{Dominik Lau, Mateusz Kowalczyk, Michał Tarnacki}
+
+
+
+
+\end_preamble
+\use_default_options false
+\maintain_unincluded_children false
+\language polish
+\language_package default
+\inputencoding utf8
+\fontencoding T1
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref true
+\pdf_bookmarks 0
+\pdf_bookmarksnumbered 0
+\pdf_bookmarksopen 0
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks 0
+\pdf_pdfborder 0
+\pdf_colorlinks 0
+\pdf_backref section
+\pdf_pdfusetitle 0
+\papersize default
+\use_geometry false
+\use_package amsmath 2
+\use_package amssymb 2
+\use_package cancel 0
+\use_package esint 1
+\use_package mathdots 0
+\use_package mathtools 0
+\use_package mhchem 0
+\use_package stackrel 0
+\use_package stmaryrd 0
+\use_package undertilde 0
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style polish
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+maketitle
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+
+\lang polish
+Wstęp
+\end_layout
+
+\begin_layout Standard
+
+\lang polish
+Celem projektu było określanie chwil na nagraniu, w których osoba bierze wdech i wydech. Dokonano oceny jakościowej za pomocą detekcji oddechu na żywo jak i ilościowej (przy wykorzystaniu dalej wymienionej miar).
+\end_layout
+
+\begin_layout Section
+
+\lang polish
+Teoria
+\end_layout
+
+\begin_layout Subsection
+
+\lang polish
+Dyskretna transformata Fouriera (DFT)
+\end_layout
+
+\begin_layout Standard
+
+\lang polish
+W celu przejścia z dziedziny natężenia od czasu do dziedziny częstotliwości stosujemy dyskretną transformatę Fouriera. DFT przekształca ciąg skończonych próbek sygnału 
+\begin_inset Formula $a_0, a_1, a_2, ..., a_{N-1}$
+\end_inset
+
+ w ciąg 
+\begin_inset Formula $A_1, ..., A_{N-1} \in \mathbb{C}$
+\end_inset
+
+ 
+\begin_inset Formula \begin{gather*}
+	A_k = \Sigma_{n=0}^{N-1} a_ne^{\frac{-kni\pi}{N}}, 0 \le k \le N-1
+\end{gather*}
+\end_inset
+
+W naszych zastosowaniach będziemy brali pod uwagę tylko część rzeczywistą tego wielomianu 
+\begin_inset Formula \begin{gather*}
+	R_k = Re(A_k), 0 \le k \le N-1
+\end{gather*}
+\end_inset
+
+Skorzystamy z odmiany dyskretnej transformaty Fouriera - STFT (krótkoczasowa transformata Fouriera). Jest to zasadniczo transformacja Fouriera jednak wykonywana w mniejszych oknach czasowych. Dzięki temu otrzymujemy informację o zmianie widma w czasie, czyli jednocześnie posiadamy informację o właściwościach zarówno w dziedzinie czasu, jak i częstotliwości. Najistotniejszym parametrem tej metody jest rozmiar okna. Ponieważ iloczyn jego szerokości w dziedzinie czasu i szerokości w dziedzinie częstotliwości jest stały dla danego okna, poprawiając rozdzielczość czasu, pogarszamy rozdzielczość częstotliwości. Naszą funkcję natężenia w czasie dla pewnego okresu 
+\begin_inset Formula $t \in [t_0, t_0 + B]$
+\end_inset
+
+, gdzie 
+\begin_inset Formula $B$
+\end_inset
+
+ - rozmiar okna (przyjmujemy 
+\begin_inset Formula $B=1024\approx \frac{1}{44} s$
+\end_inset
+
+), przedstawiamy zatem jako 
+\begin_inset Formula \begin{gather*}
+	I(t) = \Sigma_{f} I_{f}(t)sin(2 \pi f t)
+\end{gather*}
+\end_inset
+
+stąd dla danego przedziału w czasie jesteśmy w stanie stworzyć wektor natężeń 
+\begin_inset Formula \begin{gather*}
+	\boldsymbol{I} = [I_{f_1}, I_{f_2}, ..., I_{f_n}]
+\end{gather*}
+\end_inset
+
+W dalszych rozważaniach wykorzystujemy także średnią częstotliwość, którą liczymy ze wzoru 
+\begin_inset Formula \begin{gather*}
+	\bar{f} = \frac{\Sigma_ffI_f}{I}
+\end{gather*}
+\end_inset
+
+Wykorzystujemy implementację transformaty z bibliotek 
+\begin_inset Formula $numpy$
+\end_inset
+
+ oraz 
+\begin_inset Formula $tensorflow$
+\end_inset
+
+. 
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+centering
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Graphics 
+	filename stft2
+	width 10cm
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Przykład sygnału wdechu i wydechu nosem poddanego transformacie Fouriera dla okien czasowych – otrzymujemy nowy wymiar informacji, czyli nie tylko natężenie dźwięku, ale też natężenie poszczególnych częstotliwości w dźwięku. Obraz z programu Sonic Visualizer, który realizuje STFT.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+
+\lang polish
+Bramka szumów
+\end_layout
+
+\begin_layout Standard
+
+\lang polish
+Główna metoda odszumiana, z której korzystamy, to 
+\begin_inset Formula $Spectral$
+\end_inset
+
+ 
+\begin_inset Formula $Gating$
+\end_inset
+
+ (rodzaj bramki szumów). Pierw wyznaczany jest spektrogram sygnału za pomocą 
+\begin_inset Formula $DFT$
+\end_inset
+
+ i tworzony jest próg szumu dla każdej jego częstotliwości. Częstotliwości progowe służą do stworzenia maski, której potem używamy do usunięcia niechcianych dźwięków. Następnie ze spektrogramu tworzymy z powrotem natężenie 
+\begin_inset Formula $I(t)$
+\end_inset
+
+. W projekcie wykorzystujemy gotową implementację bramki szumów z biblioteki 
+\begin_inset Formula $noisereduce$
+\end_inset
+
+
+\begin_inset Foot
+status collapsed
+
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+https://pypi.org/project/noisereduce/
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+. Zdefiniujmy 
+\begin_inset Formula \begin{gather*}
+	SNR = \frac{P_s}{P_n}
+\end{gather*}
+\end_inset
+
+gdzie 
+\begin_inset Formula $P_n$
+\end_inset
+
+ – moc szumu, 
+\begin_inset Formula $P_s = P - P_n$
+\end_inset
+
+ – moc sygnału użytecznego (moc sygnału pomniejszona o moc szumu). Porównanie przykładowych SNR dla algorytmów usuwania szumu
+\begin_inset Foot
+status collapsed
+
+
+\begin_layout Standard
+
+\lang polish
+Kumar, E. and Surya, K. and Varma, K. and Akash, A. and Kurapati, Nithish Reddy (2023) 
+\emph on
+Noise Reduction in Audio File Using Spectral Gatting and FFT by Python Modules
+\emph default
+
+\end_layout
+
+\end_inset
+
+: 
+\end_layout
+
+\begin_layout Standard
+\align center
+
+\lang polish
+
+\begin_inset Tabular 
+<lyxtabular version="3" rows="4" columns="2">
+<features rotate="0" tabularvalignment="middle" tabularwidth="0pt">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+algorytm 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+SNR 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Formula $LMS$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+2 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Formula $Kalman$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+6 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Formula $Spectral$
+\end_inset
+
+ 
+\begin_inset Formula $Gating$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+14 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+
+\lang polish
+Filtr Savitzky'ego-Golaya
+\end_layout
+
+\begin_layout Standard
+
+\lang polish
+Filtru Savitzky'ego-Golaya używamy do wygładzenia spektrogramu po przeprowadzeniu DFT. Polega on na dopasowywaniu zbioru sąsiadujących punktów do wielomianu niskiego stopnia za pomocą metody najmniejszych kwadratów. Te fragmenty wielomianów są potem łączone w wygładzoną funkcję. Korzystamy z gotowej implementacji z biblioteki 
+\begin_inset Formula $scipy$
+\end_inset
+
+. W przypadku sieci neuronowej korzystamy natomiast z warstw konwolucyjnych, nakładających odpowiednie filtry na obraz. 
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+centering
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Graphics 
+	filename savitzky_golay_filter
+	width 10cm
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Wizualizacja działania filtru Savitzky'ego-Golaya dla przykładowego zbioru próbek, 
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+https://www.maplesoft.com/Applications/Detail.aspx?id=154593
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+
+\lang polish
+Ocena modeli
+\end_layout
+
+\begin_layout Standard
+
+\lang polish
+Zastosowaliśmy następujące miary oceny ilościowej modelu: 
+\begin_inset Formula \begin{flalign*}
+	&accuracy = \frac{|TP_{wdech}|+|TN_{wdech}|}{|TP_{wdech}|+|FP_{wdech}|+|TN_{wdech}|+|FN_{wdech}|}&\\
+	&precision_{wdech} = \frac{|TP_{wdech}|}{|TP_{wdech}|+|FP_{wdech}|}&\\
+	&recall_{wdech} = \frac{|TP_{wdech}|}{|TP_{wdech}|+|FN_{wdech}|}&\\
+	&F_{wdech} = \frac{2 \cdot precision_{wdech} \cdot recall_{wdech}}{precision_{wdech} + recall_{wdech}}&
+\end{flalign*}
+\end_inset
+
+gdzie 
+\begin_inset Formula $TP_{wdech}$
+\end_inset
+
+ – liczba próbek oznaczonych jako wdech, które sklasyfikowane zostały jako wdech, 
+\begin_inset Formula $TN_{wdech}$
+\end_inset
+
+ – liczba próbek nieoznaczonych jako wdech, które nie zostały sklasyfikowane jako wdech, 
+\begin_inset Formula $FP_{wdech}$
+\end_inset
+
+ – liczba próbek nieoznaczonych jako wdech, które zostały sklasyfikowane jako wdech, 
+\begin_inset Formula $FN_{wdech}$
+\end_inset
+
+ – liczba próbek oznaczonych jako wdech, które nie zostały sklasyfikowane jako wdech. Analogicznie definiujemy 
+\begin_inset Formula $precision_{wydech}, recall_{wydech}, F_{wydech}$
+\end_inset
+
+. 
+\end_layout
+
+\begin_layout Subsection
+
+\lang polish
+Standaryzacja
+\end_layout
+
+\begin_layout Standard
+
+\lang polish
+Dane wejściowe do modelu zawsze standaryzujemy, wykonując operację daną wzorem: 
+\begin_inset Formula \begin{gather*}
+	\tilde X = \frac{X - EX}{\sigma_X}.
+\end{gather*}
+\end_inset
+
+Stosujemy gotową implementację z biblioteki 
+\shape italic
+scikit-learn
+\shape default
+ lub warstwę normalizacyjną w przypadku sieci neuronowej. 
+\end_layout
+
+\begin_layout Subsection
+
+\lang polish
+SVM
+\end_layout
+
+\begin_layout Standard
+
+\lang polish
+Pierwszym modelem, jakim dokonujemy klasyfikacji, jest SVM. Metoda ta polega na szukaniu optymalnych wag 
+\begin_inset Formula $\boldsymbol{w}, b$
+\end_inset
+
+. Następnie będziemy klasyfikować według funkcji maszyny uczącej 
+\begin_inset Formula \begin{gather*}
+	f(x) = sgn(\boldsymbol{w}^T \boldsymbol{x} + b).
+\end{gather*}
+\end_inset
+
+Jeśli 
+\begin_inset Formula $f$
+\end_inset
+
+ zwraca 
+\begin_inset Formula $1$
+\end_inset
+
+, traktujemy to jako jedną z binarnych decyzji (w naszym przypadku np. wdech) a jeśli zwraca 
+\begin_inset Formula $-1$
+\end_inset
+
+, to drugą (czyli np. wydech). 
+\begin_inset Formula $\textbf{x}$
+\end_inset
+
+ jest wektorem cech. Znalezienie optymalnych wag będzie polegało na minimalizacji funkcji kosztu 
+\begin_inset Formula \begin{gather*}
+	J(\boldsymbol{w}) = \frac{1}{2}||\boldsymbol{w}||^2 + \frac{C}{N}\Sigma_x max\{0, 1 - y(\boldsymbol{w}^Tx + b)\},
+\end{gather*}
+\end_inset
+
+gdzie C jest parametrem uregulowania. Funkcję będziemy minimalizować metodą stochastycznego spadku po gradiencie. W projekcie użyliśmy własnej implementacji SVM-a. 
+\end_layout
+
+\begin_layout Subsection
+
+\lang polish
+Sieć neuronowa
+\end_layout
+
+\begin_layout Standard
+
+\lang polish
+Drugim modelem, jakim dokonujemy klasyfikacji, jest sieć neuronowa. Ze względu na trudność w samodzielnym zaprojektowaniu dobrej sieci neuronowej postanowiliśmy użyć stworzonego przez firmę Google Tensorflowa wraz z interfejsem Keras. 
+\end_layout
+
+\begin_layout Section
+
+\lang polish
+Narzędzia i inne
+\end_layout
+
+\begin_layout Subsection
+
+\lang polish
+Nagrywanie danych oddechowych
+\end_layout
+
+\begin_layout Standard
+
+\lang polish
+Żeby zapewnić dobre oznaczenie danych, etykietujemy je jeszcze w trakcie nagrywania dźwięku. Osoba nagrywana naciska przycisk, żeby zasygnalizować, że przestała brać wdech i zaczyna wydychać powietrze lub na odwrót. Momenty przejścia z wdechu na wydech i w drugą stronę zapisywane są w pliku .csv, a dźwięk w pliku .wav. Częstotliwość próbkowania ustalamy na 
+\begin_inset Formula $44,1$
+\end_inset
+
+ kHz. 
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+centering
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Graphics 
+	filename nagrywanie_ozn
+	width 10cm
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Przykładowe nagrane dane, in-wdech, out-wydech. Jak widać, dane oznaczone na żywo są bardzo dokładne, być może nie bylibyśmy w stanie osiągnąć takiej dokładności oznaczając ręcznie (lub byłoby to bardzo żmudne).
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+
+\lang polish
+Oddychanie na żywo
+\end_layout
+
+\begin_layout Standard
+
+\lang polish
+Testowanie modeli do predykcji na żywo odbywało się za pomocą programu wizualizującego aktualnie stwierdzany stan. 
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+centering
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Graphics 
+	filename wdechwydechcisza
+	width 10cm
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Jeżeli koło zwiększa się i jest niebieskie, model wykrywa wdech, jeśli zmniejsza się i jest czerwone, jest to wydech, natomiast kolor zielony oznacza, że natężenie dźwięku nie przekracza pewnego progu dobieranego eksperymentalnie w zależności od mikrofonu.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\lang polish
+Dalej klasyfikację na żywo nazywamy też testem jakościowym.
+\end_layout
+
+\begin_layout Subsection
+
+\lang polish
+Przeliczanie częstotliwości z DFT
+\end_layout
+
+\begin_layout Standard
+
+\lang polish
+W celu wyznaczenia sposobu zamiany częstotliwości otrzymanej za pomocą DFT na znaną jednostkę (Hz) wykonaliśmy kilkanaście nagrań z ustaloną (w Hz) dominującą częstotliwością i odczytaliśmy, której wartości częstotliwości otrzymanej za pomocą DFT odpowiada maksymalne natężenie. Wyniki przedstawia rysunek 5. 
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+centering
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Graphics 
+	filename przeliczanie_dft_hz
+	width 10cm
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+na osi poziomej ustalona w 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+unit
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+Hz
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+ dominująca częstotliwość z nagrania, na osi pionowej – wartość częstotliwości otrzymanej w wyniku DFT, której odpowiada maksymalne natężenie.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+
+\lang polish
+Po zaobserwowaniu w przybliżeniu liniowego charakteru tej relacji zastosowaliśmy metodę najmniejszych kwadratów do wyznaczenia najlepiej dopasowanej prostej. Otrzymaliśmy następujące wyniki: 
+\begin_inset Formula \begin{gather*}
+	f_{\unit{Hz}}\approx43,0789\,f_{\unit{DFT}}-2,8174,\\
+	f_{\unit{DFT}}\approx0,0232\,f_{\unit{Hz}}+0,068,
+\end{gather*}
+\end_inset
+
+gdzie 
+\begin_inset Formula $f_{\unit{DFT}}$
+\end_inset
+
+ to wartość liczbowa częstotliwości w jednostkach, w której otrzymuje się wynik DFT, natomiast 
+\begin_inset Formula $f_{\unit{Hz}}$
+\end_inset
+
+ to wartość liczbowa częstotliwości wyrażonej w 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+unit
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+Hz
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+. 
+\end_layout
+
+\begin_layout Section
+
+\lang polish
+Początkowo przyjęty model oddechu
+\end_layout
+
+\begin_layout Standard
+
+\lang polish
+Na początku przyjmujemy model ,,sportowego
+\begin_inset Quotes prd
+\end_inset
+
+ oddychania, czyli wdech nosem i wydech ustami. Uproszczenie to polega na tym, że wydawane dźwięki są dosyć różne, dopiero potem sprawdzamy jak nasze podejście będzie się sprawować przy innych metodach oddychania. 
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+centering
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Graphics 
+	filename model_oddechu
+	width 3cm
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Ilustracja przyjętego modelu, 
+\begin_inset CommandInset href
+LatexCommand href
+name "źródło"
+target "https://www.quora.com/Should-I-exhale-from-the-mouth-or-nose-while-deep-breathing"
+literal "true"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+
+\lang polish
+Pierwotne podejście – średnia częstotliwość w czasie
+\end_layout
+
+\begin_layout Subsection
+
+\lang polish
+Metoda
+\end_layout
+
+\begin_layout Standard
+
+\lang polish
+Pierwotnie przyjętym założeniem było, że podczas wdechu średnia częstotliwość dźwięku jest wyższa niż gdy osoba wydycha. Z pliku w formacie .wav pobieramy natężenie, które następnie 
+\series bold
+odszumiamy
+\series default
+ za pomocą 
+\begin_inset Formula $noisereduce$
+\end_inset
+
+ (przy testach jakościowych stosujemy bramkę szumów dla 3 ostatnich sekund) . 
+\series bold
+Dzielimy próbki na bloki, dla których tworzymy spektrogramy
+\series default
+ i obliczamy średnią ważoną częstotliwość. Cechami, na podstawie których dokonywana jest predykcja, są 
+\begin_inset Formula \begin{gather*}
+\boldsymbol x (t_n) = [\bar{f}(t_1), ..., \bar{f}(t_n)],
+\end{gather*}
+\end_inset
+
+czyli średnie częstotliwości z kilku przeszłych chwil. Dla danych testowych spełniających powyższe założenie (predykcja na podstawie ostatnich 100 i modelu wytrenowanego SVM-em) dawało nam to dokładność 
+\begin_inset Formula $\sim 60\%$
+\end_inset
+
+. (Inne miary nie zostały zmierzone ze względu na problemy, o których mowa w kolejnym podpunkcie). 
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+centering
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Graphics 
+	filename porownanie_srednie
+	width 10cm
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Przykładowe działanie modelu dla danych spełniających założenie: wyższy wdech, niższy wydech. W pewnych momentach podobnie wyglądające fragmenty krzywej powinny być wdechem, w innych wydechem, mamy więc możliwy underfitting.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+
+\lang polish
+Problemy
+\end_layout
+
+\begin_layout Standard
+
+\lang polish
+Podejście to jednak mocno ogranicza nasze dalsze pole do rozwoju. Zmniejszenie całego spektrogramu do pojedynczej wartości częstotliwości daje nam mniej informacji, przez co być może ograniczylibyśmy się tylko do przyjętego przez nas modelu (tj. wdech – nos, wydech – usta) – w innych modelach różnica średnich częstotliwości między wdechem a wydechem może nie być taka wyraźna. Ponadto, dla niektórych osób zaobserwowaliśmy, że zależność między wdechem a wydechem jest niekoniecznie tak prosta jak założyliśmy. Obserwowana metoda była również bardzo niestabilna jeżeli chodzi o testy jakościowe (klasyfikację na żywo). 
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+centering
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Graphics 
+	filename problem_srednie_ozn
+	width 10cm
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Nieoczywista zależność między wdechem a wydechem.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+
+\lang polish
+Wykorzystanie spektrogramu
+\end_layout
+
+\begin_layout Subsection
+
+\lang polish
+Założenie
+\end_layout
+
+\begin_layout Standard
+
+\lang polish
+Kolejnym przyjętym przez nas podejściem było podanie całego spektrogramu (a przynajmniej jego części) jako dane wejściowe do SVM-a. Metoda pochodzi od przypuszczenia, że człowiek rozpoznaje i rozróżnia wdech/wydech na podstawie barwy dźwięku. 
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+centering
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Graphics 
+	filename wdech_wydech_spektro
+	width 10cm
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Istotnym jest fakt, że w przyjętym modelu oddychania wydech jest pojedynczym pikiem 
+\begin_inset Formula $\in (0, 1)$
+\end_inset
+
+ kHz a wdech częstotliwościami z natężeniem o mniejszym odchyleniu 
+\begin_inset Formula $\in (2, 7)$
+\end_inset
+
+ kHz. Zbliżoną zależność zaobserwowano dla kilku badanych osób.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+
+\lang polish
+Metoda
+\end_layout
+
+\begin_layout Standard
+
+\lang polish
+Podobnie jak ostatnio pierw odszumiamy sygnał z pliku za pomocą 
+\begin_inset Formula $noisereduce$
+\end_inset
+
+. 
+\series bold
+Dzielimy dane na bloki rozmiaru 1024 próbek, tworzymy dla każdego bloku spektrogram
+\series default
+ ale tym razem nie liczymy średniej tylko zostawiamy całą taką klatkę. Wektor cech ma więc postać 
+\begin_inset Formula \begin{gather*}
+\boldsymbol{x} = [I_{f_1}, I_{f_2}, ..., I_{f_n}]
+\end{gather*}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+
+\lang polish
+Kluczowe częstotliwości
+\end_layout
+
+\begin_layout Standard
+
+\lang polish
+Postanowiliśmy dokładniej przeanalizować, które częstotliwości są kluczowe dla poprawnej oceny fazy oddechu. W oparciu o obserwację spektrogramów wybraliśmy kilka możliwych zakresów, w których różnice między wdechem i wydechem są dobrze widoczne: 
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+setlength{
+\backslash
+itemsep}{-0.25em}
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\lang polish
+
+\begin_inset Argument item:1
+status collapsed
+
+
+\begin_layout Standard
+
+\lang polish
+–
+\end_layout
+
+\end_inset
+
+0
+\begin_inset space \thinspace{}
+
+\end_inset
+
+–
+\begin_inset space \thinspace{}
+
+\end_inset
+
+6
+\begin_inset space \thinspace{}
+
+\end_inset
+
+900 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+unit
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+Hz
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+, 
+\end_layout
+
+\begin_layout Itemize
+
+\lang polish
+
+\begin_inset Argument item:1
+status collapsed
+
+
+\begin_layout Standard
+
+\lang polish
+–
+\end_layout
+
+\end_inset
+
+0
+\begin_inset space \thinspace{}
+
+\end_inset
+
+–
+\begin_inset space \thinspace{}
+
+\end_inset
+
+1
+\begin_inset space \thinspace{}
+
+\end_inset
+
+300 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+unit
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+Hz
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+ i 3
+\begin_inset space \thinspace{}
+
+\end_inset
+
+400
+\begin_inset space \thinspace{}
+
+\end_inset
+
+–
+\begin_inset space \thinspace{}
+
+\end_inset
+
+22
+\begin_inset space \thinspace{}
+
+\end_inset
+
+000 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+unit
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+Hz
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+, 
+\end_layout
+
+\begin_layout Itemize
+
+\lang polish
+
+\begin_inset Argument item:1
+status collapsed
+
+
+\begin_layout Standard
+
+\lang polish
+–
+\end_layout
+
+\end_inset
+
+0
+\begin_inset space \thinspace{}
+
+\end_inset
+
+–
+\begin_inset space \thinspace{}
+
+\end_inset
+
+14
+\begin_inset space \thinspace{}
+
+\end_inset
+
+000 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+unit
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+Hz
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+, 
+\end_layout
+
+\begin_layout Itemize
+
+\lang polish
+
+\begin_inset Argument item:1
+status collapsed
+
+
+\begin_layout Standard
+
+\lang polish
+–
+\end_layout
+
+\end_inset
+
+0
+\begin_inset space \thinspace{}
+
+\end_inset
+
+–
+\begin_inset space \thinspace{}
+
+\end_inset
+
+1
+\begin_inset space \thinspace{}
+
+\end_inset
+
+300 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+unit
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+Hz
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+ i 3
+\begin_inset space \thinspace{}
+
+\end_inset
+
+400
+\begin_inset space \thinspace{}
+
+\end_inset
+
+–
+\begin_inset space \thinspace{}
+
+\end_inset
+
+14
+\begin_inset space \thinspace{}
+
+\end_inset
+
+000 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+unit
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+Hz
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+, 
+\end_layout
+
+\begin_layout Itemize
+
+\lang polish
+
+\begin_inset Argument item:1
+status collapsed
+
+
+\begin_layout Standard
+
+\lang polish
+–
+\end_layout
+
+\end_inset
+
+0
+\begin_inset space \thinspace{}
+
+\end_inset
+
+–
+\begin_inset space \thinspace{}
+
+\end_inset
+
+8
+\begin_inset space \thinspace{}
+
+\end_inset
+
+500 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+unit
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+Hz
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+ i 10
+\begin_inset space \thinspace{}
+
+\end_inset
+
+000
+\begin_inset space \thinspace{}
+
+\end_inset
+
+–
+\begin_inset space \thinspace{}
+
+\end_inset
+
+14
+\begin_inset space \thinspace{}
+
+\end_inset
+
+000 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+unit
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+Hz
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+, 
+\end_layout
+
+\begin_layout Itemize
+
+\lang polish
+
+\begin_inset Argument item:1
+status collapsed
+
+
+\begin_layout Standard
+
+\lang polish
+–
+\end_layout
+
+\end_inset
+
+0
+\begin_inset space \thinspace{}
+
+\end_inset
+
+–
+\begin_inset space \thinspace{}
+
+\end_inset
+
+16
+\begin_inset space \thinspace{}
+
+\end_inset
+
+000 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+unit
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+Hz
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+, 
+\end_layout
+
+\begin_layout Itemize
+
+\lang polish
+
+\begin_inset Argument item:1
+status collapsed
+
+
+\begin_layout Standard
+
+\lang polish
+–
+\end_layout
+
+\end_inset
+
+0
+\begin_inset space \thinspace{}
+
+\end_inset
+
+–
+\begin_inset space \thinspace{}
+
+\end_inset
+
+1
+\begin_inset space \thinspace{}
+
+\end_inset
+
+300 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+unit
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+Hz
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+ i 3
+\begin_inset space \thinspace{}
+
+\end_inset
+
+400
+\begin_inset space \thinspace{}
+
+\end_inset
+
+–
+\begin_inset space \thinspace{}
+
+\end_inset
+
+16
+\begin_inset space \thinspace{}
+
+\end_inset
+
+000 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+unit
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+Hz
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+, 
+\end_layout
+
+\begin_layout Itemize
+
+\lang polish
+
+\begin_inset Argument item:1
+status collapsed
+
+
+\begin_layout Standard
+
+\lang polish
+–
+\end_layout
+
+\end_inset
+
+0
+\begin_inset space \thinspace{}
+
+\end_inset
+
+–
+\begin_inset space \thinspace{}
+
+\end_inset
+
+1
+\begin_inset space \thinspace{}
+
+\end_inset
+
+300 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+unit
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+Hz
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+, 3
+\begin_inset space \thinspace{}
+
+\end_inset
+
+400
+\begin_inset space \thinspace{}
+
+\end_inset
+
+–
+\begin_inset space \thinspace{}
+
+\end_inset
+
+8
+\begin_inset space \thinspace{}
+
+\end_inset
+
+500 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+unit
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+Hz
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+ i 10
+\begin_inset space \thinspace{}
+
+\end_inset
+
+000 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+unit
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+Hz
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+
+\begin_inset space \thinspace{}
+
+\end_inset
+
+–
+\begin_inset space \thinspace{}
+
+\end_inset
+
+16
+\begin_inset space \thinspace{}
+
+\end_inset
+
+000 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+unit
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+Hz
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+, 
+\end_layout
+
+\begin_layout Itemize
+
+\lang polish
+
+\begin_inset Argument item:1
+status collapsed
+
+
+\begin_layout Standard
+
+\lang polish
+–
+\end_layout
+
+\end_inset
+
+0
+\begin_inset space \thinspace{}
+
+\end_inset
+
+–
+\begin_inset space \thinspace{}
+
+\end_inset
+
+8
+\begin_inset space \thinspace{}
+
+\end_inset
+
+500 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+unit
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+Hz
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+ i 10
+\begin_inset space \thinspace{}
+
+\end_inset
+
+000
+\begin_inset space \thinspace{}
+
+\end_inset
+
+–
+\begin_inset space \thinspace{}
+
+\end_inset
+
+16
+\begin_inset space \thinspace{}
+
+\end_inset
+
+000 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+unit
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+Hz
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+. 
+\end_layout
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+centering
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Graphics 
+	filename spektrogram_wydech_ustami
+	width 13cm
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Spektrogramy dwóch nagrań oddechu z wdechem nosem i wydechem ustami uzyskane przy użyciu programu Audacity.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\lang polish
+Dla każdego wyboru przeprowadziliśmy testy. W przypadku ostatniego uzyskaliśmy najlepsze wartości miar i dobre działanie przy przewidywaniu na żywo. Taki wybór częstotliwości przyjęliśmy zatem dla modelu rozpoznającego wdech nosem i wydech ustami. 
+\series bold
+Używamy zatem częstotliwości z przedziału od 0 do 8
+\begin_inset space \thinspace{}
+
+\end_inset
+
+500 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+unit
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+Hz
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+ i od 10
+\begin_inset space \thinspace{}
+
+\end_inset
+
+000 do 16
+\begin_inset space \thinspace{}
+
+\end_inset
+
+000 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+unit
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+Hz
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+
+\series default
+. Stosując to podejście dla danych testowych, otrzymaliśmy następujące wyniki: 
+\end_layout
+
+\begin_layout Standard
+\align center
+
+\lang polish
+
+\begin_inset Tabular 
+<lyxtabular version="3" rows="8" columns="2">
+<features rotate="0" tabularvalignment="middle" tabularwidth="0pt">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+miara 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+wartość (%) 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Formula $accuracy$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+75 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Formula $precision_{wdech}$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+68 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Formula $precision_{wydech}$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+92 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Formula $recall_{wdech}$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+88 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Formula $recall_{wydech}$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+66 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Formula $F_{wdech}$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+74 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Formula $F_{wydech}$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+74 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\lang polish
+W testach jakościowych jednak zaobserwować było można ,,przeskakiwanie
+\begin_inset Quotes prd
+\end_inset
+
+ z jednej wartości na drugą i z powrotem np. w połowie brania wdechu, wydychania. 
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+centering
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Graphics 
+	filename przeskakiwanie_ozn
+	width 10cm
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Dane z rysunku 1. oznaczone, jak widać, występują przeskoki z jednej wartości na drugą.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+
+\lang polish
+Poprzedni stan
+\end_layout
+
+\begin_layout Standard
+
+\lang polish
+W celu pozbycia się ,,przeskakiwania
+\begin_inset Quotes prd
+\end_inset
+
+ (zwiększenia inercji) i ogólnej poprawy działania dane z poprzedniego podpunktu rozszerzyliśmy o informację o 
+\series bold
+wcześniej przewidzianym stanie
+\series default
+, czyli wektor cech ma teraz postać 
+\begin_inset Formula \begin{gather*}
+	\boldsymbol{x} = [I_{f_1}, I_{f_2}, ..., I_{f_{160}},  s]
+\end{gather*}
+\end_inset
+
+gdzie 
+\begin_inset Formula $s = 1$
+\end_inset
+
+ jeśli poprzednio stwierdzono wdech, 
+\begin_inset Formula $s=-1$
+\end_inset
+
+ jeśli poprzednio stwierdzono wydech. Dodatkowo przeprowadziliśmy jeszcze 
+\series bold
+wygładzenie spektrogramu filtrem Savitzky'ego-Golaya
+\series default
+. Następnie przetestowaliśmy program w sposób uproszczony – jako wartość 
+\begin_inset Formula $s$
+\end_inset
+
+ stanu poprzedniego stosowaliśmy tę odczytaną z danych testowych, czyli zakładaliśmy za każdym razem, że nasz model przewidzi dobrze poprzedni stan. Otrzymaliśmy następujące wyniki: 
+\begin_inset Float table
+placement H
+wide false
+sideways false
+status open
+
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Wartości miar uzyskane podczas uproszczonych testów modelu z 
+\series bold
+wydechem ustami
+\series default
+ przy wyborze częstotliwości 0
+\begin_inset space \thinspace{}
+
+\end_inset
+
+–
+\begin_inset space \thinspace{}
+
+\end_inset
+
+8
+\begin_inset space \thinspace{}
+
+\end_inset
+
+500 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+unit
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+Hz
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+ i 10
+\begin_inset space \thinspace{}
+
+\end_inset
+
+000
+\begin_inset space \thinspace{}
+
+\end_inset
+
+–
+\begin_inset space \thinspace{}
+
+\end_inset
+
+16
+\begin_inset space \thinspace{}
+
+\end_inset
+
+000.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+
+\lang polish
+
+\begin_inset Tabular 
+<lyxtabular version="3" rows="8" columns="2">
+<features rotate="0" tabularvalignment="middle" tabularwidth="0pt">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+miara 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+wartość (%) 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Formula $accuracy$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+99 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Formula $precision_{wdech}$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+99 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Formula $precision_{wydech}$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+99 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Formula $recall_{wdech}$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+99 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Formula $recall_{wydech}$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+99 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Formula $F_{wdech}$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+99 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Formula $F_{wydech}$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+99 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\lang polish
+Przypadek ten nie jest realny, ponieważ model nie będzie znał poprawnej poprzedniej klasyfikacji, lecz zakładał, że to co sam stwierdził jest poprawne. Odczytując poprzedni stan nie z danych testowych, a z poprzedniej klasyfikacji modelu, otrzymujemy gorsze, choć bardziej miarodajne wyniki: 
+\begin_inset Float table
+placement H
+wide false
+sideways false
+status open
+
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Wartości miar uzyskane podczas testów modelu z 
+\series bold
+wydechem ustami
+\series default
+ przy wyborze częstotliwości 0
+\begin_inset space \thinspace{}
+
+\end_inset
+
+–
+\begin_inset space \thinspace{}
+
+\end_inset
+
+8
+\begin_inset space \thinspace{}
+
+\end_inset
+
+500 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+unit
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+Hz
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+ i 10
+\begin_inset space \thinspace{}
+
+\end_inset
+
+000
+\begin_inset space \thinspace{}
+
+\end_inset
+
+–
+\begin_inset space \thinspace{}
+
+\end_inset
+
+16
+\begin_inset space \thinspace{}
+
+\end_inset
+
+000.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+
+\lang polish
+
+\begin_inset Tabular 
+<lyxtabular version="3" rows="8" columns="2">
+<features rotate="0" tabularvalignment="middle" tabularwidth="0pt">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+miara 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+wartość (%) 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Formula $accuracy$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+87 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Formula $precision_{wdech}$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+88 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Formula $precision_{wydech}$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+87 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Formula $recall_{wdech}$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+78 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Formula $recall_{wydech}$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+65 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Formula $F_{wdech}$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+83 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Formula $F_{wydech}$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+90 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\lang polish
+Wniosek z tego jest taki, że model z wysokim prawdopodobieństwem przewidzi dobrze kolejny stan, jeżeli dobrze przewidział poprzedni. Warto dodać, że rzeczywiście metoda z poprzednim stanem pozwoliła nam ograniczyć ,,przeskakiwanie
+\begin_inset Quotes prd
+\end_inset
+
+ w testach jakościowych, jednak całkowicie go nie wyeliminowała. 
+\end_layout
+
+\begin_layout Subsection
+
+\lang polish
+Problemy
+\end_layout
+
+\begin_layout Standard
+
+\lang polish
+W poprzednim podpunkcie wyszedł główny mankament tej metody – konieczność założenia, że poprzednio przewidziany stan jest dobry, co nie zawsze jest prawdą. W testach jakościowych zaobserwować można było ,,wariowanie
+\begin_inset Quotes prd
+\end_inset
+
+ modelu, czyli sekwencję źle przewidzianych stanów.
+\end_layout
+
+\begin_layout Section
+
+\lang polish
+Sieć neuronowa
+\end_layout
+
+\begin_layout Subsection
+
+\lang polish
+Założenie
+\end_layout
+
+\begin_layout Standard
+
+\lang polish
+Do przetestowania działania sieci neuronowej przyjęliśmy nieco odmienne podejście. Jako dane wejściowe przyjmujemy (podobnie jak w przypadku SVM) spektrogram, jednak w tym przypadku stworzony przy użyciu STFT. Dzięki temu model bierze pod uwagę także zmianę widma w czasie. 
+\end_layout
+
+\begin_layout Subsection
+
+\lang polish
+Metoda
+\end_layout
+
+\begin_layout Standard
+
+\lang polish
+Stosując poszczególne warstwy, nasz spektrogram jest odpowiednio przetwarzany, tak aby uwidocznić istotne cechy. Wykorzystywane przez nas warstwy (wraz z parametrami) to: 
+\end_layout
+
+\begin_layout Enumerate
+
+\lang polish
+
+\family typewriter
+Input
+\family default
+ - Punkt wejścia do sieci neuronowej 
+\end_layout
+
+\begin_layout Enumerate
+
+\lang polish
+
+\family typewriter
+Resizing
+\family default
+ - Zmiana rozmiaru obrazu (32x32) 
+\end_layout
+
+\begin_layout Enumerate
+
+\lang polish
+
+\family typewriter
+Normalization
+\family default
+ - Normalizacja cech 
+\end_layout
+
+\begin_layout Enumerate
+
+\lang polish
+
+\family typewriter
+Conv2D
+\family default
+ - Nałożenie odpowiedniego filtru o rozmiarze n x m (lub n x n) na obraz tak aby uwydatnić jego cechy (32, 3, 'relu'). Wykorzystuje funkcję aktywacji. 
+\end_layout
+
+\begin_layout Enumerate
+
+\lang polish
+
+\family typewriter
+Conv2D
+\family default
+ - Tak jak wyżej (64, 3, 'relu') 
+\end_layout
+
+\begin_layout Enumerate
+
+\lang polish
+
+\family typewriter
+MaxPooling2D
+\family default
+ - Downsampling czyli wybranie maksymalnej wartości spośród okna o zadanych wymiarach (2x2) 
+\end_layout
+
+\begin_layout Enumerate
+
+\lang polish
+
+\family typewriter
+Dropout
+\family default
+ - Ustawienie losowych wejść na 0 z częstotliwością n, przeskalowanie pozostałych cech przez 
+\begin_inset Formula $\frac{1}{1-n}$
+\end_inset
+
+, pozwala na zredukowanie overfittingu (0.25) 
+\end_layout
+
+\begin_layout Enumerate
+
+\lang polish
+
+\family typewriter
+Flatten
+\family default
+ - Spłaszczenie wejścia do 1 wymiaru 
+\end_layout
+
+\begin_layout Enumerate
+
+\lang polish
+
+\family typewriter
+Dense
+\family default
+ - Łączy wszystkie neurony z warstwy poprzedniej ze wszystkimi z warstwy kolejnej, identyfikuje do jakiej klasy przynależy obiekt wejściowy. Wykorzystuje funkcję aktywacji. (128, 'relu') 
+\end_layout
+
+\begin_layout Enumerate
+
+\lang polish
+
+\family typewriter
+Dropout
+\family default
+ - Tak jak wyżej (0.5) 
+\end_layout
+
+\begin_layout Enumerate
+
+\lang polish
+
+\family typewriter
+Dense
+\family default
+ - Tak jak wyżej (2) 
+\end_layout
+
+\begin_layout Subsection
+
+\lang polish
+Wykorzystywane próbki
+\end_layout
+
+\begin_layout Standard
+
+\lang polish
+W przeciwieństwie do SVM aktualną predykcję określamy nie na podstawie poprzedniego stanu, lecz dla stanu sprzed pewnej chwili czasowej. W naszym przypadku aktualnie wyświetlany stan pochodzi sprzed około 0,5 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+unit
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+s
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+. Oczywiście powoduje to pewne opóźnienie, jednak praktycznie niezauważalne przez użytkownika. Podejście to nie ulega jednak propagacji błędów, którą widzimy w przypadku SVM. 
+\end_layout
+
+\begin_layout Subsection
+
+\lang polish
+Problemy
+\end_layout
+
+\begin_layout Standard
+
+\lang polish
+Przy rozpoznawaniu próbki zakładamy przynależność do jednej z dwóch klas. W przypadku gdy jako dane wejściowe mamy jedynie wdechy i wydechy nie stanowi to problemu. Gdy jednak chcemy rozpoznać brak oddychania musimy założyć pewien próg pewności co otrzymanej klasyfikacji. Eksperymentalnie przyjęliśmy iż wdech jest wdechem gdy pewność sieci neuronowej wynosi 99% natomiast co do wydechów przyjęliśmy pewność na poziomie 70%.
+\end_layout
+
+\begin_layout Section
+
+\lang polish
+Przejście na inny model oddychania
+\end_layout
+
+\begin_layout Subsection
+
+\lang polish
+Wydech nosem
+\end_layout
+
+\begin_layout Standard
+
+\lang polish
+Kolejnym krokiem było przeniesienie wypracowanej metody uczenia na rozpoznawanie wdechu oraz wydechu nosem. W takim przypadku różnice między fazami oddechu są mniej zauważalne, co wymagało kolejnych udoskonaleń. 
+\end_layout
+
+\begin_layout Subsection
+
+\lang polish
+Kluczowe częstotliwości
+\end_layout
+
+\begin_layout Standard
+
+\lang polish
+Ponownie dokonaliśmy obserwacji spektrogramów, tym razem wyznaczonych dla wdechów i wydechów nosem. Zauważyliśmy kilka zakresów, w których różnice między fazami oddechu są zauważalne: 
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+setlength{
+\backslash
+itemsep}{-0.25em}
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\lang polish
+
+\begin_inset Argument item:1
+status collapsed
+
+
+\begin_layout Standard
+
+\lang polish
+–
+\end_layout
+
+\end_inset
+
+0
+\begin_inset space \thinspace{}
+
+\end_inset
+
+–
+\begin_inset space \thinspace{}
+
+\end_inset
+
+8
+\begin_inset space \thinspace{}
+
+\end_inset
+
+500 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+unit
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+Hz
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+ i 10
+\begin_inset space \thinspace{}
+
+\end_inset
+
+000
+\begin_inset space \thinspace{}
+
+\end_inset
+
+–
+\begin_inset space \thinspace{}
+
+\end_inset
+
+16
+\begin_inset space \thinspace{}
+
+\end_inset
+
+000 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+unit
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+Hz
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+, 
+\end_layout
+
+\begin_layout Itemize
+
+\lang polish
+
+\begin_inset Argument item:1
+status collapsed
+
+
+\begin_layout Standard
+
+\lang polish
+–
+\end_layout
+
+\end_inset
+
+0
+\begin_inset space \thinspace{}
+
+\end_inset
+
+–
+\begin_inset space \thinspace{}
+
+\end_inset
+
+3
+\begin_inset space \thinspace{}
+
+\end_inset
+
+000 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+unit
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+Hz
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+ i 6
+\begin_inset space \thinspace{}
+
+\end_inset
+
+000
+\begin_inset space \thinspace{}
+
+\end_inset
+
+–
+\begin_inset space \thinspace{}
+
+\end_inset
+
+16
+\begin_inset space \thinspace{}
+
+\end_inset
+
+000 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+unit
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+Hz
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+, 
+\end_layout
+
+\begin_layout Itemize
+
+\lang polish
+
+\begin_inset Argument item:1
+status collapsed
+
+
+\begin_layout Standard
+
+\lang polish
+–
+\end_layout
+
+\end_inset
+
+0
+\begin_inset space \thinspace{}
+
+\end_inset
+
+–
+\begin_inset space \thinspace{}
+
+\end_inset
+
+16
+\begin_inset space \thinspace{}
+
+\end_inset
+
+000 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+unit
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+Hz
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+. 
+\end_layout
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+centering
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Graphics 
+	filename spektrogram_wydech_nosem
+	width 13cm
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Spektrogramy dwóch nagrań oddechu z wdechem i wydechem nosem uzyskane przy użyciu program Audacity.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\lang polish
+Testy pokazały, iż ostatni z powyższych wybór częstotliwości spowodował największą poprawę większości wyników. Przedstawia je poniższa tabela: 
+\begin_inset Float table
+placement H
+wide false
+sideways false
+status open
+
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Wartości miar uzyskane podczas testów modelu z 
+\series bold
+wydechem nosem
+\series default
+ przy poprzednim (0
+\begin_inset space \thinspace{}
+
+\end_inset
+
+–
+\begin_inset space \thinspace{}
+
+\end_inset
+
+8
+\begin_inset space \thinspace{}
+
+\end_inset
+
+500 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+unit
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+Hz
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+ i 10
+\begin_inset space \thinspace{}
+
+\end_inset
+
+000
+\begin_inset space \thinspace{}
+
+\end_inset
+
+–
+\begin_inset space \thinspace{}
+
+\end_inset
+
+16
+\begin_inset space \thinspace{}
+
+\end_inset
+
+000 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+unit
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+Hz
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+) oraz nowym (0
+\begin_inset space \thinspace{}
+
+\end_inset
+
+–
+\begin_inset space \thinspace{}
+
+\end_inset
+
+16
+\begin_inset space \thinspace{}
+
+\end_inset
+
+000 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+unit
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+Hz
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+) wyborze częstotliwości.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+
+\lang polish
+
+\begin_inset Tabular 
+<lyxtabular version="3" rows="8" columns="3">
+<features rotate="0" tabularvalignment="middle" tabularwidth="0pt">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+miara 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+wartość (%) poprzednia 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+wartość (%) nowa 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Formula $accuracy$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+88 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+89 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Formula $precision_{wdech}$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+89 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+92 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Formula $precision_{wydech}$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+88 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+85 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Formula $recall_{wdech}$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+92 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+89 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Formula $recall_{wydech}$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+84 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+90 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Formula $F_{wdech}$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+90 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+90 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Formula $F_{wydech}$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+86 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+87 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+
+\lang polish
+Usuwanie ciszy
+\end_layout
+
+\begin_layout Standard
+
+\lang polish
+Nietrudno było zaobserwować, iż znaczą część nagrań zajmuje cisza lub dźwięk bliski ciszy. 
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+centering
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Graphics 
+	filename natezenie_wydech_nosem
+	width 13cm
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Wykres natężenia dźwięku w nagraniu wdechu i wydechu nosem uzyskany przy użyciu programu Audacity.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\lang polish
+Te przerwy między wyraźnymi dźwiękami oddechów pozostawały jednak oznaczone jako wdech lub wydech. Z tego powodu model trenowaliśmy w jednym przypadku informacją, iż cisza występuje podczas wdechu, a w innym – że w trakcie wydechu. Podczas testów natomiast w jednym przypadku za poprawną klasyfikację ciszy przyjmowaliśmy wdech, a w innym – wydech. 
+\begin_inset Newline newline
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+indent
+\end_layout
+
+\end_inset
+
+ Postanowiliśmy usunąć tę niedoskonałości z przypuszczeniem, iż poprawi to wyniki działania programu. Obliczyliśmy w tym celu sumę natężeń dźwięku w poszczególnych klatkach nagrania. Za próg ciszy przyjęliśmy wartość nieco większą niż maksymalne natężenie w klatkach pochodzących z tych fragmentów nagrania, które na podstawie własnych doświadczeń słuchowych oceniliśmy jako zbyt ciche. Następnie podczas trenowania oraz testowania usuwaliśmy z danych klatki o sumie natężeń nieprzekraczającej tego progu. Otrzymaliśmy poprawę wyników do następujących wartości: 
+\begin_inset Float table
+placement H
+wide false
+sideways false
+status open
+
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Wartości miar uzyskane podczas testów modelu z 
+\series bold
+wydechem nosem
+\series default
+ przy wyborze częstotliwości 0
+\begin_inset space \thinspace{}
+
+\end_inset
+
+–
+\begin_inset space \thinspace{}
+
+\end_inset
+
+16
+\begin_inset space \thinspace{}
+
+\end_inset
+
+000 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+unit
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+Hz
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+ i po usunięciu ciszy.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+
+\lang polish
+
+\begin_inset Tabular 
+<lyxtabular version="3" rows="8" columns="2">
+<features rotate="0" tabularvalignment="middle" tabularwidth="0pt">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+miara 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+wartość (%) poprzednia
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Formula $accuracy$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+94 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Formula $precision_{wdech}$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+96 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Formula $precision_{wydech}$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+92 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Formula $recall_{wdech}$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+95 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Formula $recall_{wydech}$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+92 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Formula $F_{wdech}$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+96 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Formula $F_{wydech}$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\lang polish
+92 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\lang polish
+Postanowiliśmy także sprawdzić, jak podejście z usuwaniem ciszy sprawdzi się w poprzednim modelu – wdechu nosem i wydechu ustami. Okazało się, iż również nastąpiła poprawa.
+\end_layout
+
+\begin_layout Section
+
+\lang polish
+Maszyna stanów do zwiększania inercji
+\end_layout
+
+\begin_layout Subsection
+
+\lang polish
+Cel
+\end_layout
+
+\begin_layout Standard
+
+\lang polish
+Powyższe rozważania miały na celu głównie poprawę jakości klasyfikacji pojedynczej próbki, natomiast w praktyce, jaką jest klasyfikacja na żywo, nawet dokładne modele mogą powodować niechciane przeskakiwanie. Przypadek, w którym ktoś bierze wdech na ułamek sekundy w połowie wykonywania wydechu jest nierealny, zatem możemy nadać wynikom naszego modelu pewnej bezwładności, co czynimy za pomocą przedstawionej w tej sekcji maszyny stanów dobudowanej na modelu i korzystającym z jego klasyfikacji do przechodzenia między kolejnymi stanami. 
+\end_layout
+
+\begin_layout Subsection
+
+\lang polish
+Schemat
+\end_layout
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+
+\begin_layout Standard
+
+\lang polish
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+centering
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Graphics 
+	filename dstanow
+	width 13cm
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Diagram stanów 
+\begin_inset Formula $S$
+\end_inset
+
+, 
+\begin_inset Formula $s \in S$
+\end_inset
+
+ oznacza stan diagramu a 
+\begin_inset Formula $A, B, C, D, M, N$
+\end_inset
+
+ są predykatami określającymi przejścia między poszczególnymi stanami
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\lang polish
+Diagram działa jak na schemacie powyżej, ponadto ma bufor stanowiący historię klasyfikacji modelu, np. 
+\begin_inset Formula $bufor = [in, out, out, out, cisza]$
+\end_inset
+
+. Niech 
+\begin_inset Formula $n$
+\end_inset
+
+ - rozmiar bufora, 
+\begin_inset Formula $i$
+\end_inset
+
+ - ilość wdechów w buforze, 
+\begin_inset Formula $o$
+\end_inset
+
+ - ilość wydechów w buforze, 
+\begin_inset Formula $t$
+\end_inset
+
+ - ilość cisz w buforze. Ponadto zdefiniujemy zdarzenie 
+\begin_inset Formula $X$
+\end_inset
+
+, takie, że 
+\begin_inset Formula $P(X) = P$
+\end_inset
+
+ dla pewnego ustalonego 
+\begin_inset Formula $P$
+\end_inset
+
+ oraz wagę 
+\begin_inset Formula $W$
+\end_inset
+
+ będące parametrami maszyny stanów wpływającymi na inercję (dobraliśmy 
+\begin_inset Formula $W = 60\%, P=70\%, n = 10$
+\end_inset
+
+). Dla tych parametrów definiujemy predykaty 
+\begin_inset Formula \begin{gather*}
+	A(s) = (\frac{t}{n} > W) \lor (\frac{o}{n} > W \land X) \\
+	B(s) = \frac{o}{n} > W \\
+	C(s) =  (\frac{t}{n} > W) \lor (\frac{i}{n} > W \land X) \\
+	D(s) = \frac{i}{n} > W \\
+	M(s) = \frac{o}{n} > W \land X \\
+	N(s) = \frac{i}{n} > W \land X
+\end{gather*}
+\end_inset
+
+przykładowo dla stanu bufora 
+\begin_inset Formula $[in,cisza, cisza, cisza, cisza]$
+\end_inset
+
+ oraz aktualnego stanu 
+\begin_inset Formula $s =$
+\end_inset
+
+ wdech i reszty parametrów przyjętych tak jak powyżej nastąpi przejście ze stanu wdech do stanu cisza po wdechu. Zdarzenie 
+\begin_inset Formula $X$
+\end_inset
+
+ tak samo jak predykaty 
+\begin_inset Formula $M, N$
+\end_inset
+
+ uwzględniono, by maszyna nie była cyklem, czyli uwzględniała też możliwość np. sekwencji stanów wdech, cisza po wdechu, wdech, gdyby zaszedł jakiś błąd.
+\end_layout
+
+\begin_layout Subsection
+
+\lang polish
+Rezultat
+\end_layout
+
+\begin_layout Standard
+
+\lang polish
+Wyżej zdefiniowana maszyna stanów spełnia swój rezultat - przy jej zastosowaniu przeskakiwanie stanów w klasyfikacji na żywo zostaje zmniejszone. Warto jednak wspomnieć, że czynimy to kosztem wprowadzenia opóźnienia proporcjonalnego do wielkości bufora, teoretycznie jeśli ktoś będzie bardzo szybko oddychał to może nie zaobserwować zmian stanu. Brak zmiany stanów może też wystąpić przy nieregularnym oddechu np. kilka razy z rzędu wdech bez wydechu, jednak zapobiegają temu predykaty 
+\begin_inset Formula $M,N$
+\end_inset
+
+. 
+\end_layout
+
+\begin_layout Section
+
+\lang polish
+Wnioski
+\end_layout
+
+\begin_layout Standard
+
+\lang polish
+Wniosek jeden: dużo zależy od obróbki danych, różnica między sieciami w tym wypadku nie była tak zauważalna 
+\begin_inset Newline newline
+\end_inset
+
+ Wniosek dwa: trudno uzyskać inercję stanów oddechu i pozbyć się efektu przeskakiwania 
+\begin_inset Newline newline
+\end_inset
+
+ Wniosek trzy: na wdech i wydech nosem wpływa bardziej zaszumione otoczenie Wniosek cztery: dodać tabelkę z końcowymi wartościami miar dla obu modeli oddychania (SVM dla nosa i ust, Tensorflow dla ust) 
+\end_layout
+
+\begin_layout Section
+
+\lang polish
+Źródła
+\end_layout
+
+\begin_layout Bibliography
+
+\lang polish
+
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+label ""
+key "Cormen"
+literal "false"
+
+\end_inset
+
+ Cormen Thomas H., Leiserson Charles E., Rivest Roland L., Stein Clifford (1989) 
+\emph on
+Wprowadzenie do algorytmów
+\emph default
+, 
+\end_layout
+
+\begin_layout Bibliography
+
+\lang polish
+
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+label ""
+key "DFT"
+literal "false"
+
+\end_inset
+
+ 
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+https://pl.wikipedia.org/wiki/Dyskretna_transformata_Fouriera
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Bibliography
+
+\lang polish
+
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+label ""
+key "STFT"
+literal "false"
+
+\end_inset
+
+ 
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+https://esezam.okno.pw.edu.pl/mod/book/view.php?id=9&chapterid=77
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Bibliography
+
+\lang polish
+
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+label ""
+key "Bramkaszumow"
+literal "false"
+
+\end_inset
+
+ Kumar, E. and Surya, K. and Varma, K. and Akash, A. and Kurapati, Nithish Reddy (2023) 
+\emph on
+Noise Reduction in Audio File Using Spectral Gatting and FFT by Python Modules
+\emph default
+ 
+\end_layout
+
+\begin_layout Bibliography
+
+\lang polish
+
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+label ""
+key "SavgolImage"
+literal "false"
+
+\end_inset
+
+ 
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+https://www.maplesoft.com/Applications/Detail.aspx?id=154593
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Bibliography
+
+\lang polish
+
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+label ""
+key "Głębokie uczenie maszyn"
+literal "false"
+
+\end_inset
+
+ 
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+https://www.deltami.edu.pl/temat/informatyka/sztuczna_inteligencja/2017/12/28/Glebokie_uczenie_maszyn/
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Bibliography
+
+\lang polish
+
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+label ""
+key "Warstwa w pełni połączona"
+literal "false"
+
+\end_inset
+
+ 
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+http://sciagaprogramisty.blogspot.com/2018/03/fully-connected-layer-fc-warstwa-w-peni.html
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Bibliography
+
+\lang polish
+
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+label ""
+key "Keras Tutorial"
+literal "false"
+
+\end_inset
+
+ 
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+https://www.tutorialspoint.com/keras
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\end_body
+\end_document
