@@ -1,4 +1,58 @@
+from abc import abstractmethod
+
+
 class QualityMeasures:
+    def __init__(self, labels_correct, labels_pred):
+        self._labels_correct = labels_correct
+        self._labels_pred = labels_pred
+
+        self.precision_in = None
+        self.precision_out = None
+        self.recall_in = None
+        self.recall_out = None
+        self.f_in = None
+        self.f_out = None
+
+    @abstractmethod
+    def count_measures(self):
+        pass
+
+    def count_common_measures(self, submeasures):
+        self.precision_in = submeasures.tp_in / (submeasures.tp_in + submeasures.fp_in)
+        self.precision_out = submeasures.tp_out / (submeasures.tp_out + submeasures.fp_out)
+        self.recall_in = submeasures.tp_in / (submeasures.tp_in + submeasures.fn_in)
+        self.recall_out = submeasures.tp_out / (submeasures.tp_out + submeasures.fn_out)
+        self.f_in = 2 * self.precision_in * self.recall_in / (self.precision_in + self.recall_in)
+        self.f_out = 2 * self.precision_out * self.recall_out / (self.precision_out + self.recall_out)
+
+    @abstractmethod
+    def count_submeasures(self):
+        pass
+
+    def count_common_submeasures(self):
+        submeasures = QualitySubMeasures()
+
+        submeasures.tp_in = sum([
+            1 if self._labels_pred[i] == self._labels_correct[i] == 'in' else 0
+            for i in range(self._labels_pred.shape[0])
+        ])
+        submeasures.tp_out = sum([
+            1 if self._labels_pred[i] == self._labels_correct[i] == 'out' else 0
+            for i in range(self._labels_pred.shape[0])
+        ])
+        submeasures.fp_in = sum([
+            1 if self._labels_pred[i] == 'in' and self._labels_correct[i] != 'in' else 0
+            for i in range(self._labels_pred.shape[0])
+        ])
+        submeasures.fp_out = sum([
+            1 if self._labels_pred[i] == 'out' and self._labels_correct[i] != 'out' else 0
+            for i in range(self._labels_pred.shape[0])
+        ])
+
+        return submeasures
+
+
+class QualityMeasuresTwoClasses(QualityMeasures):
     def __init__(self, labels_correct, labels_pred):
         """
         :param ndarray labels_correct: correct labels ('in' for inhale and 'out' for exhale)
@@ -7,49 +61,84 @@ class QualityMeasures:
         Counts accuracy, precisions, recalls and F-measures of the prediction. Counted measures are available
         as fields of the created object.
         """
+        super().__init__(labels_correct, labels_pred)
+
         self.accuracy = None
-        self.precision_in = None
-        self.precision_out = None
-        self.recall_in = None
-        self.recall_out = None
-        self.f_in = None
-        self.f_out = None
 
-        self.count_measures(labels_correct, labels_pred)
+        self.count_measures()
 
-    def count_measures(self, labels_correct, labels_pred):
-        true_pos_in, true_pos_out, false_pos_in, false_pos_out = self.get_poses_and_negs(labels_correct, labels_pred)
+    def count_measures(self):
+        submeasures = self.count_submeasures()
 
-        true_neg_in = true_pos_out
-        false_neg_in = false_pos_out
-        false_neg_out = false_pos_in
+        submeasures.tn_in = submeasures.tp_out
+        submeasures.fn_in = submeasures.fp_out
+        submeasures.fn_out = submeasures.fp_in
 
-        self.accuracy = (true_pos_in + true_neg_in) / (true_pos_in + false_pos_in + true_neg_in + false_neg_in)
-        self.precision_in = true_pos_in / (true_pos_in + false_pos_in)
-        self.precision_out = true_pos_out / (true_pos_out + false_pos_out)
-        self.recall_in = true_pos_in / (true_pos_in + false_neg_in)
-        self.recall_out = true_pos_out / (true_pos_out + false_neg_out)
-        self.f_in = 2 * self.precision_in * self.recall_in / (self.precision_in + self.recall_in)
-        self.f_out = 2 * self.precision_out * self.recall_out / (self.precision_out + self.recall_out)
+        self.accuracy = (submeasures.tp_in + submeasures.tn_in) /\
+                        (submeasures.tp_in + submeasures.fp_in + submeasures.tn_in + submeasures.fn_in)
 
-    @staticmethod
-    def get_poses_and_negs(labels_correct, labels_pred):
-        true_pos_in = sum([
-            1 if labels_pred[i] == labels_correct[i] == 'in' else 0
-            for i in range(labels_pred.shape[0])
+        self.count_common_measures(submeasures)
+
+    def count_submeasures(self):
+        return self.count_common_submeasures()
+
+
+class QualityMeasuresThreeClasses(QualityMeasures):
+    def __init__(self, labels_correct, labels_pred):
+        """
+        :param ndarray labels_correct: correct labels ('in' for inhale, 'out' for exhale, any other for none)
+        :param ndarray labels_pred: predicted labels ('in' for inhale, 'out' for exhale, any other for none)
+
+        Counts accuracy, precisions, recalls and F-measures of the prediction. Counted measures are available
+        as fields of the created object.
+        """
+        super().__init__(labels_correct, labels_pred)
+
+        self.accuracy_in = None
+        self.accuracy_out = None
+
+        self.count_measures()
+
+    def count_measures(self):
+        submeasures = self.count_submeasures()
+
+        self.accuracy_in = (submeasures.tp_in + submeasures.tn_in) /\
+                           (submeasures.tp_in + submeasures.fp_in + submeasures.tn_in + submeasures.fn_in)
+        self.accuracy_out = (submeasures.tp_out + submeasures.tn_out) /\
+                            (submeasures.tp_out + submeasures.fp_out + submeasures.tn_out + submeasures.fn_out)
+
+        self.count_common_measures(submeasures)
+
+    def count_submeasures(self):
+        submeasures = self.count_common_submeasures()
+
+        submeasures.tn_in = sum([
+            1 if self._labels_pred[i] != 'in' and self._labels_correct[i] != 'in' else 0
+            for i in range(self._labels_pred.shape[0])
         ])
-        true_pos_out = sum([
-            1 if labels_pred[i] == labels_correct[i] == 'out' else 0
-            for i in range(labels_pred.shape[0])
+        submeasures.tn_out = sum([
+            1 if self._labels_pred[i] != 'out' and self._labels_correct[i] != 'out' else 0
+            for i in range(self._labels_pred.shape[0])
+        ])
+        submeasures.fn_in = sum([
+            1 if self._labels_pred[i] != 'in' and self._labels_correct[i] == 'in' else 0
+            for i in range(self._labels_pred.shape[0])
+        ])
+        submeasures.fn_out = sum([
+            1 if self._labels_pred[i] != 'out' and self._labels_correct[i] == 'out' else 0
+            for i in range(self._labels_pred.shape[0])
         ])
 
-        false_pos_in = sum([
-            1 if labels_pred[i] == 'in' and labels_correct[i] == 'out' else 0
-            for i in range(labels_pred.shape[0])
-        ])
-        false_pos_out = sum([
-            1 if labels_pred[i] == 'out' and labels_correct[i] == 'in' else 0
-            for i in range(labels_pred.shape[0])
-        ])
+        return submeasures
 
-        return true_pos_in, true_pos_out, false_pos_in, false_pos_out
+
+class QualitySubMeasures:
+    def __init__(self):
+        self.tp_in = None
+        self.tn_in = None
+        self.fp_in = None
+        self.fn_in = None
+        self.tp_out = None
+        self.tn_out = None
+        self.fp_out = None
+        self.fn_out = None

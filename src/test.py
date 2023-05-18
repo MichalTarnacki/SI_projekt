@@ -2,7 +2,7 @@ import macros
 import numpy as np
 import src.real_time as rt
 import src.models.dataset as dataset
-from src.quality_measures import QualityMeasures
+from src.quality_measures import QualityMeasuresTwoClasses
 
 from joblib import load
 from sklearn.metrics import accuracy_score
@@ -22,7 +22,7 @@ def test_quantitative(testfiles, modelfile, with_previous_state):
         prev_pred = clf.predict(xt.reshape(-1, 1).T)
         y_test_pred.append(prev_pred)
 
-    quality_measures = QualityMeasures(y_test, np.array(y_test_pred))
+    quality_measures = QualityMeasuresTwoClasses(y_test, np.array(y_test_pred))
     print(f"accuracy = {quality_measures.accuracy}\n"
           f"precision_in = {quality_measures.precision_in}\n"
           f"precision_out = {quality_measures.precision_out}\n"
@@ -46,7 +46,7 @@ def test_quantitative_loudonly(testfiles, modelfile, with_previous_state):
         prev_pred = clf.predict(xt.reshape(-1, 1).T)
         y_test_pred.append(prev_pred)
 
-    quality_measures = QualityMeasures(y_test, np.array(y_test_pred))
+    quality_measures = QualityMeasuresTwoClasses(y_test, np.array(y_test_pred))
     print(f"accuracy = {quality_measures.accuracy}\n"
           f"precision_in = {quality_measures.precision_in}\n"
           f"precision_out = {quality_measures.precision_out}\n"

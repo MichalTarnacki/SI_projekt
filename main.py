@@ -98,6 +98,7 @@ if __name__ == '__main__':
               "5.6. Test quantitative mouth-out with loudonly prevstate SVM\n"
               "7. New real time with SVM\n"
               "8. Real time tensor\n"
+              "9. Generate separate files for Tensorflow\n"
               "10. Train with Tensorflow\n"
               "11. Show spectrograms")
         x = input()
