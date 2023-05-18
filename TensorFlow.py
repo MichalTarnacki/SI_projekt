@@ -54,7 +54,7 @@ class TensorFlow:
                     iterator += 1
 
                 # Oczyszczanie sygnału
-                new_file = sp.signal_clean(new_file)
+                # new_file = sp.signal_clean(new_file)
 
                 if i[0] == 'in':
                     soundfile.write(in_dest + f'e{k}.wav', np.array(new_file), sample_rate,
@@ -74,7 +74,7 @@ class TensorFlow:
             pressure, sample_rate = soundfile.read(macros.background_path + file + '.wav')
             for i in range(0, len(pressure), sample_rate):
                 x = i
-                new_file = sp.signal_clean(pressure[x:x + sample_rate])
+                new_file = pressure[x:x + sample_rate]
                 soundfile.write(macros.background_sorted_path + f'e{k}.wav', np.array(new_file), sample_rate,
                                 subtype='PCM_16')
                 k +=1
@@ -86,7 +86,7 @@ class TensorFlow:
             pressure, sample_rate = soundfile.read(macros.test_background_path + file + '.wav')
             for i in range(0, len(pressure), sample_rate):
                 x = i
-                new_file = sp.signal_clean(pressure[x:x + sample_rate])
+                new_file = pressure[x:x + sample_rate]
                 soundfile.write(macros.test_background_sorted_path + f'e{k}.wav', np.array(new_file), sample_rate,
                                 subtype='PCM_16')
                 k += 1

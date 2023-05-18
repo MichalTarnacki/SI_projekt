@@ -4,7 +4,7 @@
 \usepackage{blindtext}
 \usepackage{amsmath}
 \usepackage[utf8]{inputenc}
-\usepackage[polish]{babel}
+\usepackage{polski}
 \usepackage[T1]{fontenc}
 \usepackage{listings}
 \usepackage{color}
@@ -351,7 +351,7 @@ przewidziany stan jest dobry, co nie zawsze jest prawdą. W testach jakościowyc
 
 \section{Sieć neuronowa}
 \subsection{Założenie}
-Do przetestowania działania sieci neuronowej przyjęliśmy nieco odmienne podejście. Jako dane wejściowe przyjmujemy (podobnie jak w przypadku SVM) spektrogram, jednak w tym przypadku stworzony przy użyciu STFT. Dzięki temu model bierze pod uwagę także zmianę widma w czasie.
+Do przetestowania działania sieci neuronowej przyjęliśmy nieco odmienne podejście. Jako dane wejściowe przyjmujemy (podobnie jak w przypadku SVM) spektrogram, jednak w tym przypadku stworzony przy użyciu STFT (zarówno podczas uczenia jak i predykcji). Dzięki temu model bierze pod uwagę także zmianę widma w czasie.
 \subsection{Metoda}
 Stosując poszczególne warstwy, nasz spektrogram jest odpowiednio przetwarzany, tak aby uwidocznić istotne cechy. Wykorzystywane przez nas warstwy (wraz z parametrami) to:
 \begin{enumerate}

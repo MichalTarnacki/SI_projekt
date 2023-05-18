@@ -20,7 +20,7 @@ import src.data_engineering.spectrogram as sp
 
 from pydub import effects
 from scipy.io.wavfile import write
-
+from src.real_time import StateMachine
 
 def new_realtime():
     FORMAT = pyaudio.paInt16
@@ -32,7 +32,7 @@ def new_realtime():
     p = None
     stream = None
     contin = True
-    saved_chunks = 20
+    saved_chunks = 40
 
     pygame.init()
     pygame.font.init()
@@ -79,6 +79,7 @@ def new_realtime():
     R = random.randint(20, 240)
     points = 0
     avg = 50
+    sm = StateMachine()
     while True:
 
         for event in pygame.event.get():
@@ -121,18 +122,41 @@ def new_realtime():
 
             color = (0, 0, 255)
 
-            if pred[1] > wdech_s: #and np.average(saved) > avg:  # and pred[1]<10:
-                color = (255, 0, 0)
-                radius -= 2
-                text = font.render('teraz wdychasz', True, (255, 255, 255))
-                wdechy += 1
-            elif pred[2] > wydech_s: #and np.average(saved) > avg:  # and pred[0]<10:
-                color = (0, 255, 0)
-                radius += 1
-                text = font.render('teraz wydychasz', True, (0, 255, 255))
-                wydechy += 1
+            if pred[2] > wdech_s:  # and np.average(saved) > avg:  # and pred[1]<10:
+                sm.feed("in")
+            elif pred[1] > wydech_s:  # and np.average(saved) > avg:  # and pred[0]<10:
+                sm.feed("out")
             else:
-                inne += 1
+                sm.feed("silence")
+
+
+            match sm.get_state():
+                case 'in':
+                    color = (255, 0, 0)
+                    radius -= 2 if radius > 10 else 0
+                    text = font.render('teraz wdychasz', True, (255, 255, 255))
+                    wdechy += 1
+                case 'out':
+                    color = (0, 255, 0)
+                    radius += 1 if radius < 250 else 0
+                    text = font.render('teraz wydychasz', True, (0, 255, 255))
+                    wydechy += 1
+
+            # if pred[2] > wdech_s: #and np.average(saved) > avg:  # and pred[1]<10:
+            #     color = (255, 0, 0)
+            #     radius -= 2 if radius > 10 else 0
+            #     text = font.render('teraz wdychasz', True, (255, 255, 255))
+            #     wdechy += 1
+            # elif pred[1] > wydech_s: #and np.average(saved) > avg:  # and pred[0]<10:
+            #     color = (0, 255, 0)
+            #     radius += 1 if radius < 250 else 0
+            #     text = font.render('teraz wydychasz', True, (0, 255, 255))
+            #     wydechy += 1
+            # else:
+            #     inne += 1
+
+
+
             # radius -= 1
 
             # for x, y in enumerate(last_frame[:-1]):
