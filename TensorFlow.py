@@ -66,6 +66,33 @@ class TensorFlow:
                     l += 1
 
     @staticmethod
+    def save_bg():
+        folder = pl.Path(macros.background_path)
+        files = list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)]))
+        k = 0
+        for file in files:
+            pressure, sample_rate = soundfile.read(macros.background_path + file + '.wav')
+            for i in range(0, len(pressure), sample_rate):
+                x = i
+                new_file = sp.signal_clean(pressure[x:x + sample_rate])
+                soundfile.write(macros.background_sorted_path + f'e{k}.wav', np.array(new_file), sample_rate,
+                                subtype='PCM_16')
+                k +=1
+
+        folder = pl.Path(macros.test_background_path)
+        files = list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)]))
+        k = 0
+        for file in files:
+            pressure, sample_rate = soundfile.read(macros.test_background_path + file + '.wav')
+            for i in range(0, len(pressure), sample_rate):
+                x = i
+                new_file = sp.signal_clean(pressure[x:x + sample_rate])
+                soundfile.write(macros.test_background_sorted_path + f'e{k}.wav', np.array(new_file), sample_rate,
+                                subtype='PCM_16')
+                k += 1
+
+
+    @staticmethod
     def generate_seperate_files(ratio=8 / 10):
 
         # Jeśli istnieją pliki to je usuwa i tworzy nowe
@@ -81,6 +108,10 @@ class TensorFlow:
         os.mkdir(macros.test_sorted_path)
         os.mkdir(macros.test_exhales)
         os.mkdir(macros.test_breaths)
+        os.mkdir(macros.test_background_sorted_path)
+        os.mkdir(macros.background_sorted_path)
+
+
 
         # Stworzenie plików z danych treningowych i testowych
         folder = pl.Path(macros.train_path)
@@ -89,6 +120,7 @@ class TensorFlow:
         folder = pl.Path(macros.test_path)
         files = list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)]))
         TensorFlow.save_files(files, macros.test_path)
+        TensorFlow.save_bg()
 
     @staticmethod
     def decode_audio(audio_binary):
@@ -291,19 +323,19 @@ class TensorFlow:
 
         confusion_mtx = tf.math.confusion_matrix(y_true, y_pred)
 
-        y_pred = np.array(['in' if y_pred[i] == 1 else 'out'
-                           for i in range(y_pred.shape[0])])
-        y_true = np.array(['in' if y_true[i] == 1 else 'out'
-                           for i in range(y_true.shape[0])])
-
-        quality_measures = QualityMeasures(y_true, y_pred)
-        print(f"accuracy = {quality_measures.accuracy}\n"
-              f"precision_in = {quality_measures.precision_in}\n"
-              f"precision_out = {quality_measures.precision_out}\n"
-              f"recall_in = {quality_measures.recall_in}\n"
-              f"recall_out = {quality_measures.recall_out}\n"
-              f"F_in = {quality_measures.f_in}\n"
-              f"F_out = {quality_measures.f_out}\n")
+        # y_pred = np.array(['in' if y_pred[i] == 1 else 'out'
+        #                    for i in range(y_pred.shape[0])])
+        # y_true = np.array(['in' if y_true[i] == 1 else 'out'
+        #                    for i in range(y_true.shape[0])])
+        #
+        # quality_measures = QualityMeasures(y_true, y_pred)
+        # print(f"accuracy = {quality_measures.accuracy}\n"
+        #       f"precision_in = {quality_measures.precision_in}\n"
+        #       f"precision_out = {quality_measures.precision_out}\n"
+        #       f"recall_in = {quality_measures.recall_in}\n"
+        #       f"recall_out = {quality_measures.recall_out}\n"
+        #       f"F_in = {quality_measures.f_in}\n"
+        #       f"F_out = {quality_measures.f_out}\n")
 
         plt.figure(figsize=(10, 8))
         sns.heatmap(confusion_mtx,
@@ -342,7 +374,7 @@ class TensorFlow:
     @staticmethod
     def new_predict(model, audio_array):
         # Oczyszczanie sygnału
-        audio_array = sp.signal_clean(audio_array)
+        # audio_array = sp.signal_clean(audio_array)
         waveform = [i / 32768 for i in audio_array]
         waveform = tf.convert_to_tensor(waveform, dtype=tf.float32)
         spec = TensorFlow.get_spectrogram(waveform)

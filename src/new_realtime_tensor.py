@@ -48,7 +48,7 @@ def new_realtime_tensor():
 
             saved.extend(waveData)
             if saved.__len__() >= (saved_chunks + 1) * CHUNK:
-                # sd.play(saved, 44100)
+                sd.play(saved, 44100)
                 saved = saved[CHUNK:]
         stream.stop_stream()
         stream.close()

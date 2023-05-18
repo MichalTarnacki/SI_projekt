@@ -17,7 +17,6 @@ def wav_to_sample_xy(filename):
 
 def data_recorder(filename, with_bg=True, seperate=False):
     record_time_s = 20
-    record_bg_time_s = 10
     sample_rate = 44100
     channels = 1
 
@@ -27,27 +26,6 @@ def data_recorder(filename, with_bg=True, seperate=False):
     font = pygame.font.SysFont(None, 50)
     timestamps = []
     state = 'in'
-
-    if with_bg:
-        rec = sd.rec(int(record_bg_time_s * sample_rate), samplerate=sample_rate, channels=channels)
-        t0 = time.time()
-
-        while time.time() - t0 < record_bg_time_s:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    return
-
-            screen.fill((0, 0, 0))
-            text = font.render(
-                f'Recording background, try not to breath: {(record_bg_time_s - time.time() + t0).__str__()}', True,
-                (255, 255, 255))
-            screen.blit(text, (0, 0))
-            pygame.display.update()
-
-        #  pygame.quit()
-        sd.stop()
-        write(filename + '.bgwav', sample_rate, rec)
 
     rec = sd.rec(int(record_time_s * sample_rate), samplerate=sample_rate, channels=channels)
     t0 = time.time()
@@ -76,3 +54,36 @@ def data_recorder(filename, with_bg=True, seperate=False):
         write(filename + '.wav', sample_rate, rec)
     else:
         pass
+
+def record_bg(filename):
+    record_bg_time_s = 10
+    sample_rate = 44100
+    channels = 1
+
+    pygame.init()
+    pygame.font.init()
+    screen = pygame.display.set_mode((740, 480))
+    font = pygame.font.SysFont(None, 50)
+
+    rec = sd.rec(int(record_bg_time_s * sample_rate), samplerate=sample_rate, channels=channels)
+    t0 = time.time()
+
+    while time.time() - t0 < record_bg_time_s:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return
+
+        screen.fill((0, 0, 0))
+        text = font.render(
+            f'Recording background, try not to breath: {(record_bg_time_s - time.time() + t0).__str__()}', True,
+            (255, 255, 255))
+        screen.blit(text, (0, 0))
+        pygame.display.update()
+
+    #  pygame.quit()
+    sd.stop()
+    write(filename + '.wav', sample_rate, rec)
+
+    pygame.quit()
+    sd.wait()

@@ -32,7 +32,7 @@ def new_realtime():
     p = None
     stream = None
     contin = True
-    saved_chunks = 40
+    saved_chunks = 20
 
     pygame.init()
     pygame.font.init()
@@ -56,7 +56,7 @@ def new_realtime():
 
             saved.extend(waveData)
             if saved.__len__() >= (saved_chunks + 1) * CHUNK:
-                # sd.play(saved, 44100)
+                sd.play(saved, 44100)
                 saved = saved[CHUNK:]
         stream.stop_stream()
         stream.close()
@@ -78,6 +78,7 @@ def new_realtime():
     wy_p = 0
     R = random.randint(20, 240)
     points = 0
+    avg = 50
     while True:
 
         for event in pygame.event.get():
@@ -97,6 +98,14 @@ def new_realtime():
                 wdech_s -= 0.01
             if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
                 wdech_s += 0.01
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_w:
+                avg += 1
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_s:
+                avg -= 1
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_a:
+                avg -= 1
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_d:
+                avg += 1
             if event.type == minute:
                 w_p = wdechy / (wdechy + wydechy + inne)
                 wy_p = wydechy / (wdechy + wydechy + inne)
@@ -106,23 +115,24 @@ def new_realtime():
                 inne = 0
         screen.fill((0, 0, 0))
         text = font.render('nic', True, (255, 255, 255))
+        pred = [0,0]
         if saved.__len__() >= saved_chunks * CHUNK:
             commands, pred = TensorFlow.new_predict(model, saved)
 
             color = (0, 0, 255)
 
-            if pred[1] > wdech_s:  # and pred[1]<10:
+            if pred[1] > wdech_s: #and np.average(saved) > avg:  # and pred[1]<10:
                 color = (255, 0, 0)
                 radius -= 2
                 text = font.render('teraz wdychasz', True, (255, 255, 255))
-                wdechy+=1
-            elif pred[0] > wydech_s:  # and pred[0]<10:
+                wdechy += 1
+            elif pred[2] > wydech_s: #and np.average(saved) > avg:  # and pred[0]<10:
                 color = (0, 255, 0)
                 radius += 1
                 text = font.render('teraz wydychasz', True, (0, 255, 255))
-                wydechy+=1
+                wydechy += 1
             else:
-                inne+=1
+                inne += 1
             # radius -= 1
 
             # for x, y in enumerate(last_frame[:-1]):
@@ -146,10 +156,16 @@ def new_realtime():
                                 f'inne {round(100 * i_p)}%', True, (0, 255, 255))
             screen.blit(text4, (0, 90))
         text5 = font.render(f'punkty {points}', True, (0, 255, 255))
+        # text6 = font.render(f'avg_p {avg}', True, (0, 255, 255))
+        # text7 = font.render(f'avgerasge {np.max(saved) if len(saved) > 0 else 0}', True, (0, 255, 255))
+        # text8 = font.render(f'predykcje {pred[0]}, {pred[1]}', True, (0, 255, 255))
         screen.blit(text, (0, 0))
         screen.blit(text2, (0, 30))
         screen.blit(text3, (0, 60))
         screen.blit(text5, (0, 120))
+        # screen.blit(text6, (0, 150))
+        # screen.blit(text7, (0, 180))
+        # screen.blit(text8, (0, 210))
         pygame.display.update()
 
 

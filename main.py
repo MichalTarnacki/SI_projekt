@@ -47,6 +47,19 @@ def record():
         print(filename)
 
 
+def record_bg():
+    directory = pl.Path(macros.background_path)
+    files = list(set([i.stem for i in directory.iterdir() if freg.search(i.stem)]))
+
+    if not files:
+        filename = f'{macros.background_path}e1'
+    else:
+        filename = []
+        for i in files:
+            filename.append(int(re.split('e', i)[1]))
+        filename = macros.background_path + 'e' + (max(filename) + 1).__str__()
+    du.record_bg(filename)
+
 NOSE_IN_MOUTH_OUT_MODEL = "media/models/outmodel/nose_in_mouth_out/svm_prevstate"
 
 
@@ -165,3 +178,5 @@ if __name__ == '__main__':
             show_spectrograms(f'{macros.train_path}{x}.wav', x)
         elif x == '12':
             TensorFlow.accuracy(models.load_model(f'{macros.model_path}tensorflow'))
+        elif x == '13':
+            record_bg()
