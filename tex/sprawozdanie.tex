@@ -127,19 +127,6 @@ z biblioteki $scipy$. W przypadku sieci neuronowej korzystamy natomiast z warstw
 	\caption{Wizualizacja działania filtru Savitzky'ego-Golaya dla przykładowego zbioru próbek, \url{https://www.maplesoft.com/Applications/Detail.aspx?id=154593}}
 \end{figure}
 
-\subsection{Ocena modeli}
-Zastosowaliśmy następujące miary oceny ilościowej modelu:
-\begin{flalign*}
-	&accuracy = \frac{|TP_{wdech}|+|TN_{wdech}|}{|TP_{wdech}|+|FP_{wdech}|+|TN_{wdech}|+|FN_{wdech}|}&\\
-	&precision_{wdech} = \frac{|TP_{wdech}|}{|TP_{wdech}|+|FP_{wdech}|}&\\
-	&recall_{wdech} = \frac{|TP_{wdech}|}{|TP_{wdech}|+|FN_{wdech}|}&\\
-	&F_{wdech} = \frac{2 \cdot precision_{wdech} \cdot recall_{wdech}}{precision_{wdech} + recall_{wdech}}&
-\end{flalign*}
-gdzie $TP_{wdech}$ -- liczba próbek oznaczonych jako wdech, które sklasyfikowane zostały jako wdech,
-$TN_{wdech}$ -- liczba próbek nieoznaczonych jako wdech, które nie zostały sklasyfikowane jako wdech,
-$FP_{wdech}$ -- liczba próbek nieoznaczonych jako wdech, które zostały sklasyfikowane jako wdech,
-$FN_{wdech}$ -- liczba próbek oznaczonych jako wdech, które nie zostały sklasyfikowane jako wdech.
-Analogicznie definiujemy $precision_{wydech}, recall_{wydech}, F_{wydech}$.
 \subsection{Standaryzacja}
 Dane wejściowe do modelu zawsze standaryzujemy, wykonując operację daną wzorem:
 \begin{gather*}
@@ -161,7 +148,24 @@ funkcji kosztu
 gdzie C jest parametrem uregulowania. Funkcję będziemy minimalizować metodą stochastycznego spadku po gradiencie.
 W projekcie użyliśmy własnej implementacji SVM-a.
 \subsection{Sieć neuronowa}
-Drugim modelem, jakim dokonujemy klasyfikacji, jest sieć neuronowa. Ze względu na trudność w samodzielnym zaprojektowaniu dobrej sieci neuronowej postanowiliśmy użyć stworzonego przez firmę Google Tensorflowa wraz z interfejsem Keras. 
+Drugim modelem, jakim dokonujemy klasyfikacji, jest sieć neuronowa. Ze względu na trudność w samodzielnym zaprojektowaniu dobrej sieci neuronowej postanowiliśmy użyć stworzonego przez firmę Google Tensorflowa wraz z interfejsem Keras.
+\subsection{Ocena modeli}
+Zastosowaliśmy następujące miary oceny ilościowej modelu:
+\begin{flalign*}
+	&accuracy_{wdech} = \frac{|TP_{wdech}|+|TN_{wdech}|}{|TP_{wdech}|+|FP_{wdech}|+|TN_{wdech}|+|FN_{wdech}|}&\\
+	&precision_{wdech} = \frac{|TP_{wdech}|}{|TP_{wdech}|+|FP_{wdech}|}&\\
+	&recall_{wdech} = \frac{|TP_{wdech}|}{|TP_{wdech}|+|FN_{wdech}|}&\\
+	&F_{wdech} = \frac{2 \cdot precision_{wdech} \cdot recall_{wdech}}{precision_{wdech} + recall_{wdech}}&
+\end{flalign*}
+gdzie $TP_{wdech}$ -- liczba próbek oznaczonych jako wdech, które sklasyfikowane zostały jako wdech,
+$TN_{wdech}$ -- liczba próbek nieoznaczonych jako wdech, które nie zostały sklasyfikowane jako wdech,
+$FP_{wdech}$ -- liczba próbek nieoznaczonych jako wdech, które zostały sklasyfikowane jako wdech,
+$FN_{wdech}$ -- liczba próbek oznaczonych jako wdech, które nie zostały sklasyfikowane jako wdech. \\\\
+Analogicznie definiujemy $accuracy_{wydech}$, $precision_{wydech}$, $recall_{wydech}$ i $F_{wydech}$. W przypadku klasyfikacji do dwóch klas (wdech i wydech) mamy:
+\begin{flalign*}
+	accuracy_{wdech} = accuracy_{wydech} = accuracy.
+\end{flalign*}
+
 \section{Narzędzia i inne}
 \subsection{Nagrywanie danych oddechowych}
 Żeby zapewnić dobre oznaczenie danych, etykietujemy je jeszcze w trakcie nagrywania dźwięku. 

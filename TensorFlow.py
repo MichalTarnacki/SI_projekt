@@ -15,7 +15,8 @@ from keras import layers
 from keras import models
 from macros import freg
 import macros
-from src.quality_measures import QualityMeasures
+from src.quality_measures import QualityMeasuresThreeClasses
+
 
 class TensorFlow:
     # Stworzenie etykiet na podstawie folderów
@@ -77,7 +78,7 @@ class TensorFlow:
                 new_file = pressure[x:x + sample_rate]
                 soundfile.write(macros.background_sorted_path + f'e{k}.wav', np.array(new_file), sample_rate,
                                 subtype='PCM_16')
-                k +=1
+                k += 1
 
         folder = pl.Path(macros.test_background_path)
         files = list(set([i.stem for i in folder.iterdir() if freg.search(i.stem)]))
@@ -90,7 +91,6 @@ class TensorFlow:
                 soundfile.write(macros.test_background_sorted_path + f'e{k}.wav', np.array(new_file), sample_rate,
                                 subtype='PCM_16')
                 k += 1
-
 
     @staticmethod
     def generate_seperate_files(ratio=8 / 10):
@@ -110,8 +110,6 @@ class TensorFlow:
         os.mkdir(macros.test_breaths)
         os.mkdir(macros.test_background_sorted_path)
         os.mkdir(macros.background_sorted_path)
-
-
 
         # Stworzenie plików z danych treningowych i testowych
         folder = pl.Path(macros.train_path)
@@ -306,6 +304,13 @@ class TensorFlow:
         plt.show()
 
     @staticmethod
+    def change_labels_to_text(labels):
+        labels = np.array(['in' if label == 0 else
+                           'out' if label == 1 else 'none'
+                           for label in labels])
+        return labels
+
+    @staticmethod
     def accuracy(model):
         _, _, test_files = TensorFlow.get_files()
         _, _, test_ds = TensorFlow.create_ds(test_files)
@@ -323,19 +328,19 @@ class TensorFlow:
 
         confusion_mtx = tf.math.confusion_matrix(y_true, y_pred)
 
-        # y_pred = np.array(['in' if y_pred[i] == 1 else 'out'
-        #                    for i in range(y_pred.shape[0])])
-        # y_true = np.array(['in' if y_true[i] == 1 else 'out'
-        #                    for i in range(y_true.shape[0])])
-        #
-        # quality_measures = QualityMeasures(y_true, y_pred)
-        # print(f"accuracy = {quality_measures.accuracy}\n"
-        #       f"precision_in = {quality_measures.precision_in}\n"
-        #       f"precision_out = {quality_measures.precision_out}\n"
-        #       f"recall_in = {quality_measures.recall_in}\n"
-        #       f"recall_out = {quality_measures.recall_out}\n"
-        #       f"F_in = {quality_measures.f_in}\n"
-        #       f"F_out = {quality_measures.f_out}\n")
+        y_pred = TensorFlow.change_labels_to_text(y_pred)
+        y_true = TensorFlow.change_labels_to_text(y_true)
+        quality_measures = QualityMeasuresThreeClasses(y_true, y_pred)
+
+        print(f"accuracy_in = {quality_measures.accuracy_in}\n"
+              f"accuracy_out = {quality_measures.accuracy_out}\n"
+              f"precision_in = {quality_measures.precision_in}\n"
+              f"precision_out = {quality_measures.precision_out}\n"
+              f"recall_in = {quality_measures.recall_in}\n"
+              f"recall_out = {quality_measures.recall_out}\n"
+              f"F_in = {quality_measures.f_in}\n"
+              f"F_out = {quality_measures.f_out}\n")
+
 
         plt.figure(figsize=(10, 8))
         sns.heatmap(confusion_mtx,
@@ -428,7 +433,6 @@ class TensorFlow:
             # Normalize.
             norm_layer,
 
-
             # Splot
             # https://www.quora.com/Is-flatten-considered-a-separate-layer-when-using-Keras-to-build-a-CNN-model
             layers.Conv2D(32, 3, activation='relu'),
@@ -471,68 +475,67 @@ class TensorFlow:
             shutil.rmtree(folder)
         model.save(f'{macros.model_path}tensorflow')
 
-
     @staticmethod
     def train_rnn(epochs):
 
-            train_files, val_files, test_files = TensorFlow.get_files()
-            files_ds, waveform_ds, _ = TensorFlow.create_ds(train_files)
+        train_files, val_files, test_files = TensorFlow.get_files()
+        files_ds, waveform_ds, _ = TensorFlow.create_ds(train_files)
 
-            train_ds = waveform_ds
-            _, _, val_ds = TensorFlow.create_ds(val_files)
-            _, _, test_ds = TensorFlow.create_ds(test_files)
+        train_ds = waveform_ds
+        _, _, val_ds = TensorFlow.create_ds(val_files)
+        _, _, test_ds = TensorFlow.create_ds(test_files)
 
-            batch_size = 64
-            train_ds = train_ds.batch(batch_size)
-            val_ds = val_ds.batch(batch_size)
+        batch_size = 64
+        train_ds = train_ds.batch(batch_size)
+        val_ds = val_ds.batch(batch_size)
 
-            train_ds = train_ds.cache().prefetch(TensorFlow.AUTOTUNE)
-            val_ds = val_ds.cache().prefetch(TensorFlow.AUTOTUNE)
+        train_ds = train_ds.cache().prefetch(TensorFlow.AUTOTUNE)
+        val_ds = val_ds.cache().prefetch(TensorFlow.AUTOTUNE)
 
-            input_shape = None
-            for spectrogram, _ in waveform_ds.take(1):
-                input_shape = spectrogram.shape
-            num_labels = len(TensorFlow.commands)
+        input_shape = None
+        for spectrogram, _ in waveform_ds.take(1):
+            input_shape = spectrogram.shape
+        num_labels = len(TensorFlow.commands)
 
-            # Warstwa normalizacyjna
-            norm_layer = layers.Normalization()
-            # Obliczenie średniej i wariancji
-            # norm_layer.adapt(data=waveform_ds.map(map_func=lambda spec, label: spec))
+        # Warstwa normalizacyjna
+        norm_layer = layers.Normalization()
+        # Obliczenie średniej i wariancji
+        # norm_layer.adapt(data=waveform_ds.map(map_func=lambda spec, label: spec))
 
-            # Warstwy
-            model = models.Sequential([
-                layers.Input(shape=input_shape),
-                # layers.Resizing(32, 32),
-                # norm_layer,
-                layers.Lambda(lambda x: x[ :, :, 0], input_shape=(*input_shape, 3)),
-                layers.SimpleRNN(128, return_sequences=True),
-                layers.LSTM(64),
+        # Warstwy
+        model = models.Sequential([
+            layers.Input(shape=input_shape),
+            # layers.Resizing(32, 32),
+            # norm_layer,
+            layers.Lambda(lambda x: x[:, :, 0], input_shape=(*input_shape, 3)),
+            layers.SimpleRNN(128, return_sequences=True),
+            layers.LSTM(64),
 
-                layers.Dense(128, activation='relu'),
-                layers.Dropout(0.5),
-                layers.Dense(64, activation='relu'),
-                layers.Dropout(0.5),
-                layers.Dense(32, activation='softmax'),
-                layers.Dropout(0.5),
-                layers.Dense(num_labels),
-            ])
+            layers.Dense(128, activation='relu'),
+            layers.Dropout(0.5),
+            layers.Dense(64, activation='relu'),
+            layers.Dropout(0.5),
+            layers.Dense(32, activation='softmax'),
+            layers.Dropout(0.5),
+            layers.Dense(num_labels),
+        ])
 
-            model.summary()
+        model.summary()
 
-            model.compile(
-                optimizer=tf.keras.optimizers.Adam(),
-                loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-                metrics=['accuracy'],
-            )
+        model.compile(
+            optimizer=tf.keras.optimizers.Adam(),
+            loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+            metrics=['accuracy'],
+        )
 
-            EPOCHS = epochs
-            history = model.fit(
-                train_ds,
-                validation_data=val_ds,
-                epochs=EPOCHS,
-                callbacks=None  # tf.keras.callbacks.EarlyStopping(verbose=1, patience=epochs),
-            )
-            if os.path.exists(f'{macros.model_path}tensorflow'):
-                folder = pl.Path(f'{macros.model_path}tensorflow')
-                shutil.rmtree(folder)
-            model.save(f'{macros.model_path}tensorflow')
+        EPOCHS = epochs
+        history = model.fit(
+            train_ds,
+            validation_data=val_ds,
+            epochs=EPOCHS,
+            callbacks=None  # tf.keras.callbacks.EarlyStopping(verbose=1, patience=epochs),
+        )
+        if os.path.exists(f'{macros.model_path}tensorflow'):
+            folder = pl.Path(f'{macros.model_path}tensorflow')
+            shutil.rmtree(folder)
+        model.save(f'{macros.model_path}tensorflow')
