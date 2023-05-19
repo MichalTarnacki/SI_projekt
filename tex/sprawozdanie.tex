@@ -4,7 +4,7 @@
 \usepackage{blindtext}
 \usepackage{amsmath}
 \usepackage[utf8]{inputenc}
-\usepackage{polski}
+\usepackage[polish]{babel}
 \usepackage[T1]{fontenc}
 \usepackage{listings}
 \usepackage{color}
@@ -353,31 +353,6 @@ W poprzednim podpunkcie wyszedł główny mankament tej metody -- konieczność 
 przewidziany stan jest dobry, co nie zawsze jest prawdą. W testach jakościowych zaobserwować można było
 ,,wariowanie'' modelu, czyli sekwencję źle przewidzianych stanów.
 
-\section{Sieć neuronowa}
-\subsection{Założenie}
-Do przetestowania działania sieci neuronowej przyjęliśmy nieco odmienne podejście. Jako dane wejściowe przyjmujemy (podobnie jak w przypadku SVM) spektrogram, jednak w tym przypadku stworzony przy użyciu STFT (zarówno podczas uczenia jak i predykcji). Dzięki temu model bierze pod uwagę także zmianę widma w czasie.
-\subsection{Metoda}
-Stosując poszczególne warstwy, nasz spektrogram jest odpowiednio przetwarzany, tak aby uwidocznić istotne cechy. Wykorzystywane przez nas warstwy (wraz z parametrami) to:
-\begin{enumerate}
-  \item\texttt{Input} - Punkt wejścia do sieci neuronowej
-  \item\texttt{Resizing} - Zmiana rozmiaru obrazu (32x32)
-  \item\texttt{Normalization} - Normalizacja cech
-  \item\texttt{Conv2D} - Nałożenie odpowiedniego filtru o rozmiarze n x m (lub n x n) na obraz tak aby uwydatnić jego cechy (32, 3, 'relu'). Wykorzystuje funkcję aktywacji.
-  \item\texttt{Conv2D} - Tak jak wyżej (64, 3, 'relu')
-  \item\texttt{MaxPooling2D} - Downsampling czyli wybranie maksymalnej wartości spośród okna o zadanych wymiarach (2x2)
-  \item\texttt{Dropout} - Ustawienie losowych wejść na 0 z częstotliwością n, przeskalowanie pozostałych cech przez 
-  $\frac{1}{1-n}$, pozwala na zredukowanie overfittingu (0.25)
-  \item\texttt{Flatten} - Spłaszczenie wejścia do 1 wymiaru
-  \item\texttt{Dense} - Łączy wszystkie neurony z warstwy poprzedniej ze wszystkimi z warstwy kolejnej, identyfikuje do jakiej klasy przynależy obiekt wejściowy. Wykorzystuje funkcję aktywacji. (128, 'relu')
-  \item\texttt{Dropout} - Tak jak wyżej (0.5)
-  \item\texttt{Dense} - Tak jak wyżej (2)
-\end{enumerate}
-
-\subsection{Wykorzystywane próbki}
-W przeciwieństwie do SVM aktualną predykcję określamy nie na podstawie poprzedniego stanu, lecz dla stanu sprzed pewnej chwili czasowej. W naszym przypadku aktualnie wyświetlany stan pochodzi sprzed około 0,5 \unit{s}. Oczywiście powoduje to pewne opóźnienie, jednak praktycznie niezauważalne przez użytkownika. Podejście to nie ulega jednak propagacji błędów, którą widzimy w przypadku SVM.
-\subsection{Problemy}
-Przy rozpoznawaniu próbki zakładamy przynależność do jednej z dwóch klas. W przypadku gdy jako dane wejściowe mamy jedynie wdechy i wydechy nie stanowi to problemu. Gdy jednak chcemy rozpoznać brak oddychania musimy założyć pewien próg pewności co otrzymanej klasyfikacji. Eksperymentalnie przyjęliśmy iż wdech jest wdechem gdy pewność sieci neuronowej wynosi 99\% natomiast co do wydechów przyjęliśmy pewność na poziomie 70\%. 
-
 \section{Przejście na inny model oddychania}
 \subsection{Wydech nosem}
 Kolejnym krokiem było przeniesienie wypracowanej metody uczenia na rozpoznawanie wdechu oraz wydechu nosem. W takim przypadku różnice między fazami oddechu są mniej zauważalne, co wymagało kolejnych udoskonaleń.
@@ -437,6 +412,41 @@ Te przerwy między wyraźnymi dźwiękami oddechów pozostawały jednak oznaczon
 \end{center}
 \end{table}
 Postanowiliśmy także sprawdzić, jak podejście z usuwaniem ciszy sprawdzi się w poprzednim modelu -- wdechu nosem i wydechu ustami. Okazało się, iż również nastąpiła poprawa.
+
+\section{Sieć neuronowa}
+\subsection{Metoda}
+Do przetestowania działania sieci neuronowej przyjęliśmy nieco odmienne podejście. Na wejście sieci podajemy spektrogramy z kilku chwil w czasie (przeszłych ok. 0.25 s). 
+Wprowadza to opóźnienie klasyfikacji, jednak pozbywamy się propagacji błędów. Ponadto dla sieci wprowadzamy trzeci stan - ciszę (stan tła/bezdechu).
+\subsection{Architektura sieci}
+\begin{enumerate}
+  \item\texttt{Input} - Punkt wejścia do sieci neuronowej
+  \item\texttt{Resizing} - Zmiana rozmiaru obrazu (32x32)
+  \item\texttt{Normalization} - Normalizacja cech
+  \item\texttt{Conv2D} - Nałożenie odpowiedniego filtru o rozmiarze n x m (lub n x n) na obraz tak aby uwydatnić jego cechy (32, 3, 'relu'). Wykorzystuje funkcję aktywacji.
+  \item\texttt{Conv2D} - Tak jak wyżej (64, 3, 'relu')
+  \item\texttt{MaxPooling2D} - Downsampling czyli wybranie maksymalnej wartości spośród okna o zadanych wymiarach (2x2)
+  \item\texttt{Dropout} - Ustawienie losowych wejść na 0 z częstotliwością n, przeskalowanie pozostałych cech przez 
+  $\frac{1}{1-n}$, pozwala na zredukowanie overfittingu (0.25)
+  \item\texttt{Flatten} - Spłaszczenie wejścia do 1 wymiaru
+  \item\texttt{Dense} - Łączy wszystkie neurony z warstwy poprzedniej ze wszystkimi z warstwy kolejnej, identyfikuje do jakiej klasy przynależy obiekt wejściowy. Wykorzystuje funkcję aktywacji. (128, 'relu')
+  \item\texttt{Dropout} - Tak jak wyżej (0.5)
+  \item\texttt{Dense} - Tak jak wyżej (64, 'relu')
+  \item\texttt{Dropout} - Tak jak wyżej (0.5)
+  \item\texttt{Dense} - Tak jak wyżej (32, 'softmax')
+  \item\texttt{Dropout} - Tak jak wyżej (0.5)
+  \item\texttt{Dense} - Tak jak wyżej (2)
+\end{enumerate}
+W przypadku mniejszej liczby  warstw Dense i Dropout szybko następowało przeuczenie, czego efektem był brak działania dla klasyfikacji na żywo.
+
+\subsection{Problemy}
+Przy rozpoznawaniu próbki zakładamy przynależność do jednej z dwóch klas. W przypadku gdy jako dane wejściowe mamy jedynie wdechy i wydechy nie stanowi to problemu. Gdy jednak chcemy rozpoznać brak oddychania musimy założyć pewien próg pewności co otrzymanej klasyfikacji. Eksperymentalnie przyjęliśmy iż wdech jest wdechem gdy pewność sieci neuronowej wynosi 99\% natomiast co do wydechów przyjęliśmy pewność na poziomie 70\%. 
+
+\subsection{Rezultat}
+Dodanie trzeciego stanu (ciszy) zaowocowało polepszeniem się jakości klasyfikacji,  ponadto ze względu na większą złożoność modelu w stosunku do SVM'a sieć jest w stanie lepiej dobrać wagi 
+do generalizacji co widać przede wszystkim w klasyfikacji na żywo. Osiągnięte przez model metryki dla oddychania nos-usta:
+TUTAJ DODAĆ METRYKI
+Osiągnięte przez model metryki dla oddychania nos-nos:
+TUTAJ DODAĆ METRYKI
 
 \section{Maszyna stanów do zwiększania inercji}
 \subsection{Cel}
