@@ -399,7 +399,7 @@ Te przerwy między wyraźnymi dźwiękami oddechów pozostawały jednak oznaczon
 \caption{Wartości miar uzyskane podczas testów modelu z \textbf{wydechem nosem} przy wyborze częstotliwości 0\,--\,16\,000 \unit{Hz} i po usunięciu ciszy.}
 \begin{center}
 \begin{tabular}{c | c}
-	miara & wartość (\%) poprzednia\\
+	miara & wartość (\%) \\
 	\hline
 	$accuracy$ & 94 \\
 	$precision_{wdech}$ & 96 \\
@@ -411,7 +411,23 @@ Te przerwy między wyraźnymi dźwiękami oddechów pozostawały jednak oznaczon
 \end{tabular}
 \end{center}
 \end{table}
-Postanowiliśmy także sprawdzić, jak podejście z usuwaniem ciszy sprawdzi się w poprzednim modelu -- wdechu nosem i wydechu ustami. Okazało się, iż również nastąpiła poprawa.
+Postanowiliśmy także sprawdzić, jak podejście z usuwaniem ciszy sprawdzi się w poprzednim modelu -- wdechu nosem i wydechu ustami. Okazało się, iż również nastąpiła poprawa, co przedstawia poniższa tabela.
+\begin{table}[H]
+\caption{Wartości miar uzyskane podczas testów modelu z \textbf{wydechem ustami} przy wyborze częstotliwości 0\,--\,8\,500 \unit{Hz} i 10\,000\,--\,16\,000 \unit{Hz} po usunięciu ciszy.}
+\begin{center}
+\begin{tabular}{c | c}
+	miara & wartość (\%) \\
+	\hline
+	$accuracy$ & 90 \\
+	$precision_{wdech}$ & 89 \\
+	$precision_{wydech}$ & 92 \\
+	$recall_{wdech}$ & 89 \\
+	$recall_{wydech}$ & 92 \\
+	$F_{wdech}$ & 89 \\
+	$F_{wydech}$ & 92
+\end{tabular}
+\end{center}
+\end{table}
 
 \section{Sieć neuronowa}
 \subsection{Metoda}
