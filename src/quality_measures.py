@@ -1,3 +1,4 @@
+import math
 from abc import abstractmethod
 
 
@@ -18,12 +19,35 @@ class QualityMeasures:
         pass
 
     def count_common_measures(self, submeasures):
-        self.precision_in = submeasures.tp_in / (submeasures.tp_in + submeasures.fp_in)
-        self.precision_out = submeasures.tp_out / (submeasures.tp_out + submeasures.fp_out)
-        self.recall_in = submeasures.tp_in / (submeasures.tp_in + submeasures.fn_in)
-        self.recall_out = submeasures.tp_out / (submeasures.tp_out + submeasures.fn_out)
-        self.f_in = 2 * self.precision_in * self.recall_in / (self.precision_in + self.recall_in)
-        self.f_out = 2 * self.precision_out * self.recall_out / (self.precision_out + self.recall_out)
+        if submeasures.tp_in + submeasures.fp_in == 0:
+            self.precision_in = 0 if submeasures.tp_in == 0 else math.inf
+        else:
+            self.precision_in = submeasures.tp_in / (submeasures.tp_in + submeasures.fp_in)
+
+        if submeasures.tp_out + submeasures.fp_out == 0:
+            self.precision_out = 0 if submeasures.tp_out == 0 else math.inf
+        else:
+            self.precision_out = submeasures.tp_out / (submeasures.tp_out + submeasures.fp_out)\
+
+        if submeasures.tp_in + submeasures.fn_in == 0:
+            self.recall_in = 0 if submeasures.tp_in == 0 else math.inf
+        else:
+            self.recall_in = submeasures.tp_in / (submeasures.tp_in + submeasures.fn_in)
+
+        if submeasures.tp_out + submeasures.fn_out == 0:
+            self.recall_out = 0 if submeasures.tp_out == 0 else math.inf
+        else:
+            self.recall_out = submeasures.tp_out / (submeasures.tp_out + submeasures.fn_out)
+
+        if self.precision_in + self.recall_in == 0:
+            self.f_in = 0 if 2 * self.precision_in * self.recall_in == 0 else math.inf
+        else:
+            self.f_in = 2 * self.precision_in * self.recall_in / (self.precision_in + self.recall_in)
+
+        if self.precision_out + self.recall_out == 0:
+            self.f_out = 0 if 2 * self.precision_out * self.recall_out == 0 else math.inf
+        else:
+            self.f_out = 2 * self.precision_out * self.recall_out / (self.precision_out + self.recall_out)
 
     @abstractmethod
     def count_submeasures(self):
@@ -74,8 +98,11 @@ class QualityMeasuresTwoClasses(QualityMeasures):
         submeasures.fn_in = submeasures.fp_out
         submeasures.fn_out = submeasures.fp_in
 
-        self.accuracy = (submeasures.tp_in + submeasures.tn_in) /\
-                        (submeasures.tp_in + submeasures.fp_in + submeasures.tn_in + submeasures.fn_in)
+        if submeasures.tp_in + submeasures.fp_in + submeasures.tn_in + submeasures.fn_in == 0:
+            self.accuracy = 0 if submeasures.tp_in + submeasures.tn_in == 0 else math.inf
+        else:
+            self.accuracy = (submeasures.tp_in + submeasures.tn_in) / \
+                            (submeasures.tp_in + submeasures.fp_in + submeasures.tn_in + submeasures.fn_in)
 
         self.count_common_measures(submeasures)
 
@@ -102,10 +129,17 @@ class QualityMeasuresThreeClasses(QualityMeasures):
     def count_measures(self):
         submeasures = self.count_submeasures()
 
-        self.accuracy_in = (submeasures.tp_in + submeasures.tn_in) /\
-                           (submeasures.tp_in + submeasures.fp_in + submeasures.tn_in + submeasures.fn_in)
-        self.accuracy_out = (submeasures.tp_out + submeasures.tn_out) /\
-                            (submeasures.tp_out + submeasures.fp_out + submeasures.tn_out + submeasures.fn_out)
+        if submeasures.tp_in + submeasures.fp_in + submeasures.tn_in + submeasures.fn_in == 0:
+            self.accuracy_in = 0 if submeasures.tp_in + submeasures.tn_in == 0 else math.inf
+        else:
+            self.accuracy_in = (submeasures.tp_in + submeasures.tn_in) /\
+                               (submeasures.tp_in + submeasures.fp_in + submeasures.tn_in + submeasures.fn_in)
+
+        if submeasures.tp_out + submeasures.fp_out + submeasures.tn_out + submeasures.fn_out == 0:
+            self.precision_out = 0 if submeasures.tp_out + submeasures.tn_out == 0 else math.inf
+        else:
+            self.accuracy_out = (submeasures.tp_out + submeasures.tn_out) / \
+                                (submeasures.tp_out + submeasures.fp_out + submeasures.tn_out + submeasures.fn_out)
 
         self.count_common_measures(submeasures)
 

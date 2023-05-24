@@ -431,8 +431,8 @@ Postanowiliśmy także sprawdzić, jak podejście z usuwaniem ciszy sprawdzi si�
 
 \section{Sieć neuronowa}
 \subsection{Metoda}
-Do przetestowania działania sieci neuronowej przyjęliśmy nieco odmienne podejście. Na wejście sieci podajemy spektrogramy z kilku chwil w czasie (przeszłych ok. 0.25 s). 
-Wprowadza to opóźnienie klasyfikacji, jednak pozbywamy się propagacji błędów. Ponadto dla sieci wprowadzamy trzeci stan - ciszę (stan tła/bezdechu).
+Do przetestowania działania sieci neuronowej przyjęliśmy nieco odmienne podejście. Na wejście sieci podajemy spektrogramy z kilku chwil w czasie (przeszłych ok. 0,25 s). 
+Wprowadza to opóźnienie klasyfikacji, jednak pozbywamy się propagacji błędów. Ponadto dla sieci wprowadzamy trzeci stan -- ciszę (stan tła/bezdechu).
 \subsection{Architektura sieci}
 \begin{enumerate}
   \item\texttt{Input} - Punkt wejścia do sieci neuronowej
@@ -455,14 +455,45 @@ Wprowadza to opóźnienie klasyfikacji, jednak pozbywamy się propagacji błęd�
 W przypadku mniejszej liczby  warstw Dense i Dropout szybko następowało przeuczenie, czego efektem był brak działania dla klasyfikacji na żywo.
 
 \subsection{Problemy}
-Przy rozpoznawaniu próbki zakładamy przynależność do jednej z dwóch klas. W przypadku gdy jako dane wejściowe mamy jedynie wdechy i wydechy nie stanowi to problemu. Gdy jednak chcemy rozpoznać brak oddychania musimy założyć pewien próg pewności co otrzymanej klasyfikacji. Eksperymentalnie przyjęliśmy iż wdech jest wdechem gdy pewność sieci neuronowej wynosi 99\% natomiast co do wydechów przyjęliśmy pewność na poziomie 70\%. 
+Przy rozpoznawaniu próbki zakładamy przynależność do jednej z dwóch klas. W przypadku, gdy jako dane wejściowe mamy jedynie wdechy i wydechy, nie stanowi to problemu. Gdy jednak chcemy rozpoznać brak oddychania, musimy założyć pewien próg pewności co do otrzymanej klasyfikacji. Eksperymentalnie przyjęliśmy, iż wdech jest wdechem, gdy pewność sieci neuronowej wynosi 99\%, natomiast co do wydechów przyjęliśmy pewność na poziomie 70\%. 
 
 \subsection{Rezultat}
-Dodanie trzeciego stanu (ciszy) zaowocowało polepszeniem się jakości klasyfikacji,  ponadto ze względu na większą złożoność modelu w stosunku do SVM'a sieć jest w stanie lepiej dobrać wagi 
-do generalizacji co widać przede wszystkim w klasyfikacji na żywo. Osiągnięte przez model metryki dla oddychania nos-usta:
-TUTAJ DODAĆ METRYKI
-Osiągnięte przez model metryki dla oddychania nos-nos:
-TUTAJ DODAĆ METRYKI
+Dodanie trzeciego stanu (ciszy) zaowocowało polepszeniem się jakości klasyfikacji, ponadto ze względu na większą złożoność modelu w stosunku do SVM-a, sieć jest w stanie lepiej dobrać wagi do generalizacji, co widać przede wszystkim w klasyfikacji na żywo. Osiągnięte przez model miary dokładności dla oddychania nos-usta:
+\begin{table}[H]
+	\caption{Wartości miar uzyskane podczas testów modelu sieci neuronowej z \textbf{wydechem ustami} po dodaniu stanu ciszy.}
+	\begin{center}
+		\begin{tabular}{c | c}
+			miara & wartość (\%) \\
+			\hline
+			$accuracy_{wdech}$ & 94 \\
+			$accuracy_{wydech}$ & 90 \\
+			$precision_{wdech}$ & 100 \\
+			$precision_{wydech}$ & 89 \\
+			$recall_{wdech}$ & 80 \\
+			$recall_{wydech}$ & 85 \\
+			$F_{wdech}$ & 89 \\
+			$F_{wydech}$ & 86
+		\end{tabular}
+	\end{center}
+\end{table}
+Osiągnięte przez model miary dokładności dla oddychania nos-nos:
+\begin{table}[H]
+	\caption{Wartości miar uzyskane podczas testów modelu sieci neuronowej z \textbf{wydechem nosem} po dodaniu stanu ciszy.}
+	\begin{center}
+		\begin{tabular}{c | c}
+			miara & wartość (\%) \\
+			\hline
+			$accuracy_{wdech}$ & 90 \\
+			$accuracy_{wydech}$ & 89 \\
+			$precision_{wdech}$ & 100 \\
+			$precision_{wydech}$ & 84 \\
+			$recall_{wdech}$ & 73 \\
+			$recall_{wydech}$ & 100 \\
+			$F_{wdech}$ & 84 \\
+			$F_{wydech}$ & 90
+		\end{tabular}
+	\end{center}
+\end{table}
 
 \section{Maszyna stanów do zwiększania inercji}
 \subsection{Cel}
