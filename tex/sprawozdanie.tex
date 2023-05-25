@@ -527,9 +527,9 @@ Warto jednak wspomnieć, że czynimy to kosztem wprowadzenia opóźnienia propor
 do wielkości bufora, teoretycznie jeśli ktoś będzie bardzo szybko oddychał to może nie zaobserwować zmian stanu. Brak zmiany stanów może też wystąpić przy nieregularnym oddechu np. kilka razy z rzędu
 wdech bez wydechu, jednak zapobiegają temu predykaty $M,N$. 
 \section{Wnioski}
-Wniosek jeden: dużo zależy od obróbki danych, różnica między sieciami w tym wypadku nie była tak zauważalna \\
-Wniosek dwa: trudno uzyskać inercję stanów oddechu i pozbyć się efektu przeskakiwania \\
-Wniosek trzy: na wdech i wydech nosem wpływa bardziej zaszumione otoczenie
+Obróbka danych znacząco wpływa na działanie modelu. Odpowiednia jest w stanie w widoczny sposób poprawić jego wyniki. różnica między sieciami w tym wypadku nie była tak zauważalna \\
+Uzyskanie odpowiednio dużej inercji stanów oddechu podczas testowania na żywo, usuwającej efekt przeskakiwania między nimi, stanowi wymagające zadanie. \\
+Podczas rozpoznawania stanów oddechu zaszumione otoczenie jest większą przeszkodą, jeśli wydech odbywa się nosem, niż gdy następuje ustami. \\
 Wniosek cztery: dodać tabelkę z końcowymi wartościami miar dla obu modeli oddychania (SVM dla nosa i ust, Tensorflow dla ust)
 \section{Źródła}
 \begin{thebibliography}{2}

@@ -36,4 +36,4 @@
 \contentsline {subsection}{\numberline {9.2}Schemat}{22}{subsection.9.2}%
 \contentsline {subsection}{\numberline {9.3}Rezultat}{23}{subsection.9.3}%
 \contentsline {section}{\numberline {10}Wnioski}{23}{section.10}%
-\contentsline {section}{\numberline {11}Źródła}{23}{section.11}%
+\contentsline {section}{\numberline {11}Źródła}{24}{section.11}%
