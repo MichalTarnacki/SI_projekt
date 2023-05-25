@@ -15,6 +15,7 @@
 \usepackage{hyperref}
 \usepackage{float}
 \usepackage{siunitx}
+\usepackage{multirow}
 
 \usepackage{etoolbox}
 \patchcmd{\thebibliography}{\section*{\refname}}{}{}{}
@@ -62,34 +63,34 @@
 
 \section{Wstęp}
 Celem projektu było określanie chwil na nagraniu, w których osoba bierze wdech i wydech. 
-Dokonano oceny jakościowej za pomocą detekcji oddechu na żywo jak i ilościowej (przy wykorzystaniu dalej wymienionej miar).
+Dokonano oceny jakościowej za pomocą detekcji oddechu na żywo, jak i ilościowej (przy wykorzystaniu dalej wymienionej miar).
 
 \section{Teoria}
 \subsection{Dyskretna transformata Fouriera (DFT)}
 W celu przejścia z dziedziny natężenia od czasu do dziedziny częstotliwości stosujemy dyskretną transformatę Fouriera.  DFT przekształca ciąg skończonych próbek sygnału $a_0, a_1, a_2, ..., a_{N-1}$ w ciąg 
-$A_1, ..., A_{N-1} \in \mathbb{C}$
+$A_1, ..., A_{N-1} \in \mathbb{C}$:
 \begin{gather*}
-	A_k = \Sigma_{n=0}^{N-1} a_ne^{\frac{-kni\pi}{N}}, 0 \le k \le N-1
+	A_k = \Sigma_{n=0}^{N-1} a_ne^{\frac{-kni\pi}{N}}, 0 \le k \le N-1.
 \end{gather*}
-W naszych zastosowaniach będziemy brali pod uwagę tylko część rzeczywistą tego wielomianu
+W naszych zastosowaniach będziemy brali pod uwagę tylko część rzeczywistą tego wielomianu:
 \begin{gather*}
-	R_k = Re(A_k), 0 \le k \le N-1
+	R_k = Re(A_k), 0 \le k \le N-1.
 \end{gather*}
-Skorzystamy z odmiany dyskretnej transformaty Fouriera - STFT (krótkoczasowa transformata Fouriera). 
-Jest to zasadniczo transformacja Fouriera jednak wykonywana w mniejszych oknach czasowych. Dzięki temu otrzymujemy informację o zmianie widma w czasie, czyli jednocześnie posiadamy informację o właściwościach zarówno w dziedzinie czasu, jak i częstotliwości. Najistotniejszym parametrem tej metody jest rozmiar okna. Ponieważ iloczyn jego szerokości w dziedzinie czasu i szerokości w dziedzinie częstotliwości jest stały dla danego okna, poprawiając rozdzielczość czasu, pogarszamy rozdzielczość częstotliwości.
-Naszą funkcję natężenia w czasie dla pewnego okresu $t \in [t_0, t_0 + B]$, gdzie $B$ - rozmiar okna (przyjmujemy $B=1024\approx \frac{1}{44} s$), przedstawiamy zatem jako 
+Skorzystamy z odmiany dyskretnej transformaty Fouriera -- STFT (krótkoczasowa transformata Fouriera). 
+Jest to zasadniczo transformacja Fouriera, jednak wykonywana w mniejszych oknach czasowych. Dzięki temu otrzymujemy informację o zmianie widma w czasie, czyli jednocześnie posiadamy informację o właściwościach zarówno w dziedzinie czasu, jak i częstotliwości. Najistotniejszym parametrem tej metody jest rozmiar okna. Ponieważ iloczyn jego szerokości w dziedzinie czasu i szerokości w dziedzinie częstotliwości jest stały dla danego okna, poprawiając rozdzielczość czasu, pogarszamy rozdzielczość częstotliwości.
+Naszą funkcję natężenia w czasie dla pewnego okresu $t \in [t_0, t_0 + B]$, gdzie $B$ -- rozmiar okna (przyjmujemy $B=1024\approx \frac{1}{44} s$), przedstawiamy zatem jako 
 \begin{gather*}
-	I(t) = \Sigma_{f} I_{f}(t)sin(2 \pi f t)
+	I(t) = \Sigma_{f} I_{f}(t)sin(2 \pi f t),
 \end{gather*}
 stąd dla danego przedziału w czasie jesteśmy w stanie stworzyć wektor natężeń
 \begin{gather*}
-	\boldsymbol{I} = [I_{f_1}, I_{f_2}, ..., I_{f_n}]
+	\boldsymbol{I} = [I_{f_1}, I_{f_2}, ..., I_{f_n}].
 \end{gather*}
 W dalszych rozważaniach wykorzystujemy także średnią częstotliwość, którą liczymy ze wzoru
 \begin{gather*}
-	\bar{f} = \frac{\Sigma_ffI_f}{I}
+	\bar{f} = \frac{\Sigma_ffI_f}{I}.
 \end{gather*}
-Wykorzystujemy implementację transformaty z bibliotek $numpy$ oraz $tensorflow$.
+Wykorzystujemy implementację transformaty z bibliotek \textit{numpy} oraz \textit{tensorflow}.
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=10cm]{stft2}
@@ -103,7 +104,7 @@ tworzony jest próg szumu dla każdej jego częstotliwości.
 Częstotliwości progowe służą do stworzenia maski, której potem używamy do usunięcia niechcianych dźwięków.
 Następnie ze spektrogramu tworzymy z powrotem natężenie $I(t)$. W projekcie wykorzystujemy gotową implementację bramki szumów z biblioteki $noisereduce$\footnote{\url{https://pypi.org/project/noisereduce/}}. Zdefiniujmy
 \begin{gather*}
-	SNR = \frac{P_s}{P_n}
+	SNR = \frac{P_s}{P_n},
 \end{gather*}
 gdzie $P_n$ -- moc szumu, $P_s = P - P_n$ -- moc sygnału użytecznego (moc sygnału pomniejszona o moc szumu).
 Porównanie przykładowych SNR dla algorytmów usuwania szumu\footnote{Kumar, E. and Surya, K. and Varma, K. and Akash, A. and Kurapati, Nithish Reddy (2023) \emph{Noise Reduction in Audio File Using Spectral Gatting and FFT by Python Modules}}:
@@ -152,10 +153,10 @@ Drugim modelem, jakim dokonujemy klasyfikacji, jest sieć neuronowa. Ze względu
 \subsection{Ocena modeli}
 Zastosowaliśmy następujące miary oceny ilościowej modelu:
 \begin{flalign*}
-	&accuracy_{wdech} = \frac{|TP_{wdech}|+|TN_{wdech}|}{|TP_{wdech}|+|FP_{wdech}|+|TN_{wdech}|+|FN_{wdech}|}&\\
-	&precision_{wdech} = \frac{|TP_{wdech}|}{|TP_{wdech}|+|FP_{wdech}|}&\\
-	&recall_{wdech} = \frac{|TP_{wdech}|}{|TP_{wdech}|+|FN_{wdech}|}&\\
-	&F_{wdech} = \frac{2 \cdot precision_{wdech} \cdot recall_{wdech}}{precision_{wdech} + recall_{wdech}}&
+	&accuracy_{wdech} = \frac{|TP_{wdech}|+|TN_{wdech}|}{|TP_{wdech}|+|FP_{wdech}|+|TN_{wdech}|+|FN_{wdech}|},&\\
+	&precision_{wdech} = \frac{|TP_{wdech}|}{|TP_{wdech}|+|FP_{wdech}|},&\\
+	&recall_{wdech} = \frac{|TP_{wdech}|}{|TP_{wdech}|+|FN_{wdech}|},&\\
+	&F_{wdech} = \frac{2 \cdot precision_{wdech} \cdot recall_{wdech}}{precision_{wdech} + recall_{wdech}},&
 \end{flalign*}
 gdzie $TP_{wdech}$ -- liczba próbek oznaczonych jako wdech, które sklasyfikowane zostały jako wdech,
 $TN_{wdech}$ -- liczba próbek nieoznaczonych jako wdech, które nie zostały sklasyfikowane jako wdech,
@@ -175,8 +176,7 @@ powietrze lub na odwrót. Momenty przejścia z wdechu na wydech i w drugą stron
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=10cm]{nagrywanie_ozn}
-	\caption{Przykładowe nagrane dane, in-wdech, out-wydech. Jak widać, dane oznaczone na żywo są bardzo dokładne, być może nie bylibyśmy w stanie osiągnąć takiej
-dokładności oznaczając ręcznie (lub byłoby to bardzo żmudne).}
+	\caption{Przykładowe nagrane dane, in -- wdech, out -- wydech. Jak widać, dane oznaczone na żywo są bardzo dokładne, być może nie bylibyśmy w stanie osiągnąć takiej dokładności oznaczając ręcznie (lub byłoby to bardzo żmudne).}
 \end{figure}
 \subsection{Oddychanie na żywo}
 Testowanie modeli do predykcji na żywo odbywało się za pomocą programu wizualizującego aktualnie
@@ -498,7 +498,7 @@ Osiągnięte przez model miary dokładności dla oddychania nos-nos:
 \section{Maszyna stanów do zwiększania inercji}
 \subsection{Cel}
 Powyższe rozważania miały na celu głównie poprawę jakości klasyfikacji pojedynczej próbki, natomiast w praktyce, jaką jest klasyfikacja na żywo, nawet dokładne modele mogą powodować niechciane przeskakiwanie.
-Przypadek, w którym ktoś bierze wdech na ułamek sekundy w połowie wykonywania wydechu jest nierealny, zatem możemy nadać wynikom naszego modelu pewnej bezwładności, co czynimy za pomocą przedstawionej
+Przypadek, w którym ktoś bierze wdech na ułamek sekundy w połowie wykonywania wydechu, jest nierealny, zatem możemy nadać wynikom naszego modelu pewnej bezwładności, co czynimy za pomocą przedstawionej
 w tej sekcji maszyny stanów dobudowanej na modelu i korzystającym z jego klasyfikacji do przechodzenia między kolejnymi stanami.
 \subsection{Schemat}
 \begin{figure}[H]
@@ -506,8 +506,8 @@ w tej sekcji maszyny stanów dobudowanej na modelu i korzystającym z jego klasy
 	\includegraphics[width=13cm]{dstanow}
 	\caption{Diagram stanów $S$, $s \in S$ oznacza stan diagramu a $A, B, C, D, M, N$ są predykatami określającymi przejścia między poszczególnymi stanami}
 \end{figure}
-Diagram działa jak na schemacie powyżej, ponadto ma bufor stanowiący historię klasyfikacji modelu, np. $bufor = [in, out, out, out, cisza]$. Niech $n$ - rozmiar bufora,
-$i$ - ilość wdechów w buforze, $o$ - ilość wydechów w buforze, $t$ - ilość cisz w buforze. Ponadto zdefiniujemy zdarzenie $X$, takie, że $P(X) = P$ dla pewnego ustalonego $P$
+Diagram działa jak na schemacie powyżej, ponadto ma bufor stanowiący historię klasyfikacji modelu, np. $bufor = [in, out, out, out, cisza]$. Niech $n$ -- rozmiar bufora,
+$i$ -- liczba wdechów w buforze, $o$ -- liczba wydechów w buforze, $t$ -- liczba cisz w buforze. Ponadto zdefiniujemy zdarzenie $X$, takie, że $P(X) = P$ dla pewnego ustalonego $P$
 oraz wagę $W$ będące parametrami maszyny stanów wpływającymi na inercję (dobraliśmy $W = 60\%, P=70\%, n = 10$). Dla tych parametrów definiujemy predykaty
 \begin{gather*}
 	A(s) = (\frac{t}{n} > W) \lor (\frac{o}{n} > W \land X) \\
@@ -515,22 +515,62 @@ oraz wagę $W$ będące parametrami maszyny stanów wpływającymi na inercję (
 	C(s) =  (\frac{t}{n} > W) \lor (\frac{i}{n} > W \land X) \\
 	D(s) = \frac{i}{n} > W \\
 	M(s) = \frac{o}{n} > W \land X \\
-	N(s) = \frac{i}{n} > W \land X
+	N(s) = \frac{i}{n} > W \land X.
 \end{gather*}
-przykładowo dla stanu bufora $[in,cisza, cisza, cisza, cisza]$ oraz aktualnego stanu $s =$ wdech i reszty parametrów przyjętych tak jak powyżej nastąpi przejście
-ze stanu wdech do stanu cisza po wdechu. Zdarzenie $X$ tak samo jak predykaty $M, N$ uwzględniono, by maszyna nie była cyklem, czyli uwzględniała też możliwość np. sekwencji stanów
-wdech, cisza po wdechu, wdech, gdyby zaszedł jakiś błąd.
+Przykładowo dla stanu bufora $[in,cisza, cisza, cisza, cisza]$ oraz aktualnego stanu $s = wdech$ i reszty parametrów przyjętych tak jak powyżej nastąpi przejście
+ze stanu $wdech$ do stanu $cisza$ po wdechu. Zdarzenie $X$, tak samo jak predykaty $M, N$, uwzględniono, by maszyna nie była cyklem, czyli uwzględniała też możliwość np. sekwencji stanów
+$wdech$, $cisza$ po wdechu, $wdech$, gdyby zaszedł jakiś błąd.
 
 \subsection{Rezultat}
-Wyżej zdefiniowana maszyna stanów spełnia swój rezultat - przy jej zastosowaniu przeskakiwanie stanów w klasyfikacji na żywo zostaje zmniejszone. 
+Wyżej zdefiniowana maszyna stanów spełnia swój cel -- przy jej zastosowaniu przeskakiwanie stanów w klasyfikacji na żywo zostaje zmniejszone. 
 Warto jednak wspomnieć, że czynimy to kosztem wprowadzenia opóźnienia proporcjonalnego
-do wielkości bufora, teoretycznie jeśli ktoś będzie bardzo szybko oddychał to może nie zaobserwować zmian stanu. Brak zmiany stanów może też wystąpić przy nieregularnym oddechu np. kilka razy z rzędu
+do wielkości bufora, teoretycznie jeśli ktoś będzie bardzo szybko oddychał, może nie zaobserwować zmian stanu. Brak zmiany stanów może też wystąpić przy nieregularnym oddechu, np. kilka razy z rzędu
 wdech bez wydechu, jednak zapobiegają temu predykaty $M,N$. 
 \section{Wnioski}
-Obróbka danych znacząco wpływa na działanie modelu. Odpowiednia jest w stanie w widoczny sposób poprawić jego wyniki. różnica między sieciami w tym wypadku nie była tak zauważalna \\
+Obróbka danych znacząco wpływa na działanie modelu. Odpowiednia jest w stanie w widoczny sposób poprawić jego wyniki. Model SVM oraz sieć neuronowa nie różnią się przy tym w zauważalny sposób co rezultatów predykcji. \\
 Uzyskanie odpowiednio dużej inercji stanów oddechu podczas testowania na żywo, usuwającej efekt przeskakiwania między nimi, stanowi wymagające zadanie. \\
 Podczas rozpoznawania stanów oddechu zaszumione otoczenie jest większą przeszkodą, jeśli wydech odbywa się nosem, niż gdy następuje ustami. \\
-Wniosek cztery: dodać tabelkę z końcowymi wartościami miar dla obu modeli oddychania (SVM dla nosa i ust, Tensorflow dla ust)
+\begin{table}
+\caption{Podsumowanie ostatecznych wyników opisywanych modeli. Wartości miar (\%) dla SVM i sieci neuronowej przy wydechach ustami i nosem}
+\centering
+\begin{tabular}{|c|c|c|c|}
+	\hline
+	\textbf{Model} & \textbf{Miara} & \textbf{Wydech ustami} & \textbf{Wydech nosem} \\
+	\hline
+	\multirow{8}{*}{\textbf{SVM}} & $accuracy$ & 87 & 89 \\
+	\cline{2-4}
+	& $precision_{wdech}$ & 88 & 92 \\
+	\cline{2-4}
+	& $precision_{wydech}$ & 87 & 85 \\
+	\cline{2-4}
+	& $recall_{wdech}$ & 78 & 89 \\
+	\cline{2-4}
+	& $recall_{wydech}$ & 65 & 90 \\
+	\cline{2-4}
+	& $F_{wdech}$ & 83 & 90 \\
+	\cline{2-4}
+	& $F_{wydech}$ & 90 & 87 \\
+	\hline
+	\multirow{6}{*}{\textbf{Sieć neuronowa}}
+	& $accuracy_{wdech}$ & 94 & 90 \\
+	\cline{2-4}
+	& $accuracy_{wydech}$ & 90 & 89 \\
+	\cline{2-4}
+	& $precision_{wdech}$ & 100 & 100 \\
+	\cline{2-4}
+	& $precision_{wydech}$ & 89 & 84 \\
+	\cline{2-4}
+	& $recall_{wdech}$ & 80 & 73 \\
+	\cline{2-4}
+	& $recall_{wydech}$ & 85 & 100 \\
+	\cline{2-4}
+	& $F_{wdech}$ & 89 & 84 \\
+	\cline{2-4}
+	& $F_{wydech}$ & 86 & 90 \\
+	\hline
+\end{tabular}
+\end{table}
+
 \section{Źródła}
 \begin{thebibliography}{2}
 \bibitem{Cormen} 
