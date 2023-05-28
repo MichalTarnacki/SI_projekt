@@ -81,6 +81,7 @@ def menu():
 if __name__ == '__main__':
     while True:
         print("1. Record\n"
+              "1.1 Record background\n"
               "2.1. Train mouth-out with no-loudonly no-prevstate SVM\n"
               "2.2. Train mouth-out with no-loudonly prevstate SVM\n"
               "2.3. Train nose-out with no-loudonly prevstate SVM\n"
@@ -96,14 +97,15 @@ if __name__ == '__main__':
               "5.4. Test quantitative nose-out with loudonly prevstate SVM\n"
               "5.5. Test quantitative nose-out with no-loudonly prevstate SVM after loudonly prevstate SVM training\n"
               "5.6. Test quantitative mouth-out with loudonly prevstate SVM\n"
-              "7. New real time with SVM\n"
-              "8. Real time tensor\n"
+              "7. Realtime with Tensorflow\n"
               "9. Generate separate files for Tensorflow\n"
               "10. Train with Tensorflow\n"
               "11. Show spectrograms")
         x = input()
         if x == '1':
             record()
+        elif x == '1.1':
+            record_bg()
         elif x == '2.1':
             folder = pl.Path(macros.train_path)
             svm.svm_train_basic(
@@ -166,8 +168,6 @@ if __name__ == '__main__':
                                        'svm_trained_mouth_loud', with_previous_state=True)
         elif x == '7':
             new_realtime()
-        elif x == '8':
-            new_realtime_tensor()
         elif x == '9':
             TensorFlow.generate_seperate_files()
         elif x == '10':
@@ -179,5 +179,4 @@ if __name__ == '__main__':
             show_spectrograms(f'{macros.train_path}{x}.wav', x)
         elif x == '12':
             TensorFlow.accuracy(models.load_model(f'{macros.model_path}tensorflow'))
-        elif x == '13':
-            record_bg()
+
