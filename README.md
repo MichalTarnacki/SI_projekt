@@ -1,4 +1,2 @@
-repo do projektu na SI  
-Słupsk, Gdańsk, Wadowice <3
-
- [jak odpalić projekt](BUILDING.md)
+Wykrywanie wdechu i wydechu na podstawie dźwięku z mikrofonu
+ [Patrz](sprawozdanie.pdf)
